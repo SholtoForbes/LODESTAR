@@ -6,7 +6,6 @@ function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spl
 %normalised lift force. this allows for splines to be created that only
 %require M and lift force to give flap deflection, AoA and total drag
 
-disp('Calculating Angle of Attack Regime');
 
 %read communicator and create interpolatior / extrapolator splines
 Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
@@ -30,13 +29,8 @@ A = 62.77; % reference area (m^2)
 %equalises the pitching moment of flap and body to calculate lift. works
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
-j = 1;
 for v = 1500:100:3000 % Velocity (m/s)
-todisp = [num2str(j/length(1500:100:3000)*100),' % complete '];
-disp(todisp)
-j = j+1;
     for alt = 20000:1000:50000 % Altitude (m)
-
         for Lift = 0:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
             
             liftarray(end+1,1) = v;
@@ -114,11 +108,11 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M, Alpha1); % from communicator, get temp behind shock at 50kpa from communicator
+T250kPa = scattered.temp(M,AoA); % from communicator, get temp behind shock at 50kpa from communicator
 
 T = T250kPa*t_ratio;
 
-P1 = scattered.pres(M, Alpha1)*Efficiency; % note this is at 50kPa, modified by efficiency
+P1 = scattered.pres(M,AoA)*Efficiency; % note this is at 50kPa, modified by efficiency
 
 [Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
 
@@ -136,7 +130,7 @@ Thrust = Isp.*Fueldt*9.81;
 
 
 
-            Alpha2 = 10; %first guesses of AoA
+            Alpha2 = 15; %first guesses of AoA
             %Fuel Cost ===========================================================================
 
 %             Fueldt = FuelF_spline(M,Alpha2).*Efficiency;
@@ -149,15 +143,15 @@ constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each ve
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
+temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha2); % from communicator, get temp behind shock at 50kpa from communicator
+T250kPa = scattered.temp(M,AoA); % from communicator, get temp behind shock at 50kpa from communicator
 
 T = T250kPa*t_ratio;
 
-P1 = scattered.pres(M,Alpha2)*Efficiency; % note this is at 50kPa, modified by efficiency
+P1 = scattered.pres(M,AoA)*Efficiency; % note this is at 50kPa, modified by efficiency
 
 [Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
 
@@ -179,7 +173,7 @@ Thrust = Isp.*Fueldt*9.81;
             Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1); %first guesses of AoA
 
 
-            while abs(Alpha4 - Alpha3) > 0.05
+            while abs(Alpha4 - Alpha3) > 0.00005
 
             %Fuel Cost ===========================================================================
 
@@ -197,11 +191,11 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha3); % from communicator, get temp behind shock at 50kpa from communicator
+T250kPa = scattered.temp(M,AoA); % from communicator, get temp behind shock at 50kpa from communicator
 
 T = T250kPa*t_ratio;
 
-P1 = scattered.pres(M,Alpha3)*Efficiency; % note this is at 50kPa, modified by efficiency
+P1 = scattered.pres(M,AoA)*Efficiency; % note this is at 50kPa, modified by efficiency
 
 [Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
 
@@ -228,15 +222,15 @@ constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each ve
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
+temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha4); % from communicator, get temp behind shock at 50kpa from communicator
+T250kPa = scattered.temp(M,AoA); % from communicator, get temp behind shock at 50kpa from communicator
 
 T = T250kPa*t_ratio;
 
-P1 = scattered.pres(M,Alpha4)*Efficiency; % note this is at 50kPa, modified by efficiency
+P1 = scattered.pres(M,AoA)*Efficiency; % note this is at 50kPa, modified by efficiency
 
 [Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
 

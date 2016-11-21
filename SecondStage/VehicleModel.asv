@@ -137,7 +137,8 @@ end
 % end
 
 
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
+V_50kPa = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000*); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
+
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 

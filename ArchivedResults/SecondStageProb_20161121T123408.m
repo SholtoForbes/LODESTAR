@@ -32,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -87,7 +87,7 @@ global grid
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
 % settings required for trim at any flight conditions
-[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, Constq_traj, scattered);
+[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,scattered.T,scattered.fuel);
 
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
