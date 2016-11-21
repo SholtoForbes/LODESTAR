@@ -1,0 +1,15 @@
+# Matlab autosave files:
+**/*.m~
+**/*.asv
+
+# Matlab coder automatically generated files
+**/codegen/*
+**/*_mex.mex*
+
+# GPOPS autogen files:
+**/*IPOPTinfo.txt
+**/*SNOPTinfo.txt
+
+# Large data files:
+**/*.mat
+**/*.mp4

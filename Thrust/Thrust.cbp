@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Thrust" />
+		<Option pch_mode="2" />
+		<Option compiler="g95" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Thrust" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="g95" />
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Thrust" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="g95" />
+			</Target>
+		</Build>
+		<Unit filename="bivar.f95">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="propdata.f95">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="wrapper.f95">
+			<Option weight="0" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
