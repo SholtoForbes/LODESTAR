@@ -40,12 +40,9 @@ global Atmosphere
 global iteration
 global zeta
 global phi
+global Constq_traj
 
 iteration = iteration + 1;
-if rem(iteration,10000) == 0
-    todisp = ['Total Iterations Done:',num2str(iteration)];
-    disp(todisp);
-end
 
 V = primal.states(1, :)*scale.V ; % Scaled vertical position
 v = primal.states(2,:)*scale.v ;
@@ -56,7 +53,7 @@ time = primal.nodes(1, :); % Time
 thetadot = primal.states(5,:)*scale.thetadot;
 omegadot  = primal.controls(1,:)*scale.thetadot;
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,grid,const,thetadot, Atmosphere);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,grid,const,thetadot, Atmosphere, Constq_traj);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL

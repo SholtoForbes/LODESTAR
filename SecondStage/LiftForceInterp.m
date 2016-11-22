@@ -1,4 +1,4 @@
-function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, Constq_traj, scattered)
+function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, scattered)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
@@ -6,7 +6,7 @@ function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spl
 %normalised lift force. this allows for splines to be created that only
 %require M and lift force to give flap deflection, AoA and total drag
 
-disp('Calculating Angle of Attack Regime');
+disp('Calculating Flight Dynamics Regime');
 
 %read communicator and create interpolatior / extrapolator splines
 Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
@@ -106,7 +106,7 @@ j = j+1;
             
             
             
-constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results)
+constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
@@ -114,13 +114,7 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M, Alpha1); % from communicator, get temp behind shock at 50kpa from communicator
-
-T = T250kPa*t_ratio;
-
-P1 = scattered.pres(M, Alpha1)*Efficiency; % note this is at 50kPa, modified by efficiency
-
-[Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
+[Isp,Fueldt] = RESTM12int(M, Alpha1, t_ratio, Efficiency, scattered);
 
 Thrust = Isp.*Fueldt*9.81;
             %======================================================================
@@ -145,7 +139,7 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results)
+constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
@@ -153,13 +147,7 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha2); % from communicator, get temp behind shock at 50kpa from communicator
-
-T = T250kPa*t_ratio;
-
-P1 = scattered.pres(M,Alpha2)*Efficiency; % note this is at 50kPa, modified by efficiency
-
-[Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
+[Isp,Fueldt] = RESTM12int(M,Alpha2, t_ratio, Efficiency, scattered);
 
 Thrust = Isp.*Fueldt*9.81;
             %======================================================================
@@ -189,7 +177,7 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results)
+constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
@@ -197,13 +185,8 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha3); % from communicator, get temp behind shock at 50kpa from communicator
 
-T = T250kPa*t_ratio;
-
-P1 = scattered.pres(M,Alpha3)*Efficiency; % note this is at 50kPa, modified by efficiency
-
-[Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
+[Isp,Fueldt] = RESTM12int(M,Alpha3, t_ratio, Efficiency, scattered);
 
 Thrust = Isp.*Fueldt*9.81;
             %======================================================================
@@ -224,7 +207,7 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Constq_traj(2,:),Constq_traj(1,:),v); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results)
+constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
 constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
@@ -232,13 +215,9 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
 
 t_ratio = temp_actual/constq_temp;
 
-T250kPa = scattered.temp(M,Alpha4); % from communicator, get temp behind shock at 50kpa from communicator
 
-T = T250kPa*t_ratio;
 
-P1 = scattered.pres(M,Alpha4)*Efficiency; % note this is at 50kPa, modified by efficiency
-
-[Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
+[Isp,Fueldt] = RESTM12int(M,Alpha4, t_ratio, Efficiency, scattered);
 
 Thrust = Isp.*Fueldt*9.81;
             %======================================================================

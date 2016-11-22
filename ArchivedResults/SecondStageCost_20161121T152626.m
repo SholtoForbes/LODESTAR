@@ -42,10 +42,6 @@ global zeta
 global phi
 
 iteration = iteration + 1;
-if rem(iteration,10000) == 0
-    todisp = ['Total Iterations Done:',num2str(iteration)];
-    disp(todisp);
-end
 
 V = primal.states(1, :)*scale.V ; % Scaled vertical position
 v = primal.states(2,:)*scale.v ;

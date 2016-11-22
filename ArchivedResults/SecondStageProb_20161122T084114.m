@@ -32,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -64,14 +64,11 @@ scattered.pres = scatteredInterpolant(communicator(:,1),communicator(:,2),commun
 
 scattered.M1 = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,12));
 
-
-scattered.data = dlmread('RESTM12DATA.txt');  
-scattered.data = unique(scattered.data,'row
-data = scattered.data;
+data = dlmread('RESTM12DATA.txt');      
       
-% scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
-% 
-% scattered.phi = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
+scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
+
+scattered.phi = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 
 global grid
 % Interpolate engine data into easily interpolatable form. 

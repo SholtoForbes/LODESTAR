@@ -65,8 +65,7 @@ scattered.pres = scatteredInterpolant(communicator(:,1),communicator(:,2),commun
 scattered.M1 = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,12));
 
 
-scattered.data = dlmread('RESTM12DATA.txt');  
-scattered.data = unique(scattered.data,'row
+scattered.data = unique(dlmread('RESTM12DATA.txt'),'rows');  
 data = scattered.data;
       
 % scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));

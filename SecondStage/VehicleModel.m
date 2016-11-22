@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere, Constq_traj)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
 % t1 = cputime;
 % =======================================================
 % Vehicle Model
@@ -145,15 +145,10 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
 
 t_ratio = temp_actual./constq_temp;
 
-T150kPa = scattered.temp(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
 
-T = T150kPa.*t_ratio;
+[Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
 
-P1 = scattered.pres(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
-
-[Isp,Fueldt] = RESTM12int(M, T, P1, scattered);
-
-Thrust = Isp.*Fueldt*9.81;
+Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
