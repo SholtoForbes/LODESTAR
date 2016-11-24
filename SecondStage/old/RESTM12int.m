@@ -3,16 +3,21 @@ function [Isp,wf] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered)
 % Reading from RESTM12DATA 
 
 
-T150kPa = scattered.temp(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
+% T150kPa = scattered.temp(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
+% T1 = T150kPa.*t_ratio;
+% P1 = scattered.pres(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
+% M1 = scattered.M1(M, Alpha);
 
+T150kPa = scattered.tempgridded(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
 T1 = T150kPa.*t_ratio;
+P1 = scattered.presgridded(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
+M1 = scattered.M1gridded(M, Alpha);
 
-P1 = scattered.pres(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
-
-
-M1 = scattered.M1(M, Alpha);
 
 Isp = scattered.IspScattered(M1,T1);
+
+% Isp = scattered.IspGridded(M1,T1);
+
 % 
 % phi = scattered.phi(M1,T1)
 

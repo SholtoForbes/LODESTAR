@@ -1,4 +1,4 @@
-function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, scattered)
+function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, scattered, gridded)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
@@ -52,14 +52,22 @@ j = j+1;
             M = v./c; % Calculating Mach No (Descaled)
             
             %% Calculate Thrust Component ==================================
+            constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
+            constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
+
+            temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
+
+            
             if const == 1 || const == 14
                 Efficiency = zeros(1,length(q));
                 for i = 1:length(q)
                     if q(i) < 50000
                     Efficiency(i) = rho/(50000*2/v^2); % dont change this
+                    t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                     Efficiency(i) = 1; % for 50kPa
+                    t_ratio(i) = 1;
                     end
                 end
             elseif const == 12
@@ -82,6 +90,7 @@ j = j+1;
                 end
             elseif const == 3 || const == 31
             Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
+            t_ratio = temp_actual/constq_temp;
             end
 
 
@@ -103,20 +112,13 @@ j = j+1;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
             
-            
-            
-            
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
+% [Isp,Fueldt] = RESTM12int(M, Alpha1, t_ratio, Efficiency, scattered);
+% 
+% Thrust = Isp.*Fueldt*9.81;
 
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
-
-t_ratio = temp_actual/constq_temp;
-
-[Isp,Fueldt] = RESTM12int(M, Alpha1, t_ratio, Efficiency, scattered);
-
-Thrust = Isp.*Fueldt*9.81;
+Thrust =  gridded.T_eng(M,Alpha1).*cos(deg2rad(Alpha1)).*Efficiency;
+Fueldt =  gridded.fuel_eng(M,Alpha1).*Efficiency;
             %======================================================================
 
             Cl1 = Cl_spline(M,Alpha1);
@@ -139,17 +141,14 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
 
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
 
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
+% [Isp,Fueldt] = RESTM12int(M,Alpha2, t_ratio, Efficiency, scattered);
+% 
+% Thrust = Isp.*Fueldt*9.81;
 
-t_ratio = temp_actual/constq_temp;
-
-[Isp,Fueldt] = RESTM12int(M,Alpha2, t_ratio, Efficiency, scattered);
-
-Thrust = Isp.*Fueldt*9.81;
+Thrust =  gridded.T_eng(M,Alpha2).*cos(deg2rad(Alpha2)).*Efficiency;
+Fueldt =  gridded.fuel_eng(M,Alpha2).*Efficiency;
             %======================================================================
 
             Cl2 = Cl_spline(M,Alpha2);
@@ -177,18 +176,14 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
-
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
-
-t_ratio = temp_actual/constq_temp;
 
 
-[Isp,Fueldt] = RESTM12int(M,Alpha3, t_ratio, Efficiency, scattered);
+% [Isp,Fueldt] = RESTM12int(M,Alpha3, t_ratio, Efficiency, scattered);
+% 
+% Thrust = Isp.*Fueldt*9.81;
 
-Thrust = Isp.*Fueldt*9.81;
+Thrust =  gridded.T_eng(M,Alpha3).*cos(deg2rad(Alpha3)).*Efficiency;
+Fueldt =  gridded.fuel_eng(M,Alpha3).*Efficiency;
             %======================================================================
             Cl3 = Cl_spline(M,Alpha3);
 
@@ -207,19 +202,14 @@ Thrust = Isp.*Fueldt*9.81;
 % 
 %             Thrust = Isp.*Fueldt; % Thrust (N)
 
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
-
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
-
-t_ratio = temp_actual/constq_temp;
 
 
+% [Isp,Fueldt] = RESTM12int(M,Alpha4, t_ratio, Efficiency, scattered);
+% 
+% Thrust = Isp.*Fueldt*9.81;
 
-[Isp,Fueldt] = RESTM12int(M,Alpha4, t_ratio, Efficiency, scattered);
-
-Thrust = Isp.*Fueldt*9.81;
+Thrust =  gridded.T_eng(M,Alpha4).*cos(deg2rad(Alpha4)).*Efficiency;
+Fueldt =  gridded.fuel_eng(M,Alpha4).*Efficiency;
             %======================================================================
             Cl4 = Cl_spline(M,Alpha4);
 

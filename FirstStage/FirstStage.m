@@ -4,6 +4,9 @@ clc; clear;
 clear all;
 addpath TrajOpt-master
 
+Aero = dlmread('FirstStageAeroCoeffs.txt');
+scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
+scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
    
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
@@ -25,7 +28,7 @@ phase = 'prepitch';
 tspan = [0 15];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase), tspan, y0);  
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase,scattered), tspan, y0);  
 
 % % FOR TESTING
 % phase = 'postpitch';
@@ -45,7 +48,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 h0 = y(end,1);  %Rocket starts on the ground
 v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
-gamma0 = deg2rad(89);    % pitchover 
+gamma0 = deg2rad(88);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -110,7 +113,7 @@ P.guess.control = [ 0, 0 ];
 
 % Dynamics function:
 phase = 'postpitch';
-P.func.dynamics = @(t,x,u)( rocketDynamics(x,u,phase) );
+P.func.dynamics = @(t,x,u)( rocketDynamics(x,u,phase,scattered) );
 
 % Objective function:
 % P.func.bndObj = @(t0,x0,tF,xF)( -xF(1)/10000 );  %Maximize final height
@@ -130,7 +133,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100 );
         
         P.options(2).method = 'rungeKutta';
         P.options(2).defaultAccuracy = 'high';
-        P.options(2).nlpOpt.MaxFunEvals = 2e5;
+        P.options(2).nlpOpt.MaxFunEvals = 5e4;
         P.options(2).nlpOpt.MaxIter = 1e5;
         P.options(2).rungeKutta.nSegment = 40;
 

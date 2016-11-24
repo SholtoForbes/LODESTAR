@@ -1,5 +1,5 @@
 %2ndStageEngineInterpolator
-
+clear all
 % this runs the file EngineData.exe which takes input of Mach, T and p (behind initial shock, given in communicator matrix) and
 % produces output of thrust force (N) and fuel usage (kg/s).
 
@@ -11,17 +11,19 @@ com = dlmread('communicator_extrapolate_MpT.txt'); % import data from atmosphere
 
 wcap = 0.65;
 
-for i = 6:1.:13
+for i = 6:.2:11
     M = i ;
 
-    for j = 0.:1.:6
+    for j = 0.:.2:6
         AoA = j;
-
+        for k = 1:0.02:1.3
+            t_ratio = k;
+            
         Mshock = griddata(com(:,1), com(:,2), com(:,4), M, AoA); %calculates M after shock from extrapolated hypaero communicator
 
         pshock = griddata(com(:,1), com(:,2), com(:,5), M, AoA);
 
-        Tshock = griddata(com(:,1), com(:,2), com(:,6), M, AoA);
+        Tshock = t_ratio*griddata(com(:,1), com(:,2), com(:,6), M, AoA);
         
         %write input file
         input = fopen('input','w');
@@ -42,12 +44,13 @@ for i = 6:1.:13
         output_temp = dlmread('output');
 
         %write to file
-        engineoutput_matrix = fopen('engineoutput_matrix','a+');
+        engineoutput_matrix = fopen('engineoutput_matrixnew','a+');
 
-        outputstring = [num2str(M,'%10.4e') ' ' num2str(AoA,'%10.4e') ' ' num2str(output_temp(1),'%10.4e') ' ' num2str(output_temp(2),'%10.4e') '\r\n'];
+        outputstring = [num2str(M,'%10.4e') ' ' num2str(AoA,'%10.4e') ' ' num2str(t_ratio,'%10.4e') ' ' num2str(output_temp(1),'%10.4e') ' ' num2str(output_temp(2),'%10.4e') '\r\n'];
 
         fprintf(engineoutput_matrix,outputstring);
 
         fclose('all');
+        end
     end
 end

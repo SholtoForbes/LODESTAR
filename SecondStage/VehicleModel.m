@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere)
 % t1 = cputime;
 % =======================================================
 % Vehicle Model
@@ -81,15 +81,33 @@ if const == 14
 end
 
 % THRUST AND MOTION ==================================================================
+
+    
+%Fuel Cost ===========================================================================
+
+
+
+
+constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
+
+constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
+
+temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+
+% Calculate temperature and pressure ratios
 if const == 1 || const == 14
     Efficiency = zeros(1,length(time)); % note this is a penalty as dynamic pressure decreases
     Penalty = zeros(1,length(time));
+    t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 50000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
+            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = 1;
         else
             Efficiency(i) = 1; % for 50kPa
             Penalty(i) = q(i)/50000-1; 
+            t_ratio(i) = 1;
         end
     end
 elseif const == 12
@@ -117,9 +135,9 @@ elseif const == 13
 elseif const == 3 || const == 31
     Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
     Penalty = 0;
+    t_ratio = temp_actual./constq_temp;
 end
-    
-%Fuel Cost ===========================================================================
+
 
 % for i = 1:length(time)
 % 
@@ -136,19 +154,12 @@ end
 %     end
 % end
 
+Thrust =  gridded.T_eng(M,Alpha).*cos(deg2rad(Alpha)).*Efficiency;
+Fueldt =  gridded.fuel_eng(M,Alpha).*Efficiency;
 
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
-
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-
-t_ratio = temp_actual./constq_temp;
-
-
-[Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
-
-Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
+% [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
+% 
+% Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

@@ -32,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -66,11 +66,10 @@ scattered.M1 = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 
 
 scattered.data = dlmread('RESTM12DATA.txt');  
-scattered.data = unique(scattered.data,'row
 data = scattered.data;
       
-% scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
-% 
+scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
+
 % scattered.phi = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 
 global grid
@@ -340,8 +339,9 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35500]/scale.V; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35500]/scale.V; %50kpa limited
 % 
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100]/scale.V; %50kpa limited
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];

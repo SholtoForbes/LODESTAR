@@ -1,4 +1,4 @@
-function dz = rocketDynamicsFullSize(z,u,phase)
+function dz = rocketDynamicsFullSize(z,u,phase,scattered)
 
 
 h = z(1,:);   %Height
@@ -21,17 +21,17 @@ T = 460000;
 density = 1.474085291*(0.9998541833.^h);  %Data fit off of wolfram alpha
 
 
-A1 = 0.0095;
-A2 = 25;
-A3 = 0.953;
-A4 = 0.036;
+
 speedOfSound = 280;  %(m/s)  %At 10 km altitude
 mach = v/speedOfSound;
-Cd = A1*atan(A2*(mach-A3))+A4;
+
+Cd = scattered.Drag(mach,alpha);
+Cl = scattered.Lift(mach,alpha);
 
 %%%% Compute the drag:
 Area = pi*3.66;  %(m^2) cross-sectional area (SpaceX F9 Falcon)  this is overestimating... should be about a falcon 1
 D = 0.5*Cd.*Area.*density.*v.^2;
+L = 0.5*Cl.*Area.*density.*v.^2;
 
 %%%% Compute gravity from inverse-square law:
 rEarth = 6.3674447e6;  %(m) radius of earth
@@ -50,7 +50,7 @@ dm = -160*ones(1,length(h)).*T/Tmax;
 xi = 0*ones(1,length(h));
 phi = 0*ones(1,length(h));
 zeta = 0*ones(1,length(h));
-L = 0*ones(1,length(h));
+
 
 switch phase
     case 'prepitch'
