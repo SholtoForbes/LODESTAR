@@ -103,7 +103,7 @@ if const == 1 || const == 14
         if q(i) < 50000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
             t_ratio(i) = temp_actual(i)./constq_temp(i);
-            t_ratio(i) = 1;
+%             t_ratio(i) = 1;
         else
             Efficiency(i) = 1; % for 50kPa
             Penalty(i) = q(i)/50000-1; 
@@ -138,28 +138,28 @@ elseif const == 3 || const == 31
     t_ratio = temp_actual./constq_temp;
 end
 
+% OLD
+% % for i = 1:length(time)
+% % 
+% %     if Alpha(i) > 0 && Alpha(i) < 6
+% %         Thrust(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M(i),Alpha(i),'spline').*cos(deg2rad(Alpha(i))).*Efficiency(i);
+% %         Fueldt(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M(i),Alpha(i),'spline').*Efficiency(i);
+% %     else
+% %         Thrust(i) =  scattered.T(M(i),Alpha(i)).*cos(deg2rad(Alpha(i))).*Efficiency(i);
+% %         Fueldt(i) =  scattered.fuel(M(i),Alpha(i)).*Efficiency(i);
+% %     end
+% % 
+% %     if q(i) < 20000
+% %         Thrust(i) = 0;
+% %     end
+% % end
 
-% for i = 1:length(time)
-% 
-%     if Alpha(i) > 0 && Alpha(i) < 6
-%         Thrust(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M(i),Alpha(i),'spline').*cos(deg2rad(Alpha(i))).*Efficiency(i);
-%         Fueldt(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M(i),Alpha(i),'spline').*Efficiency(i);
-%     else
-%         Thrust(i) =  scattered.T(M(i),Alpha(i)).*cos(deg2rad(Alpha(i))).*Efficiency(i);
-%         Fueldt(i) =  scattered.fuel(M(i),Alpha(i)).*Efficiency(i);
-%     end
-% 
-%     if q(i) < 20000
-%         Thrust(i) = 0;
-%     end
-% end
+% Thrust =  gridded.T_eng(M,Alpha).*cos(deg2rad(Alpha)).*Efficiency;
+% Fueldt =  gridded.fuel_eng(M,Alpha).*Efficiency;
 
-Thrust =  gridded.T_eng(M,Alpha).*cos(deg2rad(Alpha)).*Efficiency;
-Fueldt =  gridded.fuel_eng(M,Alpha).*Efficiency;
+[Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
 
-% [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
-% 
-% Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
+Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

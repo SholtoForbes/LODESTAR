@@ -14,9 +14,9 @@ P1 = scattered.presgridded(M,Alpha).*Efficiency; % note this is at 50kPa, modifi
 M1 = scattered.M1gridded(M, Alpha);
 
 
-Isp = scattered.IspScattered(M1,T1);
+% Isp = scattered.IspScattered(M1,T1);
 
-% Isp = scattered.IspGridded(M1,T1);
+Isp = scattered.IspGridded(M1,T1);
 
 % 
 % phi = scattered.phi(M1,T1)

@@ -107,7 +107,18 @@ ThirdStagePayloadMass = interp1(Payload_temp(:,2),Payload_temp(:,3),zeta(end)); 
 
 
 
-
+if rem(iteration,10000) == 0
+    hold on
+    Payload_temp
+    ThirdStagePayloadMass
+    phi(end)
+    zeta(end)
+    todisp = ['Total Iterations Done:',num2str(iteration)];
+    disp(todisp);
+    figure(10)
+    plot(time,V)
+    drawnow
+end
 
 % Define Cost =======================================================
 % The pseudospectral solver is able to run with no cost at all, this is useful for checking dynamics
@@ -146,19 +157,5 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = 0;
 end
 
-if rem(iteration,10000) == 0
-    hold on
-%     Payload_temp
-    ThirdStagePayloadMass
-%     phi(end)
-%     zeta(end)
-    EndpointCost
-    RunningCost
-    todisp = ['Total Iterations Done:',num2str(iteration)];
-    disp(todisp);
-    figure(10)
-    plot(time,V)
-    drawnow
-end
 
 end

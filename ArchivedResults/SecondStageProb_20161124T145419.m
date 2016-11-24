@@ -32,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -50,6 +50,22 @@ enginedata = dlmread('engineoutput_matrix');
 global scattered
 
 
+
+
+% scattered.temp = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,14));
+% scattered.pres = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,13));
+% scattered.M1 = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,12));
+% MList = (linspace(min(communicator(:,1)),max(communicator(:,1)),100).' * ones(1,100));
+% AOAList = (ones(100,1) * linspace(min(communicator(:,2)),max(communicator(:,2)),100));
+% M1_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,12),100,100,'interp','triangle');
+% pres_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,13),100,100,'interp','bilinear');
+% temp_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,14),100,100,'interp','bilinear');
+% scattered.M1gridded = griddedInterpolant(MList,AOAList,M1_GridFit,'linear','linear');
+% scattered.presgridded = griddedInterpolant(MList,AOAList,pres_GridFit,'spline','linear');
+% scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_GridFit,'spline','linear');
+% [MGrid,AOAGrid,M1_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,12));
+% [MGrid,AOAGrid,pres_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,13));
+% [MGrid,AOAGrid,temp_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,14));
     
 
 
@@ -65,12 +81,8 @@ data = scattered.data;
 IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
 M_englist = unique(sort(data(:,1))); % create unique list of Mach numbers from engine data
 M_eng_interp = floor(M_englist(1)):0.1:ceil(M_englist(end)); % enlarge spread, this is not necessary if you have a lot of engine data
-% M_eng_interp = unique(sort(data(:,1)));
-
 T_englist = unique(sort(data(:,2))); % create unique list of angle of attack numbers from engine data
 T_eng_interp = floor(T_englist(1)):10:ceil(T_englist(end)); 
-% T_eng_interp = unique(sort(data(:,2)));
-
 [grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
 grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng);
 scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','linear');

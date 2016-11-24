@@ -25,11 +25,11 @@ density = 1.474085291*(0.9998541833.^h);  %Data fit off of wolfram alpha
 speedOfSound = 280;  %(m/s)  %At 10 km altitude
 mach = v/speedOfSound;
 
-Cd = scattered.Drag(mach,alpha);
-Cl = scattered.Lift(mach,alpha);
+Cd = scattered.Drag(mach,rad2deg(alpha));
+Cl = scattered.Lift(mach,rad2deg(alpha));
 
 %%%% Compute the drag:
-Area = pi*3.66;  %(m^2) cross-sectional area (SpaceX F9 Falcon)  this is overestimating... should be about a falcon 1
+Area = 62.77;  
 D = 0.5*Cd.*Area.*density.*v.^2;
 L = 0.5*Cl.*Area.*density.*v.^2;
 

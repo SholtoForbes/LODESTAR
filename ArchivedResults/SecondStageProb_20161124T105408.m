@@ -49,47 +49,69 @@ enginedata = dlmread('engineoutput_matrix');
 %Produce scattered interpolants for vehicle data
 global scattered
 
+scattered.T = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
+scattered.fuel = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
 
+M_eng = unique(sort(enginedata(:,1))); % create unique list of Mach numbers from engine data
+M_eng_interp = M_eng(1):0.1:M_eng(end); % enlarge spread, this is not necessary if you have a lot of engine data
+
+Alpha_eng = unique(sort(enginedata(:,2))); % create unique list of angle of attack numbers from engine data
+Alpha_eng_interp = Alpha_eng(1):0.1:Alpha_eng(end); 
+
+% scattered.temp = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,14));
+% 
+% scattered.pres = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,13));
+% 
+% scattered.M1 = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,12));
+
+% MList = (linspace(min(communicator(:,1)),max(communicator(:,1)),100).' * ones(1,100));
+% AOAList = (ones(100,1) * linspace(min(communicator(:,2)),max(communicator(:,2)),100));
+
+% M1_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,12),100,100,'interp','triangle');
+% pres_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,13),100,100,'interp','bilinear');
+% temp_GridFit = gridfit(communicator(:,1),communicator(:,2),communicator(:,14),100,100,'interp','bilinear');
+% 
+% scattered.M1gridded = griddedInterpolant(MList,AOAList,M1_GridFit,'linear','linear');
+% scattered.presgridded = griddedInterpolant(MList,AOAList,pres_GridFit,'spline','linear');
+% scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_GridFit,'spline','linear');
+
+% [MGrid,AOAGrid,M1_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,12));
+% [MGrid,AOAGrid,pres_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,13));
+% [MGrid,AOAGrid,temp_Grid] = ndgrid(communicator(:,1),communicator(:,2),communicator(:,14));
     
-
-
 [MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
-M1_Grid = reshape(communicator(:,12),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-pres_Grid = reshape(communicator(:,13),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-temp_Grid = reshape(communicator(:,14),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+% 
+M1_Grid = reshape(communicator(:,12),[length(unique(communicator(:,1))),length(unique(communicator(:,2)))]);
+pres_Grid = reshape(communicator(:,13),[length(unique(communicator(:,1))),length(unique(communicator(:,2)))]);
+temp_Grid = reshape(communicator(:,14),[length(unique(communicator(:,1))),length(unique(communicator(:,2)))]);
+
 scattered.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
 scattered.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
 scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
+
 scattered.data = dlmread('RESTM12DATA.txt');  
 data = scattered.data;
-IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
-M_englist = unique(sort(data(:,1))); % create unique list of Mach numbers from engine data
-M_eng_interp = floor(M_englist(1)):0.1:ceil(M_englist(end)); % enlarge spread, this is not necessary if you have a lot of engine data
-% M_eng_interp = unique(sort(data(:,1)));
-
-T_englist = unique(sort(data(:,2))); % create unique list of angle of attack numbers from engine data
-T_eng_interp = floor(T_englist(1)):10:ceil(T_englist(end)); 
-% T_eng_interp = unique(sort(data(:,2)));
-
-[grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
-grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng);
-scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','linear');
-
-
-
+      
+scattered.IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
 
 % Isp_GridFit = gridfit(data(:,1),data(:,2),data(:,6),100,100,'interp','bilinear');
 % M1List = linspace(min(data(:,1)),max(data(:,1)),100).' * ones(1,100);
 % TList = ones(100,1) * linspace(min(data(:,2)),max(data(:,2)),100);
+% 
 % scattered.IspGridded = griddedInterpolant(M1List,TList,Isp_GridFit,'spline','linear');
+
 % [M1Grid,T1Grid,Isp_Grid] = ndgrid(data(:,1),data(:,2),data(:,6));
+
 % [M1List,TList] = ndgrid(unique(data(:,1)),unique(data(:,2)));
 % Isp_Grid = reshape(data(:,6),[length(unique(data(:,1))),length(unique(data(:,2)))]).';
+% 
 % scattered.IspGridded = griddedInterpolant(M1List,T1List,Isp_Grid,'spline','linear');
+
+
+
 % scattered.phi = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
+
 % global grid
-
-
 % Interpolate engine data into easily interpolatable form. 
 
 % This linear interpolation is then interpolated using spline
@@ -103,25 +125,20 @@ scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng
 % grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
 
 
-% This works
-% scattered.T = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
-% scattered.fuel = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
-% M_eng = unique(sort(enginedata(:,1))); % create unique list of Mach numbers from engine data
-% M_eng_interp = M_eng(1):0.1:M_eng(end); % enlarge spread, this is not necessary if you have a lot of engine data
-% Alpha_eng = unique(sort(enginedata(:,2))); % create unique list of angle of attack numbers from engine data
-% Alpha_eng_interp = Alpha_eng(1):0.1:Alpha_eng(end); 
-% [grid.Mgrid_eng2,grid.alpha_eng2] =  ndgrid(M_eng_interp,Alpha_eng_interp);
-% grid.T_eng = scattered.T(grid.Mgrid_eng2,grid.alpha_eng2);
-% grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
-% global gridded
-% gridded.T_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,'spline','linear');
-% gridded.fuel_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,'spline','linear');
+[grid.Mgrid_eng2,grid.alpha_eng2] =  ndgrid(M_eng_interp,Alpha_eng_interp);
+grid.T_eng = scattered.T(grid.Mgrid_eng2,grid.alpha_eng2);
+grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
+
+global gridded
+gridded.T_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,'spline','linear');
+gridded.fuel_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,'spline','linear');
 
 
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
 % settings required for trim at any flight conditions
-[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered);
+[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, gridded);
+
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));

@@ -32,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
