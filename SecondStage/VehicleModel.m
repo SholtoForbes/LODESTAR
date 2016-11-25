@@ -159,6 +159,12 @@ end
 
 [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
 
+for i = 1:length(time)
+  if q(i) < 20000
+        Isp(i) = gaussmf(q(i),[1000,20000]);
+  end  
+end
+
 Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;

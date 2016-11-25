@@ -67,46 +67,46 @@ omegadot  = primal.controls(1,:)*scale.thetadot;
 % global payload_array
 % global phi_list
 % global zeta_list
-% 
-% global Payload_cell
-% 
-% for  i = 1: length(Payload_cell)
-%     if V(end) > 40000
-%         if theta(end) < 0  
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 40000])*Payload_cell{i,2}(40000,0,v(end))];
-%         else
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 40000])*Payload_cell{i,2}(40000,theta(end),v(end))];
-%         end
-%     elseif V(end) < 30000
-%         if theta(end) < 0  
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 30000])*Payload_cell{i,2}(30000,0,v(end))];
-%         else
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 30000])*Payload_cell{i,2}(30000,theta(end),v(end))];
-%         end
-%     elseif v(end) < 2500
-%         if theta(end) < 0
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(v(end),[1000 2000])*Payload_cell{i,2}(V(end),0,2500)]; 
-%         else
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(v(end),[1000 2000])*Payload_cell{i,2}(V(end),theta(end),2500)]; 
-%         end
-%     else
-%         if theta(end) < 0
-%         Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*Payload_cell{i,2}(V(end),0,v(end))];  
-%         else
-%         Payload_temp(i,:) = [Payload_cell{i,1},Payload_cell{i,2}(V(end),theta(end),v(end))];
-%         end
-%     end
-% end
+
+global Payload_cell
+
+for  i = 1: length(Payload_cell)
+    if V(end) > 40000
+        if theta(end) < 0  
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 40000])*Payload_cell{i,2}(40000,0,v(end))];
+        else
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 40000])*Payload_cell{i,2}(40000,theta(end),v(end))];
+        end
+    elseif V(end) < 30000
+        if theta(end) < 0  
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 30000])*Payload_cell{i,2}(30000,0,v(end))];
+        else
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(V(end),[10000 30000])*Payload_cell{i,2}(30000,theta(end),v(end))];
+        end
+    elseif v(end) < 2500
+        if theta(end) < 0
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(v(end),[1000 2000])*Payload_cell{i,2}(V(end),0,2500)]; 
+        else
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*gaussmf(v(end),[1000 2000])*Payload_cell{i,2}(V(end),theta(end),2500)]; 
+        end
+    else
+        if theta(end) < 0
+        Payload_temp(i,:) = [Payload_cell{i,1},gaussmf(theta(end),[0.1 0])*Payload_cell{i,2}(V(end),0,v(end))];  
+        else
+        Payload_temp(i,:) = [Payload_cell{i,1},Payload_cell{i,2}(V(end),theta(end),v(end))];
+        end
+    end
+end
 
 % if phi(end) > max(phi_list.course) || phi(end) < min(phi_list.course) || zeta(end) > max(zeta_list.course) || zeta(end) < min(zeta_list.course) 
 % disp('end values outside of search range for latitude or heading angle')
 % end
 
 % ThirdStageinterp = scatteredInterpolant(Payload_temp(:,1),Payload_temp(:,2),Payload_temp(:,3));
-% ThirdStagePayloadMass = interp1(Payload_temp(:,2),Payload_temp(:,3),zeta(end)); % note, this does not use latitude because it barely matters (need to add for 3D analysis when roll is to be included)
+ThirdStagePayloadMass = interp1(Payload_temp(:,2),Payload_temp(:,3),zeta(end)); % note, this does not use latitude because it barely matters (need to add for 3D analysis when roll is to be included)
 
-global PayloadGrid
-ThirdStagePayloadMass = PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end));
+
+
 
 
 % Define Cost =======================================================
@@ -129,7 +129,6 @@ if const == 3
 % RunningCost =((q-50000).^2+2000000)/2000000 + abs(thetadot);
 % RunningCost =((q-50000).^2+2000000)/2000000; %looser
 RunningCost =((q-50000).^2+10000)/10000; % tighter
-
 elseif const == 1  || const == 12 || const == 13 || const == 14
     
 %smoothing functions (can be adjusted depending on needs, remove if not working
@@ -138,8 +137,7 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = [0 0.001*abs(omegadot)]; %for smoothing 45kPa and 55kPa and
 % high drag
 
-    RunningCost = Penalty + abs(omegadot);
-
+    RunningCost = Penalty + 10*abs(omegadot);
 
 %     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
     %Omegadot cost smooths the trajectory (sometimes), but also throws a SOL error and

@@ -99,7 +99,7 @@ scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng
 % grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
 
 
-% This works for const q
+% This works
 % scattered.T = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
 % scattered.fuel = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
 % M_eng = unique(sort(enginedata(:,1))); % create unique list of Mach numbers from engine data
@@ -145,43 +145,41 @@ scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 % array should be expanded.
 % 
 ThirdStageData = dlmread('thirdstage.dat'); %Import Third Stage Data Raw 
-ThirdStageData = sortrows(ThirdStageData);
+ThirdStageData = sort(ThirdStageData);
 
-% test of using griddedinterpolant
-PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,1)))]),[5 4 3 2 1]);
-[phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
-global PayloadGrid
-PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'linear','linear');
+% test of using griddedinterpolant: does not interpolate well
+% PayloadData = reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,1))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,5)))]);
+% [phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'linear','linear');
 
 
-% this works 
-% endcond = [ThirdStageData(1,1) , ThirdStageData(1,2)];
-% 
-% % Separate by latitude and heading angle
-% j = 1;
-% n = 1;
-% for i = 1:length(ThirdStageData)
-%     
-%     endcond_temp = [ThirdStageData(i,1) , ThirdStageData(i,2)];
-%     
-%     if endcond_temp(1) ~= endcond(1) || endcond_temp(2) ~= endcond(2) 
-%         
-%         ThirdStageData_manip(:,:,n) = ThirdStageData(j:i-1,:);
-%         endcond = endcond_temp;
-%         j = i;
-%         n = n+1;
-%     elseif i == length(ThirdStageData)
-%         ThirdStageData_manip(:,:,n) = ThirdStageData(j:i,:);
-%     end
-% end
-% 
-% global Payload_cell
-% Payload_cell = cell(1);
-% for  i = 1: length(ThirdStageData_manip(1,1,:))
-%     Payload_temp = scatteredInterpolant(ThirdStageData_manip(:,3,i),ThirdStageData_manip(:,4,i),ThirdStageData_manip(:,5,i),ThirdStageData_manip(:,6,i));
-%     Payload_cell{i,1} = [ThirdStageData_manip(1,1,i),ThirdStageData_manip(1,2,i)];
-%     Payload_cell{i,2} = Payload_temp;
-% end
+endcond = [ThirdStageData(1,1) , ThirdStageData(1,2)];
+
+% Separate by latitude and heading angle
+j = 1;
+n = 1;
+for i = 1:length(ThirdStageData)
+    
+    endcond_temp = [ThirdStageData(i,1) , ThirdStageData(i,2)];
+    
+    if endcond_temp(1) ~= endcond(1) || endcond_temp(2) ~= endcond(2) 
+        
+        ThirdStageData_manip(:,:,n) = ThirdStageData(j:i-1,:);
+        endcond = endcond_temp;
+        j = i;
+        n = n+1;
+    elseif i == length(ThirdStageData)
+        ThirdStageData_manip(:,:,n) = ThirdStageData(j:i,:);
+    end
+end
+
+global Payload_cell
+Payload_cell = cell(1);
+for  i = 1: length(ThirdStageData_manip(1,1,:))
+    Payload_temp = scatteredInterpolant(ThirdStageData_manip(:,3,i),ThirdStageData_manip(:,4,i),ThirdStageData_manip(:,5,i),ThirdStageData_manip(:,6,i));
+    Payload_cell{i,1} = [ThirdStageData_manip(1,1,i),ThirdStageData_manip(1,2,i)];
+    Payload_cell{i,2} = Payload_temp;
+end
 
 
 
@@ -376,7 +374,7 @@ constq = dlmread('primalconstq.txt');
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36500]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35500]/scale.V; %50kpa limited
 % 
 % guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000];

@@ -145,16 +145,14 @@ scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 % array should be expanded.
 % 
 ThirdStageData = dlmread('thirdstage.dat'); %Import Third Stage Data Raw 
-ThirdStageData = sortrows(ThirdStageData);
+ThirdStageData = sort(ThirdStageData);
 
 % test of using griddedinterpolant
 PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,1)))]),[5 4 3 2 1]);
 [phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
-global PayloadGrid
-PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'linear','linear');
+PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 
-
-% this works 
+% 
 % endcond = [ThirdStageData(1,1) , ThirdStageData(1,2)];
 % 
 % % Separate by latitude and heading angle

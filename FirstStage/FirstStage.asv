@@ -84,8 +84,8 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.1];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.1];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.4];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.4];
 
 P.bounds.initialState.low = [h0;v0;m0;gamma0;0];
 P.bounds.initialState.upp = [h0;v0;m0;gamma0;0];
