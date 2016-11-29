@@ -261,10 +261,10 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1  || const == 12 || const == 14 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 % bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
+% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
 elseif const == 13
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.00035/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
@@ -353,10 +353,10 @@ TwoStage2d.bounds       = bounds;
 % 87 for const 50kPa
 if const == 3 || const == 31
 % algorithm.nodes		= [80]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [60]; 
 elseif const == 1
-% algorithm.nodes		= [75];
-algorithm.nodes		= [75]; 
+algorithm.nodes		= [75];
+% algorithm.nodes		= [60]; 
 elseif const == 12 
 algorithm.nodes		= [78];
 elseif const == 13
@@ -377,11 +377,11 @@ constq = dlmread('primalconstq.txt');
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000]/scale.V; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36000]/scale.V; %50kpa limited
 % 
 % guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000];
-% guess.states(1,:) = constq(1,:);
+guess.states(1,:) = constq(1,:);
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];
@@ -396,8 +396,8 @@ guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 end
 
-guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
-% guess.states(2,:) = constq(2,:);
+% guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
+guess.states(2,:) = constq(2,:);
 if const ==3 || const == 31 
 % guess.states(3,:) = [0,0]/scale.theta;
 guess.states(3,:) = [0,0]/scale.theta;
@@ -406,21 +406,21 @@ elseif const == 13
 guess.states(3,:) = [deg2rad(0.5),0.04]/scale.theta;
 else
 % guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;  
-guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
-% guess.states(3,:) = constq(3,:);
+% guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+guess.states(3,:) = constq(3,:);
 end 
 
-guess.states(4,:) = [mfuelU, 0]/scale.m;
-% guess.states(4,:) = constq(4,:);
+% guess.states(4,:) = [mfuelU, 0]/scale.m;
+guess.states(4,:) = constq(4,:);
 
-guess.states(5,:) = [0,0];
-% guess.states(5,:) = zeros(1,length(constq(1,:)));
+% guess.states(5,:) = [0,0];
+guess.states(5,:) = zeros(1,length(constq(1,:)));
 
-guess.controls(1,:)    = [0,0]; 
-% guess.controls(1,:)    = zeros(1,length(constq(1,:)));
+% guess.controls(1,:)    = [0,0]; 
+guess.controls(1,:)    = zeros(1,length(constq(1,:)));
 
-guess.time        = [t0 ,tfGuess];
-% guess.time        = constq(7,:);
+% guess.time        = [t0 ,tfGuess];
+guess.time        = constq(7,:);
 
 % Tell DIDO the guess
 %========================

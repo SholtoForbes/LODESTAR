@@ -2,7 +2,8 @@ function mpayload = ThirdStageOptm(k,j,u, phi0, zeta0)
 
 mScale = 1; % This needs to be manually changed in altitude and velocity files as well
 % x0 = [1200*mScale deg2rad(15) deg2rad(15)] % 
-x0 = [1500  deg2rad(13) deg2rad(13)];
+% x0 = [1500  deg2rad(13) deg2rad(13)];
+x0 = [1500  deg2rad(13)];
 options.Display = 'iter';
 options.TolFun = 0.1;
 options.TolX = 0.1;
@@ -14,7 +15,7 @@ x = fminsearch(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
 % x = fmincon(@(x)Payload(x,k,j,u),x0,[1],[1800],[],[],[],[],[],options);
 
 mfuel_burn = x(1)
-AoA_control = [x(2) x(3)]
+AoA_control = [x(2)]
 
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 

@@ -26,8 +26,7 @@ CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50))*50000/q_init; %maximum allowable AoA
 
 
-% AoA_init = x(2); 
-AoA_init = AoA_max; 
+AoA_init = x(2); 
 if AoA_init > deg2rad(20)
     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
 elseif AoA_init < deg2rad(0)
@@ -39,8 +38,8 @@ if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
-% AoA_end = x(3); 
-AoA_end = x(2); 
+
+AoA_end = x(3); 
 if AoA_end > deg2rad(20)
     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
 elseif AoA_end < deg2rad(0)
@@ -102,7 +101,7 @@ Isp = 451;
 %define starting condtions
 t(1) = 0.;
 
-dt_main = .3; %time step
+dt_main = .2; %time step
 dt = dt_main;
 
 i=1;
@@ -223,7 +222,7 @@ while gamma(i) >= 0 || t(i) < 60;
         fprintf('BAD CONDITIONS!');
     end
    
-%     if i == 1
+    if i == 1 ||
     r(i+1) = r(i) + rdot*dt;
     
     Alt(i+1) = r(i+1) - r_E;
@@ -237,22 +236,22 @@ while gamma(i) >= 0 || t(i) < 60;
     v(i+1) = v(i) + vdot*dt;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
-%     else
-%     r(i+1) = r(i-1) + rdot*2*dt;
-%     
-%     Alt(i+1) = r(i+1) - r_E;
-%     
-%     xi(i+1) = xi(i-1) + xidot*2*dt;
-%     
-%     phi(i+1) = phi(i-1) + phidot*2*dt;
-%     
-%     gamma(i+1) = gamma(i-1) + gammadot*2*dt;
-%     
-%     v(i+1) = v(i-1) + vdot*2*dt;
-%     
-%     zeta(i+1) = zeta(i-1) + zetadot*2*dt;
-%     
-%     end
+    else
+    r(i+1) = r(i-1) + rdot*2*dt;
+    
+    Alt(i+1) = r(i+1) - r_E;
+    
+    xi(i+1) = xi(i-1) + xidot*2*dt;
+    
+    phi(i+1) = phi(i-1) + phidot*2*dt;
+    
+    gamma(i+1) = gamma(i-1) + gammadot*2*dt;
+    
+    v(i+1) = v(i-1) + vdot*2*dt;
+    
+    zeta(i+1) = zeta(i-1) + zetadot*2*dt;
+    
+    end
     i = i+1;
 end
 

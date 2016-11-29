@@ -261,10 +261,10 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1  || const == 12 || const == 14 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 % bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
+% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
 elseif const == 13
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.00035/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
@@ -353,10 +353,10 @@ TwoStage2d.bounds       = bounds;
 % 87 for const 50kPa
 if const == 3 || const == 31
 % algorithm.nodes		= [80]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [60]; 
 elseif const == 1
-% algorithm.nodes		= [75];
-algorithm.nodes		= [75]; 
+algorithm.nodes		= [75];
+% algorithm.nodes		= [60]; 
 elseif const == 12 
 algorithm.nodes		= [78];
 elseif const == 13
@@ -377,7 +377,7 @@ constq = dlmread('primalconstq.txt');
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36000]/scale.V; %50kpa limited
 % 
 % guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000];

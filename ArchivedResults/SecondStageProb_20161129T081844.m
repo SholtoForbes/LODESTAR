@@ -264,7 +264,7 @@ if const == 1  || const == 12 || const == 14
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 % bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
+% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.001/scale.thetadot];
 elseif const == 13
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.00035/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
@@ -289,8 +289,8 @@ end
 % omegadotL = -0.0005;
 % omegadotU = 0.0005;
 
-omegadotL = -0.0001;
-omegadotU = 0.0001;
+omegadotL = -0.0005;
+omegadotU = 0.0005;
 % omegadotL = -0.001;
 % omegadotU = 0.001;
 
@@ -353,10 +353,10 @@ TwoStage2d.bounds       = bounds;
 % 87 for const 50kPa
 if const == 3 || const == 31
 % algorithm.nodes		= [80]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [60]; 
 elseif const == 1
-% algorithm.nodes		= [75];
-algorithm.nodes		= [75]; 
+algorithm.nodes		= [75];
+% algorithm.nodes		= [60]; 
 elseif const == 12 
 algorithm.nodes		= [78];
 elseif const == 13
@@ -377,7 +377,7 @@ constq = dlmread('primalconstq.txt');
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36500]/scale.V; %50kpa limited
 % 
 % guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000];
@@ -406,7 +406,7 @@ elseif const == 13
 guess.states(3,:) = [deg2rad(0.5),0.04]/scale.theta;
 else
 % guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;  
-guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+guess.states(3,:) = [deg2rad(1.3),0.03]/scale.theta;  
 % guess.states(3,:) = constq(3,:);
 end 
 

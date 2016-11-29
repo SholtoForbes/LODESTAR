@@ -1,6 +1,6 @@
 % visualising third stage cost results
 clear all
-ThirdStageData = sortrows(dlmread('thirdstagefine.dat'));
+ThirdStageData = sortrows(dlmread('thirdstage.dat'));
 Atmosphere = dlmread('atmosphere.txt');
 % map = [0, 0, 0
 %     0, 0, 0
@@ -16,8 +16,8 @@ Atmosphere = dlmread('atmosphere.txt');
 colormap jet
 scatter3(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),30,ThirdStageData(:,4), 'filled')
 
-xlabel('Trajectory Angle (deg)')
-ylabel('Velocity (m/s)')
+ylabel('Trajectory Angle (deg)')
+xlabel('Velocity (m/s)')
 zlabel('Altitude (km)')
 c=colorbar('northoutside');
 ylabel(c,'Payload Mass, kg')

@@ -10,7 +10,8 @@ scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
    
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-mSpartan = 8755.1;
+% mSpartan = 8755.1;
+
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 global Tmax
@@ -84,8 +85,8 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.4];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.4];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.1];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.1];
 
 P.bounds.initialState.low = [h0;v0;m0;gamma0;0];
 P.bounds.initialState.upp = [h0;v0;m0;gamma0;0];

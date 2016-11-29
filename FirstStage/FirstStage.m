@@ -10,7 +10,8 @@ scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
    
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-mSpartan = 8755.1;
+% mSpartan = 8755.1;
+mSpartan = 6000.1; % SCALED DOWN SECOND STAGE
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 global Tmax
@@ -48,7 +49,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 h0 = y(end,1);  %Rocket starts on the ground
 v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
-gamma0 = deg2rad(88);    % pitchover 
+gamma0 = deg2rad(89.9);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -74,8 +75,8 @@ gammaUpp = deg2rad(90);
 % uLow = [-1.5]; % Can do either AoA or thrust
 % uUpp = [.5]; 
 
-uLow = [-.1]; % Can do either AoA or thrust
-uUpp = [.1]; 
+uLow = [-.005]; % Can do either AoA or thrust
+uUpp = [.005]; 
 
 
 P.bounds.initialTime.low = 0;
@@ -84,10 +85,10 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.1];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.1];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.05];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.05];
 
-P.bounds.initialState.low = [h0;v0;m0;gamma0;0];
+P.bounds.initialState.low = [h0;v0;m0;gamma0;-0.05];
 P.bounds.initialState.upp = [h0;v0;m0;gamma0;0];
 
 % P.bounds.finalState.low = [hLow;vF;mF;gammaF];
@@ -133,21 +134,22 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
         
         P.options(2).method = 'hermiteSimpson';
         P.options(2).defaultAccuracy = 'high';
-        P.options(2).nlpOpt.MaxFunEvals = 1e5;
+        P.options(2).nlpOpt.MaxFunEvals = 5e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
-        P.options(2).rungeKutta.nSegment = 40;
+        P.options(2).nSegment = 40;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                              Solve!                                     %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 soln = trajOpt(P);
 
-t = linspace(soln(end).grid.time(1),soln(end).grid.time(end),100);  % It interpolates the end result!
-x = soln(end).interp.state(t);
-u = soln(end).interp.control(t);
+% t = linspace(soln(end).grid.time(1),soln(end).grid.time(end),100);  % It interpolates the end result!
+% x = soln(end).interp.state(t);
+% u = soln(end).interp.control(t);
 
-
-
+t = soln(end).grid.time;
+x = soln(end).grid.state;
+u = soln(end).grid.control;
 
 
 
@@ -190,6 +192,7 @@ u = soln(end).interp.control(t);
 
 
 % Plotting
+global mach
 
 figure(120);
 subplot(2,3,1);

@@ -1,5 +1,5 @@
 function dz = rocketDynamicsFullSize(z,u,phase,scattered)
-
+global mach
 
 h = z(1,:);   %Height
 v = z(2,:);   %Velocity

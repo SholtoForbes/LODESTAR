@@ -261,10 +261,10 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1  || const == 12 || const == 14 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 % bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
+% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
 elseif const == 13
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.00035/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
@@ -353,7 +353,7 @@ TwoStage2d.bounds       = bounds;
 % 87 for const 50kPa
 if const == 3 || const == 31
 % algorithm.nodes		= [80]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [60]; 
 elseif const == 1
 % algorithm.nodes		= [75];
 algorithm.nodes		= [75]; 
