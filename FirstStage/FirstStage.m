@@ -7,15 +7,15 @@ addpath TrajOpt-master
 Aero = dlmread('FirstStageAeroCoeffs.txt');
 scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
-   
+
+
+
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-% mSpartan = 8755.1;
-mSpartan = 6000.1; % SCALED DOWN SECOND STAGE
+mSpartan = 8755.1;
+% mSpartan = 6000.1; % SCALED DOWN SECOND STAGE
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
-global Tmax
-Tmax = 460000; %(nearly a merlin 1C) (This whole thing is nearly a Falcon 1 first stage)
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %

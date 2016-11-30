@@ -380,7 +380,7 @@ nodes = algorithm.nodes;
 %  Guess =================================================================
 constq = dlmread('primalconstq.txt');
 
-% tfGuess = tfMax; % this needs to be close to make sure solution stays within Out_Force bounds
+tfGuess = tfMax; % this needs to be close to make sure solution stays within Out_Force bounds
 
 if const == 1
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]/scale.V; %50kpa limited
@@ -428,7 +428,7 @@ guess.controls(1,:)    = [0,0];
 
 guess.time        = [t0 ,tfGuess];
 % guess.time        = constq(7,:);
-% guess.time        = [t0 ,230];
+
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -439,7 +439,7 @@ algorithm.guess = guess;
 
 %Start Plot
 figure(10)
-plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes),'k')
+plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes))
 iterative_V(end+1,:) = linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes);
 iterative_t(end+1,:) = linspace(guess.time(1),guess.time(2),algorithm.nodes);
 

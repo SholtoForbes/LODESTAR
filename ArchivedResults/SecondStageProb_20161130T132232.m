@@ -426,9 +426,9 @@ guess.states(5,:) = [0,0];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(1,:)    = zeros(1,length(constq(1,:)));
 
-guess.time        = [t0 ,tfGuess];
+% guess.time        = [t0 ,tfGuess];
 % guess.time        = constq(7,:);
-% guess.time        = [t0 ,230];
+guess.time        = [t0 ,230];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;

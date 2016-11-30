@@ -8,10 +8,6 @@ clear all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Counts iterations of DIDO
-global iterative_V
-iterative_V = [];
-global iterative_t
-iterative_t = [];
 global iteration
 iteration = 1;
 
@@ -36,7 +32,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 12
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -380,7 +376,7 @@ nodes = algorithm.nodes;
 %  Guess =================================================================
 constq = dlmread('primalconstq.txt');
 
-% tfGuess = tfMax; % this needs to be close to make sure solution stays within Out_Force bounds
+tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]/scale.V; %50kpa limited
@@ -428,29 +424,13 @@ guess.controls(1,:)    = [0,0];
 
 guess.time        = [t0 ,tfGuess];
 % guess.time        = constq(7,:);
-% guess.time        = [t0 ,230];
+
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
 % %========================
 % algorithm.mode = 'accurate';
 %=====================================================================================
-
-
-%Start Plot
-figure(10)
-plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes),'k')
-iterative_V(end+1,:) = linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes);
-iterative_t(end+1,:) = linspace(guess.time(1),guess.time(2),algorithm.nodes);
-
-filename = 'testnew51.gif';
-frame = getframe(10);
-im = frame2im(frame);
-[imind,cm] = rgb2ind(im,256);
-imwrite(imind,cm,filename,'gif', 'Loopcount',1);
-
-
-
 
 % Call dido
 % =====================================================================

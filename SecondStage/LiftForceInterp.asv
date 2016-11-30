@@ -9,16 +9,25 @@ function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spl
 disp('Calculating Flight Dynamics Regime');
 
 %read communicator and create interpolatior / extrapolator splines
-Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
-% flaplift_spline_2 = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6)); %find flap lift, given M, AoA, flap deflection
-Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,4)); % find Cd given M, AoA 
-% Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,2)); % find AoA given M, Cl
-pitchingmoment_scattered = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11)); % find pitching moment given M, AoA changed from main code
-% pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,6));
-flapdeflection_scattered = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-flapdrag_scattered = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-flaplift_scattered = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+% Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
+% % flaplift_spline_2 = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6)); %find flap lift, given M, AoA, flap deflection
+% Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,4)); % find Cd given M, AoA 
+% % Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,2)); % find AoA given M, Cl
+% pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11)); % find pitching moment given M, AoA changed from main code
+% % pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,6));
+flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
 
+
+[MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
+Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+Cd_Grid = reshape(communicator(:,4),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+pitchingmoment_Grid = reshape(communicator(:,11),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+
+Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
+pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
 
 
@@ -73,8 +82,10 @@ j = j+1;
                 for i = 1:length(q)
                     if q(i) < 55000
                     Efficiency(i) = rho/(50000*2/v^2); % dont change this
+                    t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                     Efficiency(i) = 1.1; % for 55kPa
+                    t_ratio(i) = temp_actual(i)/constq_temp(i);
                     end
                 end
             elseif const == 13
@@ -82,8 +93,10 @@ j = j+1;
                 for i = 1:length(q)
                     if q(i) < 45000
                         Efficiency(i) = rho/(50000*2/v^2); % dont change this
+                        t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                         Efficiency(i) = .9; % for 45kPa
+                        t_ratio(i) = temp_actual(i)/constq_temp(i);
                     end
                 end
             elseif const == 3 || const == 31
@@ -253,9 +266,24 @@ end
 % create splines
 % given M and lift force / q , find AoA, flap deflection and total drag
 % force / q
+
 AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
 flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
 Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
 Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
 
+
+% [vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
+% 
+% AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+% AoA_spline = griddedInterpolant(vList,altList,liftList,AoA_Grid,'spline','linear');
+% 
+% flapdeflection_Grid = permute(reshape(liftarray(:,5),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+% flapdeflection_spline = griddedInterpolant(vList,altList,liftList,flapdeflection_Grid,'spline','linear');
+% 
+% Drag_Grid = permute(reshape(liftarray(:,6),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+% Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','linear');
+% 
+% Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+% Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
 end

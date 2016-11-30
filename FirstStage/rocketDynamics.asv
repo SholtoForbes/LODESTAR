@@ -19,18 +19,23 @@ mEarth = 5.9721986e24;  %(kg) mass of earth
 G = 6.67e-11; %(Nm^2/kg^2) gravitational constant
 g = G*mEarth./((h+rEarth).^2);
 
-density = interp1(Atmosphere(:,1),Atmosphere(:,4),h);
-P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),h);
-speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),h);
+density = spline(Atmosphere(:,1),Atmosphere(:,4));
+P_atm = scattered.P_atm(h);
+speedOfSound = spline(Atmosphere(:,1),Atmosphere(:,5));
 
-SCALE = 1.2;
-T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
-Isp = 275 + (101325 - P_atm)*2.9410e-04;
+scattered.rho = 
+scattered.va = 
+scattered.P_atm = spline(Atmosphere(:,1),Atmosphere(:,3));
 
-dm = -T./Isp./g;
+
+T = 422581 + (1.22500 - P_atm)*1000*47.2; %(This whole thing is nearly a Falcon 1 first stage) this doesnt really fit the rocket equation, but fits the quoted thrust values 
+Isp = 275 + (1.22500 - P_atm)*24.3265;
+
+dm = T/Isp/g;
 
 
 mach = v./speedOfSound;
+
 Cd = scattered.Drag(mach,rad2deg(alpha));
 Cl = scattered.Lift(mach,rad2deg(alpha));
 

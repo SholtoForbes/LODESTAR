@@ -74,7 +74,7 @@ j = j+1;
                     t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                     Efficiency(i) = 1; % for 50kPa
-                    t_ratio(i) = 1;
+                    t_ratio(i) = 1; % This shouldnt really matter
                     end
                 end
             elseif const == 12
@@ -82,8 +82,10 @@ j = j+1;
                 for i = 1:length(q)
                     if q(i) < 55000
                     Efficiency(i) = rho/(50000*2/v^2); % dont change this
+                    t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                     Efficiency(i) = 1.1; % for 55kPa
+                    t_ratio(i) = temp_actual(i)/constq_temp(i);
                     end
                 end
             elseif const == 13
@@ -91,8 +93,10 @@ j = j+1;
                 for i = 1:length(q)
                     if q(i) < 45000
                         Efficiency(i) = rho/(50000*2/v^2); % dont change this
+                        t_ratio(i) = temp_actual(i)/constq_temp(i);
                     else
                         Efficiency(i) = .9; % for 45kPa
+                        t_ratio(i) = temp_actual(i)/constq_temp(i);
                     end
                 end
             elseif const == 3 || const == 31

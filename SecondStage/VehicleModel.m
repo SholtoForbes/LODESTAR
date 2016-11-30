@@ -113,23 +113,29 @@ if const == 1 || const == 14
 elseif const == 12
     Efficiency = zeros(1,length(time));
     Penalty = zeros(1,length(time));
+    t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 55000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
+            t_ratio(i) = temp_actual(i)./constq_temp(i);
         else
             Efficiency(i) = 1.1; % for 55kPa
             Penalty(i) = q(i)/55000-1; 
+            t_ratio(i) = temp_actual(i)./constq_temp(i);
         end
     end
 elseif const == 13
     Efficiency = zeros(1,length(time));
     Penalty = zeros(1,length(time));
+    t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 45000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
+            t_ratio(i) = temp_actual(i)./constq_temp(i);
         else
             Efficiency(i) = .9; % for 45kPa
             Penalty(i) = q(i)/45000-1; 
+            t_ratio(i) = temp_actual(i)./constq_temp(i);
         end
     end
 elseif const == 3 || const == 31
