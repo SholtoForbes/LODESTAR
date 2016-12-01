@@ -8,6 +8,10 @@ clear all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Counts iterations of DIDO
+global iterative_V
+iterative_V = [];
+global iterative_t
+iterative_t = [];
 global iteration
 iteration = 1;
 
@@ -32,7 +36,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -352,16 +356,18 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 if const == 3 || const == 31
-% algorithm.nodes		= [80]; 
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [80]; 
+% algorithm.nodes		= [110]; 
 elseif const == 1
 % algorithm.nodes		= [75];
 algorithm.nodes		= [75]; 
 elseif const == 12 
-algorithm.nodes		= [78];
+% algorithm.nodes		= [78];
+algorithm.nodes		= [110];
 elseif const == 13
-algorithm.nodes		= [78];
+% algorithm.nodes		= [78];
 % algorithm.nodes		= [77];
+algorithm.nodes		= [110];
 elseif const == 14
 algorithm.nodes		= [78];
 end
@@ -374,7 +380,7 @@ nodes = algorithm.nodes;
 %  Guess =================================================================
 constq = dlmread('primalconstq.txt');
 
-tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
+% tfGuess = tfMax; % this needs to be close to make sure solution stays within Out_Force bounds
 
 if const == 1
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]/scale.V; %50kpa limited
@@ -387,7 +393,8 @@ elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];
 elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,33000];%45kPa limited
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
@@ -421,13 +428,29 @@ guess.controls(1,:)    = [0,0];
 
 guess.time        = [t0 ,tfGuess];
 % guess.time        = constq(7,:);
-
+% guess.time        = [t0 ,230];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
 % %========================
 % algorithm.mode = 'accurate';
 %=====================================================================================
+
+
+%Start Plot
+figure(10)
+plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes),'k')
+iterative_V(end+1,:) = linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes);
+iterative_t(end+1,:) = linspace(guess.time(1),guess.time(2),algorithm.nodes);
+
+filename = 'testnew51.gif';
+frame = getframe(10);
+im = frame2im(frame);
+[imind,cm] = rgb2ind(im,256);
+imwrite(imind,cm,filename,'gif', 'Loopcount',0);
+
+
+
 
 % Call dido
 % =====================================================================
@@ -784,7 +807,7 @@ end
 
 
 if PayloadGrid(phi(end),zeta(end),V(end)+10,theta(end),v(end)) - PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end)) < 0
-    
+    disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
 
 

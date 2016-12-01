@@ -36,7 +36,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -237,8 +237,7 @@ thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING (ie. scramjet 
 end
 
 if const == 1  || const == 12 || const == 13 || const == 14
-% thetaU = 0.1; % 
-thetaU = 0.05; % 
+thetaU = 0.1; % 
 else
 thetaU = 0.1;  
 end
@@ -358,11 +357,11 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 if const == 3 || const == 31
-% algorithm.nodes		= [60]; 
-algorithm.nodes		= [100]; 
+algorithm.nodes		= [60]; 
+% algorithm.nodes		= [110]; 
 elseif const == 1
 % algorithm.nodes		= [75];
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [75]; 
 elseif const == 12 
 % algorithm.nodes		= [78];
 algorithm.nodes		= [110];
@@ -802,8 +801,8 @@ plot(t,thetadot_F,t,thetadot);
 % Compute difference with CADAC for constant dynamic pressure path
 if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
-    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),linspace(0,CADAC_DATA(end,1),nodes));
-    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),linspace(0,CADAC_DATA(end,1),nodes));
+    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),t);
+    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),t);
     MeanError_V = sum((CADAC_V - V)./V)/nodes
     MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha)/nodes
 end

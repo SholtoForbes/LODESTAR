@@ -23,7 +23,9 @@ density = interp1(Atmosphere(:,1),Atmosphere(:,4),h);
 P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),h);
 speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),h);
 
-SCALE = 1.2;
+% SCALE = 1.4;
+SCALE = 1; %this is engine scale
+% Merlin 1C engine 
 T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
 Isp = 275 + (101325 - P_atm)*2.9410e-04;
 
@@ -35,7 +37,8 @@ Cd = scattered.Drag(mach,rad2deg(alpha));
 Cl = scattered.Lift(mach,rad2deg(alpha));
 
 %%%% Compute the drag:
-Area = 62.77;  
+global SPARTANscale
+Area = 62.77*SPARTANscale^(2/3);  
 D = 0.5*Cd.*Area.*density.*v.^2;
 L = 0.5*Cl.*Area.*density.*v.^2;
 

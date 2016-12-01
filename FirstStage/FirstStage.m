@@ -8,11 +8,12 @@ Aero = dlmread('FirstStageAeroCoeffs.txt');
 scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
-
+global SPARTANscale
+SPARTANscale = 0.7
 
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-mSpartan = 8755.1;
+mSpartan = 8755.1*SPARTANscale;
 % mSpartan = 6000.1; % SCALED DOWN SECOND STAGE
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
@@ -50,6 +51,7 @@ h0 = y(end,1);  %Rocket starts on the ground
 v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
 gamma0 = deg2rad(89.9);    % pitchover 
+% gamma0 = deg2rad(88);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -126,6 +128,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
 
 
         P.options(1).method = 'hermiteSimpson';
+%         P.options(1).method = 'chebyshev';
         P.options(1).defaultAccuracy = 'medium';
         P.options(1).nlpOpt.MaxFunEvals = 2e5;
         P.options(1).nlpOpt.MaxIter = 1e5;
@@ -133,6 +136,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
 
         
         P.options(2).method = 'hermiteSimpson';
+%         P.options(2).method = 'chebyshev';
         P.options(2).defaultAccuracy = 'high';
         P.options(2).nlpOpt.MaxFunEvals = 5e5;
         P.options(2).nlpOpt.MaxIter = 1e5;

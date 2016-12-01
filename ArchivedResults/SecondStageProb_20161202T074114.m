@@ -36,7 +36,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -362,7 +362,7 @@ if const == 3 || const == 31
 algorithm.nodes		= [100]; 
 elseif const == 1
 % algorithm.nodes		= [75];
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [75]; 
 elseif const == 12 
 % algorithm.nodes		= [78];
 algorithm.nodes		= [110];

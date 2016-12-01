@@ -36,7 +36,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -237,8 +237,7 @@ thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING (ie. scramjet 
 end
 
 if const == 1  || const == 12 || const == 13 || const == 14
-% thetaU = 0.1; % 
-thetaU = 0.05; % 
+thetaU = 0.1; % 
 else
 thetaU = 0.1;  
 end
@@ -362,7 +361,7 @@ if const == 3 || const == 31
 algorithm.nodes		= [100]; 
 elseif const == 1
 % algorithm.nodes		= [75];
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [75]; 
 elseif const == 12 
 % algorithm.nodes		= [78];
 algorithm.nodes		= [110];

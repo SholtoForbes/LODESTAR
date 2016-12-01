@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma] = ThirdStageSim(x,k,j,u, phi0, zeta0)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 
 SCALE_Engine = 1.0; % changes characteristic length
 
@@ -26,8 +26,8 @@ CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50))*50000/q_init; %maximum allowable AoA
 
 
-% AoA_init = x(2); 
-AoA_init = AoA_max; 
+AoA_init = x(2); 
+% AoA_init = AoA_max; 
 if AoA_init > deg2rad(20)
     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
 elseif AoA_init < deg2rad(0)
@@ -39,8 +39,8 @@ if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
-% AoA_end = x(3); 
-AoA_end = x(2); 
+AoA_end = x(3); 
+% AoA_end = x(2); 
 if AoA_end > deg2rad(20)
     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
 elseif AoA_end < deg2rad(0)
@@ -118,7 +118,7 @@ xi(1) = 0;
 % phi(1) = -0.1314;
 phi(1) = phi0;
 
-gamma(1) = deg2rad(j);
+gamma(1) = j;
 
 v(1) = u;
 
@@ -219,7 +219,7 @@ while gamma(i) >= 0 || t(i) < 60;
    
     [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
     
-    if i == 1 && gammadot < 0
+    if i == 1 && gammadot < 0 && x(1) ~= 0
         fprintf('BAD CONDITIONS!');
     end
    
@@ -313,6 +313,5 @@ end
 if AltF < 160000
     mpayload = gaussmf(AltF,[10000 160000]);
 end
-
 
 

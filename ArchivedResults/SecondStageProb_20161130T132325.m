@@ -36,7 +36,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -48,7 +48,7 @@ global Atmosphere
 Atmosphere = dlmread('atmosphere.txt');
 
 %produce scattered interpolants for thrust and fuel usage
-% enginedata = dlmread('engineoutput_matrix');
+enginedata = dlmread('engineoutput_matrix');
 
 %Produce scattered interpolants for vehicle data
 global scattered
@@ -75,7 +75,6 @@ T_eng_interp = floor(T_englist(1)):10:ceil(T_englist(end));
 grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng);
 scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','linear');
 
-scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 
 
 
@@ -237,8 +236,7 @@ thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING (ie. scramjet 
 end
 
 if const == 1  || const == 12 || const == 13 || const == 14
-% thetaU = 0.1; % 
-thetaU = 0.05; % 
+thetaU = 0.1; % 
 else
 thetaU = 0.1;  
 end
@@ -358,11 +356,11 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 if const == 3 || const == 31
-% algorithm.nodes		= [60]; 
-algorithm.nodes		= [100]; 
+% algorithm.nodes		= [80]; 
+algorithm.nodes		= [110]; 
 elseif const == 1
 % algorithm.nodes		= [75];
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [75]; 
 elseif const == 12 
 % algorithm.nodes		= [78];
 algorithm.nodes		= [110];
@@ -401,10 +399,8 @@ elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
 else
-% guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
+guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
-
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ]/scale.V; %50kpa limited
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
@@ -430,9 +426,9 @@ guess.states(5,:) = [0,0];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(1,:)    = zeros(1,length(constq(1,:)));
 
-guess.time        = [t0 ,tfMax];
+% guess.time        = [t0 ,tfGuess];
 % guess.time        = constq(7,:);
-% guess.time        = [t0 ,230];
+guess.time        = [t0 ,230];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -451,7 +447,7 @@ filename = 'testnew51.gif';
 frame = getframe(10);
 im = frame2im(frame);
 [imind,cm] = rgb2ind(im,256);
-imwrite(imind,cm,filename,'gif', 'Loopcount',0);
+imwrite(imind,cm,filename,'gif', 'Loopcount',1);
 
 
 
@@ -802,8 +798,8 @@ plot(t,thetadot_F,t,thetadot);
 % Compute difference with CADAC for constant dynamic pressure path
 if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
-    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),linspace(0,CADAC_DATA(end,1),nodes));
-    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),linspace(0,CADAC_DATA(end,1),nodes));
+    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),t);
+    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),t);
     MeanError_V = sum((CADAC_V - V)./V)/nodes
     MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha)/nodes
 end

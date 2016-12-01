@@ -21,7 +21,7 @@ Isp = scattered.IspGridded(M1,T1);
 % 
 % phi = scattered.phi(M1,T1)
 
-phi = 1;
+phi = scattered.equivalence(M1,T1);
 % data = scattered.data;
 
 % Isp = griddata(data(:,1),data(:,2),data(:,6),M1,T1,'cubic');
