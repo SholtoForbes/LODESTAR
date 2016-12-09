@@ -9,7 +9,7 @@ scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
 global SPARTANscale
-SPARTANscale = 0.7
+SPARTANscale = 0.75
 
 mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
@@ -87,10 +87,10 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-0.05];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;0.05];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(4)];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(4)];
 
-P.bounds.initialState.low = [h0;v0;m0;gamma0;-0.05];
+P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(4)];
 P.bounds.initialState.upp = [h0;v0;m0;gamma0;0];
 
 % P.bounds.finalState.low = [hLow;vF;mF;gammaF];
@@ -127,21 +127,24 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 
-        P.options(1).method = 'hermiteSimpson';
-%         P.options(1).method = 'chebyshev';
-        P.options(1).defaultAccuracy = 'medium';
-        P.options(1).nlpOpt.MaxFunEvals = 2e5;
-        P.options(1).nlpOpt.MaxIter = 1e5;
-
+%         P.options(1).method = 'hermiteSimpson';
+        P.options(1).method = 'chebyshev';
+%         P.options(1).method = 'rungeKutta';
+%         P.options(1).defaultAccuracy = 'medium';
+P.options(1).defaultAccuracy = 'low';
+        P.options(1).nlpOpt.MaxFunEvals = 5e7;
+        P.options(1).nlpOpt.MaxIter = 1e7;
+    P.options(1).chebyshev.nColPts = 150
 
         
-        P.options(2).method = 'hermiteSimpson';
-%         P.options(2).method = 'chebyshev';
+%         P.options(2).method = 'hermiteSimpson';
+        P.options(2).method = 'chebyshev';
+% P.options(2).method = 'rungeKutta';
         P.options(2).defaultAccuracy = 'high';
         P.options(2).nlpOpt.MaxFunEvals = 5e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
         P.options(2).nSegment = 40;
-
+P.options(2).chebyshev.nColPts = 150
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                              Solve!                                     %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -160,37 +163,41 @@ u = soln(end).grid.control;
 
 
 % Forward Simulation ======================================================
-% 
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% %                        Pre-Pitchover Simulation                         %
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% 
-% % Note this doesnt work for AoA control
-% 
-% f_h0_prepitch = 0;  %Rocket starts on the ground
-% f_v0_prepitch = 0;  %Rocket starts stationary
-% f_m0_prepitch = mTotal;  %Rocket starts full of fuel
-% f_gamma0_prepitch = deg2rad(90);
-% 
-% phase = 'prepitch';
-% f_tspan = [0 15];
-% f_y0 = [f_h0_prepitch, f_v0_prepitch, f_m0_prepitch, f_gamma0_prepitch, 0];
-% % [f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,Tmax,phase), f_tspan, f_y0);
-% [f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,0,phase), f_tspan, f_y0);
-% 
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% %                        Post-Pitchover Simulation                         %
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% 
-% f_h0 = f_y_prepitch(end,1);  %Rocket starts on the ground
-% f_v0 = f_y_prepitch(end,2);  %Rocket starts stationary
-% f_m0 = f_y_prepitch(end,3);  %Rocket starts full of fuel
-% f_gamma0 = deg2rad(89);    % pitchover 
-% 
-% phase = 'postpitch';
-% f_tspan = [0 t(end)];
-% f_y0 = [f_h0, f_v0, f_m0, f_gamma0, 0];
-% [f_t, f_y] = ode45(@(f_t,f_y) rocketDynamics(f_y,ControlFunction(f_t,t,u),phase), f_tspan, f_y0);
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+%                        Pre-Pitchover Simulation                         %
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+
+% Note this doesnt work for AoA control
+
+f_h0_prepitch = 0;  %Rocket starts on the ground
+f_v0_prepitch = 0;  %Rocket starts stationary
+f_m0_prepitch = mTotal;  %Rocket starts full of fuel
+f_gamma0_prepitch = deg2rad(90);
+
+phase = 'prepitch';
+f_tspan = [0 15];
+f_y0 = [f_h0_prepitch, f_v0_prepitch, f_m0_prepitch, f_gamma0_prepitch, 0];
+% [f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,Tmax,phase), f_tspan, f_y0);
+[f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,0,phase,scattered), f_tspan, f_y0);
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+%                        Post-Pitchover Simulation                         %
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
+
+f_h0 = f_y_prepitch(end,1);  %Rocket starts on the ground
+f_v0 = f_y_prepitch(end,2);  %Rocket starts stationary
+f_m0 = f_y_prepitch(end,3);  %Rocket starts full of fuel
+f_gamma0 = deg2rad(89.9);    % pitchover 
+f_alpha0 = x(5,1);  
+
+
+phase = 'postpitch';
+% f_tspan = linspace(0,t(end),P.options(2).chebyshev.nColPts);
+f_tspan = t;
+% f_tspan = [0,t(end)];
+f_y0 = [f_h0, f_v0, f_m0, f_gamma0, f_alpha0];
+[f_t, f_y] = ode45(@(f_t,f_y) rocketDynamics(f_y,ControlFunction(f_t,t,u),phase,scattered), f_tspan, f_y0);
 
 
 

@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE)
 % t1 = cputime;
 % =======================================================
 % Vehicle Model
@@ -87,22 +87,20 @@ end
 
 
 
-
-constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-
-constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % Calculate density using atmospheric data
-
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+kpa50_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2);% altitude at each velocity, if it were a constant 50kPa q trajectory (used to compare with communicator matrix results) 
+kpa50_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), kpa50_alt); % Calculate density using atmospheric data
 
 % Calculate temperature and pressure ratios
 if const == 1 || const == 14
+    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+    
     Efficiency = zeros(1,length(time)); % note this is a penalty as dynamic pressure decreases
     Penalty = zeros(1,length(time));
     t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 50000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
-            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = temp_actual(i)./kpa50_temp(i);
 %             t_ratio(i) = 1;
         else
             Efficiency(i) = 1; % for 50kPa
@@ -111,31 +109,39 @@ if const == 1 || const == 14
         end
     end
 elseif const == 12
+    constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
+    constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % 
+    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+    
     Efficiency = zeros(1,length(time));
     Penalty = zeros(1,length(time));
     t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 55000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
-            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = temp_actual(i)./kpa50_temp(i);
         else
             Efficiency(i) = 1.1; % for 55kPa
             Penalty(i) = q(i)/55000-1; 
-            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = constq_temp(i)/kpa50_temp(i);
         end
     end
 elseif const == 13
+    constq_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000./v.^2); % altitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
+    constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_alt); % 
+    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+    
     Efficiency = zeros(1,length(time));
     Penalty = zeros(1,length(time));
     t_ratio = zeros(1,length(time));
     for i = 1:length(time)
         if q(i) < 45000
             Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
-            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = temp_actual(i)./kpa50_temp(i);
         else
             Efficiency(i) = .9; % for 45kPa
             Penalty(i) = q(i)/45000-1; 
-            t_ratio(i) = temp_actual(i)./constq_temp(i);
+            t_ratio(i) = constq_temp(i)/kpa50_temp(i);
         end
     end
 elseif const == 3 || const == 31
@@ -163,11 +169,11 @@ end
 % Thrust =  gridded.T_eng(M,Alpha).*cos(deg2rad(Alpha)).*Efficiency;
 % Fueldt =  gridded.fuel_eng(M,Alpha).*Efficiency;
 
-[Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered);
+[Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
 
 for i = 1:length(time)
   if q(i) < 20000
-        Isp(i) = gaussmf(q(i),[1000,20000]);
+        Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);
   end  
 end
 

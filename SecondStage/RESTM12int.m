@@ -1,4 +1,4 @@
-function [Isp,wf] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered)
+function [Isp,wf] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE)
 % Engine Interpolator for RESTM12 Data
 % Reading from RESTM12DATA 
 
