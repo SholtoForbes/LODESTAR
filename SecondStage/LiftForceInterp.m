@@ -49,7 +49,7 @@ disp(todisp)
 j = j+1;
     for alt = 20000:1000:50000 % Altitude (m)
 %     for alt = 25000:250:40000 % Altitude (m)
-        for Lift = 50000:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
+        for Lift = 0:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
 %         for Lift = 0:2500:200000 % Lift force (N)   max mass of vehicle is 8755.1
             liftarray(end+1,1) = v;
             liftarray(end,2) = alt;
@@ -110,8 +110,9 @@ j = j+1;
                     end
                 end
             elseif const == 3 || const == 31
+            temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), alt);
             Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
-            t_ratio = temp_actual/constq_temp;
+            t_ratio = temp_actual./kpa50_temp;
             end
 
 
@@ -119,164 +120,51 @@ j = j+1;
             %% Determine AoA ==============================================================
             
             
+            Alpha = fminsearch(@(Alpha)LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift),5);
+%             error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline);
             
 
     %         Alpha = Alpha_spline(M, Liftq/A); % first approximation of alpha using only body lift
 
-            Alpha1 = 0;
+            %Fuel Cost ===========================================================================
             
-            %Fuel Cost ===========================================================================
+            [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
 
-%             Fueldt = FuelF_spline(M,Alpha1).*Efficiency;
-% 
-%             Isp = ThrustF_spline(M,Alpha1)./FuelF_spline(M,Alpha1); % this isnt quite Isp (doesnt have g) but doesnt matter
-% 
-%             Thrust = Isp.*Fueldt; % Thrust (N)
+            Thrust = Isp.*Fueldt*9.81;
+
+            %======================================================================
+
+            Cl1 = Cl_spline(M,Alpha);
+
+            body_pitchingmoment = pitchingmoment_spline(M, Alpha);% first approximation of pitchingmoment using only body lift
+
+            Flap_lift = q./50000*flaplift_spline(M,Alpha,-body_pitchingmoment);% first approximation of flap lift
+
+            total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(Alpha)); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
+
+            error = abs(total_lift - Lift);
             
-
-[Isp,Fueldt] = RESTM12int(M, Alpha1, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
-
-Thrust = Isp.*Fueldt*9.81;
-
-% Thrust =  gridded.T_eng(M,Alpha1).*cos(deg2rad(Alpha1)).*Efficiency;
-% Fueldt =  gridded.fuel_eng(M,Alpha1).*Efficiency;
-            %======================================================================
-
-            Cl1 = Cl_spline(M,Alpha1);
-
-            body_pitchingmoment1 = pitchingmoment_spline(M, Alpha1);% first approximation of pitchingmoment using only body lift
-
-            Flap_lift1 = q./50000*flaplift_spline(M,Alpha1,-body_pitchingmoment1);% first approximation of flap lift
-
-            total_lift1 = Cl1*A*q + Flap_lift1 + Thrust*sin(deg2rad(Alpha1)); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
-
-
-
-
-            Alpha2 = 10; %first guesses of AoA
-            %Fuel Cost ===========================================================================
-
-%             Fueldt = FuelF_spline(M,Alpha2).*Efficiency;
-% 
-%             Isp = ThrustF_spline(M,Alpha2)./FuelF_spline(M,Alpha2); % this isnt quite Isp (doesnt have g) but doesnt matter
-% 
-%             Thrust = Isp.*Fueldt; % Thrust (N)
-
-
-
-[Isp,Fueldt] = RESTM12int(M,Alpha2, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
-
-Thrust = Isp.*Fueldt*9.81;
-
-% Thrust =  gridded.T_eng(M,Alpha2).*cos(deg2rad(Alpha2)).*Efficiency;
-% Fueldt =  gridded.fuel_eng(M,Alpha2).*Efficiency;
-            %======================================================================
-
-            Cl2 = Cl_spline(M,Alpha2);
-
-            body_pitchingmoment2 = pitchingmoment_spline(M, Alpha2);% first approximation of pitchingmoment using only body lift
-
-            Flap_lift2 = q./50000*flaplift_spline(M,Alpha2,-body_pitchingmoment2);% first approximation of flap lift
-
-            total_lift2 = Cl2*A*q + Flap_lift2 + Thrust*sin(deg2rad(Alpha2));
-
-
-
-            Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1); %first golden section point
-
-            Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1); %first guesses of AoA
-
-            total_lift4 = 10000;
-            total_lift3 = 0;
-
-%             while abs(Alpha4 - Alpha3) > 0.05
-%              while   abs(abs(Lift - total_lift4) - abs(Lift - total_lift3)) > 1
-                 
-             while   abs(Lift - total_lift4) > 100
-            %Fuel Cost ===========================================================================
-
-%             Fueldt = FuelF_spline(M,Alpha3).*Efficiency;
-% 
-%             Isp = ThrustF_spline(M,Alpha3)./FuelF_spline(M,Alpha3); % this isnt quite Isp (doesnt have g) but doesnt matter
-% 
-%             Thrust = Isp.*Fueldt; % Thrust (N)
-
-
-
-[Isp,Fueldt] = RESTM12int(M,Alpha3, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
-
-Thrust = Isp.*Fueldt*9.81;
-
-% Thrust =  gridded.T_eng(M,Alpha3).*cos(deg2rad(Alpha3)).*Efficiency;
-% Fueldt =  gridded.fuel_eng(M,Alpha3).*Efficiency;
-            %======================================================================
-            Cl3 = Cl_spline(M,Alpha3);
-
-            body_pitchingmoment3 = pitchingmoment_spline(M, Alpha3);% first approximation of pitchingmoment using only body lift
-
-            Flap_lift3 = q./50000*flaplift_spline(M,Alpha3,-body_pitchingmoment3);% first approximation of flap lift
-
-            total_lift3 = Cl3*A*q + Flap_lift3 + Thrust*sin(deg2rad(Alpha3));
-
-
-            %Fuel Cost ===========================================================================
-
-%             Fueldt = FuelF_spline(M,Alpha4).*Efficiency;
-% 
-%             Isp = ThrustF_spline(M,Alpha4)./FuelF_spline(M,Alpha4); % this isnt quite Isp (doesnt have g) but doesnt matter
-% 
-%             Thrust = Isp.*Fueldt; % Thrust (N)
-
-
-
-[Isp,Fueldt] = RESTM12int(M,Alpha4, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
-
-Thrust = Isp.*Fueldt*9.81;
-
-% Thrust =  gridded.T_eng(M,Alpha4).*cos(deg2rad(Alpha4)).*Efficiency;
-% Fueldt =  gridded.fuel_eng(M,Alpha4).*Efficiency;
-            %======================================================================
-            Cl4 = Cl_spline(M,Alpha4);
-
-            body_pitchingmoment4 = pitchingmoment_spline(M, Alpha4);% first approximation of pitchingmoment using only body lift
-
-            Flap_lift4 = q./50000*flaplift_spline(M,Alpha4,-body_pitchingmoment4);% first approximation of flap lift
-
-            total_lift4 = Cl4*A*q + Flap_lift4 + Thrust*sin(deg2rad(Alpha4));
-
-
-
-                if abs(Lift - total_lift4) > abs(Lift - total_lift3)
-                    Alpha2 = Alpha4;
-                    Alpha4 = Alpha3;
-                    Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1);
-                else
-                    Alpha1 = Alpha3;
-                    Alpha3 = Alpha4;
-                    Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1);
-                end
-                Alpha4
-                M
-                Alpha3
-
-abs(Lift - total_lift4)
+            if error>1000
+             v
+             alt
+             Lift
             end
-            abs(Lift - total_lift4)
+            
 
-            flapdeflection = flapdeflection_spline(M,Alpha4,-body_pitchingmoment4);
+            flapdeflection = flapdeflection_spline(M,Alpha,-body_pitchingmoment);
 
-            Drag = Cd_spline(M,Alpha4)*A*q +  q/50000*flapdrag_spline(M,Alpha4,-body_pitchingmoment4);
+            Drag = Cd_spline(M,Alpha)*A*q +  q/50000*flapdrag_spline(M,Alpha,-body_pitchingmoment);
            
             
 %               Drag = Cd_spline(M,Alpha4)*A*q ; % changed to just body drag
 
-            liftarray(end,4) = Alpha4;
+            liftarray(end,4) = Alpha;
 
             liftarray(end,5) = flapdeflection;
 
             liftarray(end,6) = Drag;
             
-            liftarray(end,7) = -body_pitchingmoment4;
+            liftarray(end,7) = -body_pitchingmoment;
 
         end
     end
@@ -290,19 +178,19 @@ AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),l
 flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
 Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
 Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
+% 
 
+[vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
 
-% [vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
-% 
-% AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
-% AoA_spline = griddedInterpolant(vList,altList,liftList,AoA_Grid,'spline','linear');
-% 
-% flapdeflection_Grid = permute(reshape(liftarray(:,5),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
-% flapdeflection_spline = griddedInterpolant(vList,altList,liftList,flapdeflection_Grid,'spline','linear');
-% 
-% Drag_Grid = permute(reshape(liftarray(:,6),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
-% Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','linear');
-% 
-% Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
-% Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
-% end
+AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+AoA_spline = griddedInterpolant(vList,altList,liftList,AoA_Grid,'spline','linear');
+
+flapdeflection_Grid = permute(reshape(liftarray(:,5),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+flapdeflection_spline = griddedInterpolant(vList,altList,liftList,flapdeflection_Grid,'spline','linear');
+
+Drag_Grid = permute(reshape(liftarray(:,6),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','linear');
+
+Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
+% % end

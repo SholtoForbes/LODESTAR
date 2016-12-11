@@ -40,6 +40,7 @@ global Atmosphere
 global iteration
 global zeta
 global phi
+global SPARTAN_SCALE
 
 iteration = iteration + 1;
 
@@ -55,7 +56,7 @@ omegadot  = primal.controls(1,:)*scale.thetadot;
 
 
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,gridded,const,thetadot, Atmosphere);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,gridded,const,thetadot, Atmosphere, SPARTAN_SCALE);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -139,10 +140,14 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % high drag
 
 %     RunningCost = Penalty + abs(omegadot);
+% RunningCost = Penalty + abs(omegadot) + Fd/1e5 + [0 abs(diff(flapdeflection))]/100;
 
-%  RunningCost = Penalty;
+% RunningCost = Penalty + abs(omegadot) + Fd/1e5;
 
-  RunningCost = Penalty + [0 10*abs(diff(omegadot))];
+ RunningCost = Penalty;
+% RunningCost = Penalty + [0 abs(diff(flapdeflection))]/100;
+% RunningCost = Penalty + abs(omegadot);
+%   RunningCost = Penalty + [0 10*abs(diff(omegadot))];
  
 %     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
     %Omegadot cost smooths the trajectory (sometimes), but also throws a SOL error and
@@ -153,8 +158,14 @@ end
 
 global iterative_V
 global iterative_t
+global iterative_V_f
 
 if rem(iteration,5000) == 0
+    
+    
+    iterative_V_f(end+1,:) = cumtrapz(time,v.*sin(theta));
+    
+    
     cla
     hold on
 %     Payload_temp
@@ -184,6 +195,8 @@ if rem(iteration,5000) == 0
     
     plot(iterative_t(end-1,:),iterative_V(end-1,:),'Color',[0.2 0.2 0.2])
     plot(iterative_t(end,:),iterative_V(end,:),'Color',[0 0 0])
+%     plot(iterative_t(end,:),iterative_V_f(end,:),'Color','r')
+    
     
     filename = 'testnew51.gif';
     frame = getframe(10);

@@ -284,8 +284,8 @@ end
 
 % control bounds
 
-omegadotL = -0.0001;
-omegadotU = 0.0001;
+omegadotL = -0.00005;
+omegadotU = 0.00005;
 % omegadotL = -0.001;
 % omegadotU = 0.001;
 
@@ -394,7 +394,7 @@ else
 % guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ]/scale.V; %50kpa limited
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use

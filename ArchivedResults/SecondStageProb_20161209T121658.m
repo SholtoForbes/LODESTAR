@@ -41,7 +41,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -284,10 +284,10 @@ end
 
 % control bounds
 
-omegadotL = -0.0001;
-omegadotU = 0.0001;
-% omegadotL = -0.001;
-% omegadotU = 0.001;
+% omegadotL = -0.0001;
+% omegadotU = 0.0001;
+omegadotL = -0.001;
+omegadotU = 0.001;
 
 bounds.lower.controls = [omegadotL/scale.thetadot];
 bounds.upper.controls = [omegadotU/scale.thetadot]; 
@@ -394,7 +394,7 @@ else
 % guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ]/scale.V; %50kpa limited
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use

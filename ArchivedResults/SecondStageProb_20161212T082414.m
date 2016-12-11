@@ -7,6 +7,10 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+global SPARTAN_SCALE
+SPARTAN_SCALE = 1 % volumetric scale
+
+
 % Counts iterations of DIDO
 global iterative_V
 iterative_V = [];
@@ -123,7 +127,7 @@ scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
 % settings required for trim at any flight conditions
-[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered);
+[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, SPARTAN_SCALE);
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
@@ -271,12 +275,6 @@ if const == 1  || const == 12 || const == 14 || const == 13
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 
-
-% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.0015/scale.thetadot];
-% elseif const == 13
-% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.00035/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
 if const == 3 || const == 31
@@ -286,22 +284,10 @@ end
 
 % control bounds
 
-% thetadotL = -0.02;
-% thetadotU = 0.02;
-
-% thetadotL = -0.02;
-% thetadotU = 0.006;
-% 
-% bounds.lower.controls = [thetadotL/scale.theta];
-% bounds.upper.controls = [thetadotU/scale.theta]; 
-
-% omegadotL = -0.0005;
-% omegadotU = 0.0005;
-
-omegadotL = -0.0002;
-omegadotU = 0.0002;
-% omegadotL = -0.001;
-% omegadotU = 0.001;
+% omegadotL = -0.0001;
+% omegadotU = 0.0001;
+omegadotL = -0.001;
+omegadotU = 0.001;
 
 bounds.lower.controls = [omegadotL/scale.thetadot];
 bounds.upper.controls = [omegadotU/scale.thetadot]; 
@@ -365,7 +351,7 @@ if const == 3 || const == 31
 algorithm.nodes		= [100]; 
 elseif const == 1
 algorithm.nodes		= [80];
-% algorithm.nodes		= [110]; 
+% algorithm.nodes		= [100]; 
 elseif const == 12 
 algorithm.nodes		= [80];
 % algorithm.nodes		= [110];
@@ -391,12 +377,12 @@ if const == 1
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]/scale.V; %50kpa limited
 % 
 % guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,32000 ];
 % guess.states(1,:) = constq(1,:);
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,36010];
 elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
@@ -408,7 +394,7 @@ else
 % guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ]/scale.V; %50kpa limited
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use

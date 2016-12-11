@@ -145,9 +145,10 @@ elseif const == 13
         end
     end
 elseif const == 3 || const == 31
+    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
     Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
     Penalty = 0;
-    t_ratio = temp_actual./constq_temp;
+    t_ratio = temp_actual./kpa50_temp;
 end
 
 % OLD

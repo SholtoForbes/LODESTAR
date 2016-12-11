@@ -41,7 +41,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -284,10 +284,10 @@ end
 
 % control bounds
 
-omegadotL = -0.0001;
-omegadotU = 0.0001;
-% omegadotL = -0.001;
-% omegadotU = 0.001;
+% omegadotL = -0.0001;
+% omegadotU = 0.0001;
+omegadotL = -0.001;
+omegadotU = 0.001;
 
 bounds.lower.controls = [omegadotL/scale.thetadot];
 bounds.upper.controls = [omegadotU/scale.thetadot]; 
