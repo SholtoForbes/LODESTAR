@@ -50,8 +50,8 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 h0 = y(end,1);  %Rocket starts on the ground
 v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
-gamma0 = deg2rad(89.9);    % pitchover 
-% gamma0 = deg2rad(88);    % pitchover 
+% gamma0 = deg2rad(89.9);    % pitchover 
+gamma0 = deg2rad(89.999);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -77,8 +77,8 @@ gammaUpp = deg2rad(90);
 % uLow = [-1.5]; % Can do either AoA or thrust
 % uUpp = [.5]; 
 
-uLow = [-.005]; % Can do either AoA or thrust
-uUpp = [.005]; 
+uLow = [-.004]; % Can do either AoA or thrust
+uUpp = [.004]; 
 
 
 P.bounds.initialTime.low = 0;
@@ -87,11 +87,11 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(4)];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(4)];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(3)];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(3)];
 
-P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(4)];
-P.bounds.initialState.upp = [h0;v0;m0;gamma0;0];
+P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(3)];
+P.bounds.initialState.upp = [h0;v0;m0;gamma0;deg2rad(3)];
 
 % P.bounds.finalState.low = [hLow;vF;mF;gammaF];
 % P.bounds.finalState.upp = [hUpp;vF;mF;gammaF];
@@ -134,7 +134,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
 P.options(1).defaultAccuracy = 'low';
         P.options(1).nlpOpt.MaxFunEvals = 5e7;
         P.options(1).nlpOpt.MaxIter = 1e7;
-    P.options(1).chebyshev.nColPts = 150
+    P.options(1).chebyshev.nColPts = 100
 
         
 %         P.options(2).method = 'hermiteSimpson';
@@ -144,7 +144,7 @@ P.options(1).defaultAccuracy = 'low';
         P.options(2).nlpOpt.MaxFunEvals = 5e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
         P.options(2).nSegment = 40;
-P.options(2).chebyshev.nColPts = 150
+P.options(2).chebyshev.nColPts = 100
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                              Solve!                                     %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -188,7 +188,9 @@ f_y0 = [f_h0_prepitch, f_v0_prepitch, f_m0_prepitch, f_gamma0_prepitch, 0];
 f_h0 = f_y_prepitch(end,1);  %Rocket starts on the ground
 f_v0 = f_y_prepitch(end,2);  %Rocket starts stationary
 f_m0 = f_y_prepitch(end,3);  %Rocket starts full of fuel
-f_gamma0 = deg2rad(89.9);    % pitchover 
+% f_gamma0 = deg2rad(89.9);    % pitchover 
+f_gamma0 = deg2rad(89.999);    % pitchover 
+
 f_alpha0 = x(5,1);  
 
 
@@ -197,7 +199,11 @@ phase = 'postpitch';
 f_tspan = t;
 % f_tspan = [0,t(end)];
 f_y0 = [f_h0, f_v0, f_m0, f_gamma0, f_alpha0];
+
+% f_y0 = [f_h0, f_v0, f_m0, f_gamma0];
+
 [f_t, f_y] = ode45(@(f_t,f_y) rocketDynamics(f_y,ControlFunction(f_t,t,u),phase,scattered), f_tspan, f_y0);
+
 
 
 
@@ -232,3 +238,14 @@ subplot(2,3,6);
 plot(t,x(5,:))
 xlabel('time (s)')
 ylabel('Alpha (rad)')
+
+figure(2)
+hold on
+plot(t,x(1,:)/1000,'Color','k','LineStyle','-')
+plot(t,x(2,:)/100,'Color','k','LineStyle',':')
+plot(t,x(3,:)/1000,'Color','k','LineStyle','-.')
+plot(t,rad2deg(x(4,:)/10),'Color','k','LineStyle','--')
+plot(t,rad2deg(x(5,:)),'Color','k','LineWidth',2)
+legend('Altitude (km)','Velocity (m/s x10^-2)','Mass (kg x10^-3)','Trajectory Angle (deg x10-1)','Angle of Attack (deg)');
+xlabel('time (s)')
+xlim([0, max(t)]);

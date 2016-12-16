@@ -10,7 +10,7 @@ clear all;
 global SPARTAN_SCALE
 SPARTAN_SCALE = 1 % volumetric scale
 
-
+global scattered
 % Counts iterations of DIDO
 global iterative_V
 iterative_V = [];
@@ -48,6 +48,21 @@ const = 1
 communicator = importdata('communicator.txt');
 communicator_trim = importdata('communicator_trim.txt');
 
+
+scattered.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+
+
+[MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
+Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+Cd_Grid = reshape(communicator(:,4),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+pitchingmoment_Grid = reshape(communicator(:,11),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+
+scattered.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+scattered.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
+scattered.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
+
 % Produce Atmosphere Data
 global Atmosphere
 Atmosphere = dlmread('atmosphere.txt');
@@ -56,7 +71,7 @@ Atmosphere = dlmread('atmosphere.txt');
 % enginedata = dlmread('engineoutput_matrix');
 
 %Produce scattered interpolants for vehicle data
-global scattered
+
 
 [MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
 M1_Grid = reshape(communicator(:,12),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
@@ -83,51 +98,10 @@ scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng
 scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 
 
-
-% Isp_GridFit = gridfit(data(:,1),data(:,2),data(:,6),100,100,'interp','bilinear');
-% M1List = linspace(min(data(:,1)),max(data(:,1)),100).' * ones(1,100);
-% TList = ones(100,1) * linspace(min(data(:,2)),max(data(:,2)),100);
-% scattered.IspGridded = griddedInterpolant(M1List,TList,Isp_GridFit,'spline','linear');
-% [M1Grid,T1Grid,Isp_Grid] = ndgrid(data(:,1),data(:,2),data(:,6));
-% [M1List,TList] = ndgrid(unique(data(:,1)),unique(data(:,2)));
-% Isp_Grid = reshape(data(:,6),[length(unique(data(:,1))),length(unique(data(:,2)))]).';
-% scattered.IspGridded = griddedInterpolant(M1List,T1List,Isp_Grid,'spline','linear');
-% scattered.phi = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
-% global grid
-
-
-% Interpolate engine data into easily interpolatable form. 
-
-% This linear interpolation is then interpolated using spline
-% interpolation in VehicleModel.m, so that first order discontinuities are eliminated, while 
-% preserving the overall shape of the data. This is only necessary because
-% the experimental engine data has a small amount of data points, and
-% direct spline interpolation does not tend to work well.
-
-% [grid.Mgrid_eng2,grid.alpha_eng2] =  meshgrid(M_eng_interp,Alpha_eng_interp);
-% grid.T_eng = scattered.T(grid.Mgrid_eng2,grid.alpha_eng2);
-% grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
-
-
-% This works for const q
-% scattered.T = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
-% scattered.fuel = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
-% M_eng = unique(sort(enginedata(:,1))); % create unique list of Mach numbers from engine data
-% M_eng_interp = M_eng(1):0.1:M_eng(end); % enlarge spread, this is not necessary if you have a lot of engine data
-% Alpha_eng = unique(sort(enginedata(:,2))); % create unique list of angle of attack numbers from engine data
-% Alpha_eng_interp = Alpha_eng(1):0.1:Alpha_eng(end); 
-% [grid.Mgrid_eng2,grid.alpha_eng2] =  ndgrid(M_eng_interp,Alpha_eng_interp);
-% grid.T_eng = scattered.T(grid.Mgrid_eng2,grid.alpha_eng2);
-% grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
-% global gridded
-% gridded.T_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,'spline','linear');
-% gridded.fuel_eng = griddedInterpolant(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,'spline','linear');
-
-
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
 % settings required for trim at any flight conditions
-[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, SPARTAN_SCALE);
+[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm,liftarray] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, SPARTAN_SCALE);
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
@@ -146,14 +120,6 @@ scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 % space for all primal variables end states, so there must be a
 % payload-to-orbit solution at every possible end state.
 
-% Creating an extremely fine solution over every possible end state would
-% be prohibitively time consuming, so the course array should cover every
-% possible solution point, and the fine array should be focussed around the
-% expected solution.
-
-% If the solution is near, or beyond the fine-course boundary, the fine
-% array should be expanded.
-% 
 ThirdStageData = dlmread('thirdstage.dat'); %Import Third Stage Data Raw 
 ThirdStageData = sortrows(ThirdStageData);
 
@@ -162,50 +128,6 @@ PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(
 [phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
 global PayloadGrid
 PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
-
-
-% this works 
-% endcond = [ThirdStageData(1,1) , ThirdStageData(1,2)];
-% 
-% % Separate by latitude and heading angle
-% j = 1;
-% n = 1;
-% for i = 1:length(ThirdStageData)
-%     
-%     endcond_temp = [ThirdStageData(i,1) , ThirdStageData(i,2)];
-%     
-%     if endcond_temp(1) ~= endcond(1) || endcond_temp(2) ~= endcond(2) 
-%         
-%         ThirdStageData_manip(:,:,n) = ThirdStageData(j:i-1,:);
-%         endcond = endcond_temp;
-%         j = i;
-%         n = n+1;
-%     elseif i == length(ThirdStageData)
-%         ThirdStageData_manip(:,:,n) = ThirdStageData(j:i,:);
-%     end
-% end
-% 
-% global Payload_cell
-% Payload_cell = cell(1);
-% for  i = 1: length(ThirdStageData_manip(1,1,:))
-%     Payload_temp = scatteredInterpolant(ThirdStageData_manip(:,3,i),ThirdStageData_manip(:,4,i),ThirdStageData_manip(:,5,i),ThirdStageData_manip(:,6,i));
-%     Payload_cell{i,1} = [ThirdStageData_manip(1,1,i),ThirdStageData_manip(1,2,i)];
-%     Payload_cell{i,2} = Payload_temp;
-% end
-
-
-
-% global phi_list
-% global zeta_list
-% global alt_list
-% global gamma_list
-% global v_list
-% global payload_array
-% [phi_list.course,zeta_list.course,alt_list.course,gamma_list.course,v_list.course,payload_array.course] = thirdstagemanipulation('thirdstage.dat'); %Import third stage data
-% 
-% [phi_list.fine,zeta_list.fine,alt_list.fine,gamma_list.fine,v_list.fine,payload_array.fine] = thirdstagemanipulation('thirdstagefine.dat');
-
-% [phi_list.course,zeta_list.course,alt_list.course,gamma_list.course,v_list.course,payload_array.course] = 
 
 %=============================================== 
 
@@ -259,11 +181,6 @@ mfuelU = 994; %
 
 
 global scale
-% scale.V = 100;
-% scale.v = 10;
-% scale.theta = 0.1;
-% scale.thetadot = 0.01;
-% scale.m = 10;
 
 scale.V = 1;
 scale.v = 1;
@@ -283,12 +200,15 @@ bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; mfuelU/scale
 end
 
 % control bounds
-
+if const == 1 || const == 12 || const == 13 || const == 14
 omegadotL = -0.0001;
 omegadotU = 0.0001;
-% omegadotL = -0.001;
-% omegadotU = 0.001;
-
+% omegadotL = -0.00005;
+% omegadotU = 0.00005;
+else
+omegadotL = -0.001;
+omegadotU = 0.001;
+end
 bounds.lower.controls = [omegadotL/scale.thetadot];
 bounds.upper.controls = [omegadotU/scale.thetadot]; 
 
@@ -315,15 +235,10 @@ vf = 2839.51;
 % See events file for definition of events function
 if const == 1 || const == 12 || const == 14 || const == 13
     bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % 
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)]; % 
 end
 
-% if const == 13
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)];
-% end
 
 if const == 3 || const == 31
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m];
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m];
 end
 
@@ -348,19 +263,19 @@ TwoStage2d.bounds       = bounds;
 % 87 for const 50kPa
 if const == 3 || const == 31
 % algorithm.nodes		= [60]; 
-algorithm.nodes		= [100]; 
+algorithm.nodes		= [80]; 
 elseif const == 1
 algorithm.nodes		= [80];
-% algorithm.nodes		= [100]; 
+% algorithm.nodes		= [10]; 
 elseif const == 12 
+% algorithm.nodes		= [80];
 algorithm.nodes		= [80];
-% algorithm.nodes		= [110];
 elseif const == 13
 % algorithm.nodes		= [78];
 algorithm.nodes		= [80];
 % algorithm.nodes		= [110];
 elseif const == 14
-algorithm.nodes		= [78];
+algorithm.nodes		= [80];
 end
 
 global nodes
@@ -382,11 +297,11 @@ guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,36010];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33000];
 elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,33000];%45kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,34000];%45kPa limited
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; %High Drag
 
@@ -394,7 +309,7 @@ else
 % guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,32000 ]/scale.V; %50kpa limited
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
@@ -406,8 +321,9 @@ guess.states(3,:) = [0,0]/scale.theta;
 % guess.states(3,:) = [deg2rad(1.0),thetaU]/scale.theta;
 % guess.states(3,:) = [deg2rad(0.5),0.04]/scale.theta;
 else
-% guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;  
-guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+guess.states(3,:) = [0,0.05]/scale.theta;  
+% guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+
 % guess.states(3,:) = constq(3,:);
 end 
 
@@ -697,11 +613,12 @@ line(t, dual.dynamics(1,:),'Color','k', 'LineStyle','-');
 line(t, dual.dynamics(2,:),'Color','k', 'LineStyle','--');
 line(t, dual.dynamics(3,:),'Color','k', 'LineStyle','-.');
 line(t, dual.dynamics(4,:),'Color','k', 'LineStyle',':');
+line(t, dual.dynamics(5,:),'Color','k', 'LineStyle','-','LineWidth',2);
 title('costates')
 xlabel('time');
 ylabel('Costates');
-axis([0,t(end),-1,1])
-legend('\lambda_1', '\lambda_2', '\lambda_3', '\lambda_4');
+% axis([0,t(end),-1,1])
+legend('\lambda_1', '\lambda_2', '\lambda_3', '\lambda_4','\lambda_5');
 
 subplot(2,5,[6,10])
 Hamiltonian = dual.Hamiltonian(1,:);
@@ -744,7 +661,7 @@ mu_u = dual.controls; % NOTE: This deviates from 0, as the controls are set as a
 %GRADIENT NORMALITY CONDITION
 
 % Lagrangian of the Hamiltonian 
-dLHdu = dual.dynamics(3,:) + mu_u; % NEED TO CHECK THAT THIS IS THE CORRECT ANALYTICAL SOLUTION
+dLHdu = dual.dynamics(3,:) + mu_u; % 
 
 figure(5)
 
@@ -804,6 +721,16 @@ if PayloadGrid(phi(end),zeta(end),V(end)+10,theta(end),v(end)) - PayloadGrid(phi
     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
 
+
+forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),8755.1];
+
+
+[f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
+
+figure(12)
+hold on
+plot(t,f_y(:,1));
+plot(t,V);
 
 % =========================================================================
 % Troubleshooting Procedure

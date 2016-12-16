@@ -67,5 +67,5 @@ dgamma = 0;
 end
 
 dz = [dr;dv;dm;dgamma;dalphadt];
-
+% dz = [dr;dv;dm;dgamma];
 end

@@ -1,4 +1,4 @@
-function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, scattered, SPARTAN_SCALE)
+function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline,liftarray] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere, scattered, SPARTAN_SCALE)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
@@ -34,7 +34,7 @@ pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'sp
 % pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'linear','linear');
 
 
-A = 62.77; % reference area (m^2)
+A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 
 % golden sections method, to search for a variety of M and lift forces
 %equalises the pitching moment of flap and body to calculate lift. works
@@ -138,22 +138,22 @@ j = j+1;
 
             body_pitchingmoment = pitchingmoment_spline(M, Alpha);% first approximation of pitchingmoment using only body lift
 
-            Flap_lift = q./50000*flaplift_spline(M,Alpha,-body_pitchingmoment);% first approximation of flap lift
+            Flap_lift = q./50000*flaplift_spline(M,Alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
 
             total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(Alpha)); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
             error = abs(total_lift - Lift);
             
-            if error>1000
-             v
-             alt
-             Lift
-            end
+%             if error>1000
+%              v
+%              alt
+%              Lift
+%             end
             
 
             flapdeflection = flapdeflection_spline(M,Alpha,-body_pitchingmoment);
 
-            Drag = Cd_spline(M,Alpha)*A*q +  q/50000*flapdrag_spline(M,Alpha,-body_pitchingmoment);
+            Drag = Cd_spline(M,Alpha)*A*q +  q/50000*flapdrag_spline(M,Alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);
            
             
 %               Drag = Cd_spline(M,Alpha4)*A*q ; % changed to just body drag
@@ -165,6 +165,8 @@ j = j+1;
             liftarray(end,6) = Drag;
             
             liftarray(end,7) = -body_pitchingmoment;
+            
+            liftarray(end,8) = error;
 
         end
     end
@@ -173,13 +175,13 @@ end
 % create splines
 % given M and lift force / q , find AoA, flap deflection and total drag
 % force / q
-
+if const == 3
 AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
 flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
 Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
 Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
-% 
-
+% % 
+else
 [vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
 
 AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
@@ -193,4 +195,4 @@ Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','line
 
 Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
 Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
-% % end
+end

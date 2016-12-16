@@ -40,9 +40,9 @@ plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.0)
 plot(t, m/100, 'LineStyle', ':','Color','k', 'lineWidth', 2.0)
 plot(t,v/100, 'LineStyle', '--','Color','k', 'lineWidth', 2.0)
 plot(t(1:end-1),q/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 2.0)
-% plot(t(1:end-1),rad2deg(Alpha), 'LineStyle', '-','Color','k', 'lineWidth', 1.0)
+plot(t(1:end-1),rad2deg(Alpha), 'LineStyle', '-','Color','k', 'lineWidth', 1.0)
 
-legend(  'Altitude (km)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)')
+legend(  'Altitude (km)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)','Angle of Attack (deg)');
 
 
 Integrated_Drag = cumtrapz(t(1:end-1),D) ;

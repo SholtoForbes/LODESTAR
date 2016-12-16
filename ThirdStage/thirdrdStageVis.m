@@ -24,7 +24,7 @@ ylabel(c,'Payload Mass, kg')
 
 
 
-[Alt,Angle,Vel,Payload] = thirdstagemanipulation('thirdstagefine.dat');
+[Alt,Angle,Vel,Payload] = thirdstagemanipulation('thirdstage.dat');
 
 [meshAlt,meshAngle,meshVel] = meshgrid(Alt,Angle,Vel);
 
