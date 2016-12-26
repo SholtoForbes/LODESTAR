@@ -42,15 +42,16 @@ A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 liftarray = [];
 j = 1;
 for v = 1500:100:3000 % Velocity (m/s)
-% for v = [1500 1700:25:3000] % Velocity (m/s)
-    
+% for v = 1500:50:3000 % Velocity (m/s)
 todisp = [num2str(j/length(1500:100:3000)*100),' % complete '];
 disp(todisp)
 j = j+1;
     for alt = 20000:1000:50000 % Altitude (m)
-%     for alt = 25000:250:40000 % Altitude (m)
+% for alt = 20000:500:50000 % Altitude (m)
+
         for Lift = 0:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
-%         for Lift = 0:2500:200000 % Lift force (N)   max mass of vehicle is 8755.1
+% for Lift = 0:2500:200000 % Lift force (N)   max mass of vehicle is 8755.1
+
             liftarray(end+1,1) = v;
             liftarray(end,2) = alt;
             liftarray(end,3) = Lift;
@@ -175,13 +176,13 @@ end
 % create splines
 % given M and lift force / q , find AoA, flap deflection and total drag
 % force / q
-if const == 3
-AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
-flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
-Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
-Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
+% if const == 3
+% AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
+% flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
+% Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
+% Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
 % % 
-else
+% else
 [vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
 
 AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
@@ -195,4 +196,4 @@ Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','line
 
 Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
 Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
-end
+% end

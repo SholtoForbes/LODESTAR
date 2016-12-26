@@ -23,13 +23,13 @@ density = interp1(Atmosphere(:,1),Atmosphere(:,4),h);
 P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),h);
 speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),h);
 
-% SCALE = 1.4;
-SCALE = 1; %this is engine scale
+SCALE = 1.3;
+% SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
 T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
 Isp = 275 + (101325 - P_atm)*2.9410e-04;
 
-dm = -T./Isp./g;
+dm = -T./Isp./g*SCALE;
 
 
 mach = v./speedOfSound;
@@ -40,6 +40,7 @@ Cl = scattered.Lift(mach,rad2deg(alpha));
 global SPARTANscale
 Area = 62.77*SPARTANscale^(2/3);  
 D = 0.5*Cd.*Area.*density.*v.^2;
+global L
 L = 0.5*Cl.*Area.*density.*v.^2;
 
 
@@ -47,9 +48,9 @@ L = 0.5*Cl.*Area.*density.*v.^2;
 %%%% Complete the calculation:
 
 
-xi = 0*ones(1,length(h));
-phi = 0*ones(1,length(h));
-zeta = 0*ones(1,length(h));
+xi = 0*ones(1,length(h)); 
+phi = -0.2138*ones(1,length(h));
+zeta = deg2rad(97)*ones(1,length(h));
 
 
 switch phase
@@ -66,6 +67,12 @@ if isnan(dgamma)
 dgamma = 0;
 end
 
+
+
 dz = [dr;dv;dm;dgamma;dalphadt];
+
+if any(isnan(dz))
+    disp('NaN Values Detected')
+end
 % dz = [dr;dv;dm;dgamma];
 end

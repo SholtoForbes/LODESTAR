@@ -14,7 +14,7 @@ g = 9.81;
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
+mstruct = (8755.1 - 994)*SPARTAN_SCALE; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
 
 m = mfuel + mstruct;
 
@@ -35,7 +35,8 @@ phi = zeros(1,length(time));
 zeta = zeros(1,length(time));
 
 phi(1) = -0.2138;
-zeta(1) = deg2rad(97);
+% zeta(1) = deg2rad(97);
+zeta(1) = 1.696;
 
 r = V + 6371000;
 i= 1;
@@ -157,7 +158,7 @@ elseif const == 3 || const == 31
 end
 
 % [Fd, Alpha, flapdeflection] = OutForce2(theta,M,q,m,scattered,v,V,thetadot,time,t_ratio, Efficiency, SPARTAN_SCALE,A,lift_search);
-% lift = lift_search;
+lift = lift_search;
 
 
 [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);

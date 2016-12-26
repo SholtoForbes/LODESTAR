@@ -9,12 +9,15 @@ scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
 global SPARTANscale
-SPARTANscale = 0.75
+% SPARTANscale = 0.75
+SPARTANscale = 1
 
-mRocket = 27000; %(kg)  %Total lift-off mass
-mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
+% mRocket = 27000; %(kg)  %Total lift-off mass
+mRocket = 23000; %(kg)  %Total lift-off mass
+% mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
+mFuel = 0.77*mRocket-630;  %(kg)  %mass of the fuel   630 is for the merlin
 mSpartan = 8755.1*SPARTANscale;
-% mSpartan = 6000.1; % SCALED DOWN SECOND STAGE
+
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 
@@ -32,16 +35,16 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase,scattered), tspan, y0);  
 
-% % FOR TESTING
-% phase = 'postpitch';
-% Tratio = .94;
-% tspan = [0 (y(end,3)-(mEmpty+mSpartan))/(Tratio*60*Tmax/200000)];
-% postpitch0 = [y(end,1), y(end,2), y(end,3), deg2rad(89)];
-% [t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,Tratio*Tmax,phase), tspan, postpitch0);
-% 
-% y
-% postpitch
-% postpitch(end,4)
+% FOR TESTINGm, see where it gets after 100s no aoa
+phase = 'postpitch';
+Tratio = 1;
+tspan = [0 118];
+postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89) 0];
+[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,phase,scattered), tspan, postpitch0);
+
+y
+postpitch
+postpitch(end,4)
 % 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
@@ -50,8 +53,8 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 h0 = y(end,1);  %Rocket starts on the ground
 v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
-% gamma0 = deg2rad(89.9);    % pitchover 
-gamma0 = deg2rad(89.999);    % pitchover 
+gamma0 = deg2rad(89.9);    % pitchover 
+% gamma0 = deg2rad(89.999);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -87,11 +90,17 @@ P.bounds.initialTime.upp = 0;
 P.bounds.finalTime.low = 0;
 P.bounds.finalTime.upp = 60*60;
 
-P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(3)];
-P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(3)];
+% P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(3)];
+% P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(3)];
+% 
+% P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(3)];
+% P.bounds.initialState.upp = [h0;v0;m0;gamma0;deg2rad(3)];
 
-P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(3)];
-P.bounds.initialState.upp = [h0;v0;m0;gamma0;deg2rad(3)];
+P.bounds.state.low = [hLow;vLow;mLow;gammaLow;-deg2rad(10)];
+P.bounds.state.upp = [hUpp;vUpp;mUpp;gammaUpp;deg2rad(10)];
+
+P.bounds.initialState.low = [h0;v0;m0;gamma0;-deg2rad(10)];
+P.bounds.initialState.upp = [h0;v0;m0;gamma0;deg2rad(10)];
 
 % P.bounds.finalState.low = [hLow;vF;mF;gammaF];
 % P.bounds.finalState.upp = [hUpp;vF;mF;gammaF];
@@ -134,7 +143,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100);
 P.options(1).defaultAccuracy = 'low';
         P.options(1).nlpOpt.MaxFunEvals = 5e7;
         P.options(1).nlpOpt.MaxIter = 1e7;
-    P.options(1).chebyshev.nColPts = 100
+    P.options(1).chebyshev.nColPts = 30
 
         
 %         P.options(2).method = 'hermiteSimpson';
@@ -144,7 +153,7 @@ P.options(1).defaultAccuracy = 'low';
         P.options(2).nlpOpt.MaxFunEvals = 5e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
         P.options(2).nSegment = 40;
-P.options(2).chebyshev.nColPts = 100
+P.options(2).chebyshev.nColPts = 30
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                              Solve!                                     %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -188,8 +197,8 @@ f_y0 = [f_h0_prepitch, f_v0_prepitch, f_m0_prepitch, f_gamma0_prepitch, 0];
 f_h0 = f_y_prepitch(end,1);  %Rocket starts on the ground
 f_v0 = f_y_prepitch(end,2);  %Rocket starts stationary
 f_m0 = f_y_prepitch(end,3);  %Rocket starts full of fuel
-% f_gamma0 = deg2rad(89.9);    % pitchover 
-f_gamma0 = deg2rad(89.999);    % pitchover 
+f_gamma0 = deg2rad(89.9);    % pitchover 
+% f_gamma0 = deg2rad(89.999);    % pitchover 
 
 f_alpha0 = x(5,1);  
 

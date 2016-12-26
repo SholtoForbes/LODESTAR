@@ -28,13 +28,13 @@ phi = scattered.equivalence(M1,T1);
 % 
 % phi = griddata(data(:,1),data(:,2),data(:,7),M1,T1,'cubic');
 
-wcap = 0.65*SPARTAN_SCALE^(2/3);
+wcap = 0.65;
 
 wcapstandard = 0.2156; %meters
 
 R0 = wcap^2/wcapstandard^2; % meters
 
-Acap = 0.0470*R0; %                   m^2          
+Acap = 0.0470*R0*SPARTAN_SCALE^(2/3); %                   m^2          
 
 gam0 = 1.4000000;
 r = 287.035;

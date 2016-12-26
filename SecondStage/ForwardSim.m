@@ -103,9 +103,9 @@ Flap_lift = q./50000*flaplift_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE
 
 total_lift = Cl1*A*q + Flap_lift ;
 
-Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3)
+Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);
 
-flapdeflection = flapdeflection_spline(M,alpha,-body_pitchingmoment)
+flapdeflection = flapdeflection_spline(M,alpha,-body_pitchingmoment);
 
 [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsForward(r,xi,phi,gamma,v,zeta,total_lift,Drag,Thrust,m,alpha);
 
