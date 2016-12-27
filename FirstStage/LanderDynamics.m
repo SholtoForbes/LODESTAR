@@ -6,21 +6,21 @@ function xdot = LanderDynamics(primal)
 % I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global CONSTANTS
-
+global AOAScale
 h = primal.states(1,:);		
 v = primal.states(2,:);		
 m = primal.states(3,:);	
 gamma = primal.states(4,:);	
-alpha = primal.states(5,:);	
+alpha = primal.states(5,:)/AOAScale;	
 x = [h; v ;m ;gamma; alpha];
 
-u = primal.controls;
+u = primal.controls/AOAScale;
 phase = 'postpitch';
 global scattered
 
-
-dz = rocketDynamics(x,u,phase,scattered);
-
+global q
+[dz,q] = rocketDynamics(x,u,phase,scattered);
+dz(5) = dz(5)*AOAScale;
 xdot = dz;
 
 % all done! 

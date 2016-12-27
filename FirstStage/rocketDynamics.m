@@ -1,4 +1,4 @@
-function dz = rocketDynamicsFullSize(z,u,phase,scattered)
+function [dz,q] = rocketDynamicsFullSize(z,u,phase,scattered)
 global mach
 Atmosphere = dlmread('atmosphere.txt');
 h = z(1,:);   %Height
@@ -23,7 +23,9 @@ density = interp1(Atmosphere(:,1),Atmosphere(:,4),h);
 P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),h);
 speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),h);
 
-SCALE = 1.3;
+q = 0.5*density.*v.^2;
+
+SCALE = 1.;
 % SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
 T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 

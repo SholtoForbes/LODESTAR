@@ -24,12 +24,12 @@ scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
 global SPARTANscale
 % SPARTANscale = 0.75
-SPARTANscale = .75
+SPARTANscale = 1
 
 % mRocket = 27000; %(kg)  %Total lift-off mass
-mRocket = 30000; %(kg)  %Total lift-off mass
-mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-% mFuel = 0.7814*mRocket-630*1.1^(3/2);  %(kg)  %mass of the fuel   630 is for the merlin , change this if scaling
+mRocket = 27100; %(kg)  %Total lift-off mass
+mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
+
 mSpartan = 8755.1*SPARTANscale;
 
 mTotal = mSpartan + mRocket;
@@ -49,10 +49,10 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase,scattered), tspan, y0);  
 
-% FOR TESTINGm, see where it gets after 100s no aoa
+% FOR TESTINGm, see where it gets 
 phase = 'postpitch';
 Tratio = 1;
-tspan = [0 mFuel/156];
+tspan = [0 mFuel/156]; % flies for way too long
 postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(0)];
 [t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,phase,scattered), tspan, postpitch0);
 
@@ -63,7 +63,8 @@ postpitch(end,4)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-
+global AOAScale
+AOAScale = 1;
 h0 = y(end,1);  
 v0 = y(end,2);  %
 m0 = y(end,3);  
@@ -73,8 +74,9 @@ gamma0 = deg2rad(89.9);    % pitchover
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 gammaF = deg2rad(1);
-hF = 26550;
+% hF = 26550;
 % hF = 45000;
+hF = 26000;
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 70000;  
@@ -90,8 +92,8 @@ gammaUpp = deg2rad(89.9);
 
 
 
-uLow = [-.004]; % Can do either AoA or thrust
-uUpp = [.004]; 
+uLow = [-.005]*AOAScale; % Can do either AoA or thrust
+uUpp = [.005]*AOAScale; 
 
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
@@ -107,8 +109,9 @@ bounds.upper.time	= [0 tfMax];
 % Note: DO NOT set mfmin to zero because the equations 
 % of motion have a singularity at m = 0.
 
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(15)];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(5)];
+
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(3)*AOAScale];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
@@ -149,7 +152,7 @@ guess.states(1,:)	= [h0, hF];
 guess.states(2,:)	= [v0, vF];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,gammaF];
-guess.states(5,:)	= [0, 0];
+guess.states(5,:)	= [-deg2rad(0.03)*AOAScale, -deg2rad(0.03)*AOAScale];
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
 

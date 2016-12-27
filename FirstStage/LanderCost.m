@@ -1,8 +1,10 @@
 function [eventCost, runningCost] = LanderCost(primal)
 
 v = primal.states(2,:);	
+alpha = primal.states(5,:);	
+
 % eventCost   = -v(end);
 eventCost   = 0;
 
-runningCost =0;
-% That's it!  Remember to fill the first output first!
+% runningCost =0;
+runningCost =abs(alpha);
