@@ -47,14 +47,14 @@ phase = 'prepitch';
 tspan = [0 15];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase,scattered), tspan, y0);  
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
 % FOR TESTINGm, see where it gets 
 phase = 'postpitch';
 Tratio = 1;
 tspan = [0 mFuel/156]; % flies for way too long
 postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(0)];
-[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,phase,scattered), tspan, postpitch0);
+[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,0,phase,scattered), tspan, postpitch0);
 
 y
 postpitch
@@ -76,7 +76,7 @@ mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 gammaF = deg2rad(1);
 % hF = 26550;
 % hF = 45000;
-hF = 26000;
+hF = 26300;
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 70000;  
@@ -153,6 +153,7 @@ guess.states(2,:)	= [v0, vF];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,gammaF];
 guess.states(5,:)	= [-deg2rad(0.03)*AOAScale, -deg2rad(0.03)*AOAScale];
+% guess.states(5,:)	= [0, 0];
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
 
@@ -205,4 +206,15 @@ legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');
 title('Validation')
 %=============================================================================
 
+% FOR TESTINGm, see where it gets 
+dalphadt = [diff(alpha)./diff(primal.nodes) 0];
 
+phase = 'postpitch';
+Tratio = 1;
+tspan = primal.nodes; 
+postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) alpha(1)];
+[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamics(postpitch_f,ControlFunction(t,primal.nodes,dalphadt),phase,scattered), tspan, postpitch0_f);
+
+% y
+% postpitch_f
+% postpitch_f(end,4)

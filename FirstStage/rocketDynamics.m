@@ -1,4 +1,4 @@
-function [dz,q] = rocketDynamicsFullSize(z,u,phase,scattered)
+function [dz,q] = rocketDynamics(z,u,t,phase,scattered)
 global mach
 Atmosphere = dlmread('atmosphere.txt');
 h = z(1,:);   %Height
@@ -50,9 +50,9 @@ L = 0.5*Cl.*Area.*density.*v.^2;
 %%%% Complete the calculation:
 
 
-xi = 0*ones(1,length(h)); 
-phi = -0.2138*ones(1,length(h));
-zeta = deg2rad(97)*ones(1,length(h));
+% xi = 0*ones(1,length(h)); 
+% phi = -0.2138*ones(1,length(h));
+% zeta = deg2rad(97)*ones(1,length(h));
 
 
 switch phase
@@ -62,8 +62,17 @@ switch phase
     %Do nothing
 end
 
+xi = 0; 
+phi = -0.2138;
+zeta = deg2rad(97);
+i = 1;
+[dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
+for i= 2:length(t)
 
-[dr,dxi,dphi,dgamma,dv,dzeta] = RotCoords(h+rEarth,xi,phi,gamma,v,zeta,L,D,T,m,alpha,phase);
+phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));
+zeta(i) = zeta(i-1) + dzeta(i-1)*(t(i) - t(i-1));
+[dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi,phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
+end
 
 if isnan(dgamma)
 dgamma = 0;
