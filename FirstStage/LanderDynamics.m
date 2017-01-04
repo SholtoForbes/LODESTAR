@@ -12,15 +12,17 @@ v = primal.states(2,:);
 m = primal.states(3,:);	
 gamma = primal.states(4,:);	
 alpha = primal.states(5,:)/AOAScale;	
+zeta = primal.states(6,:);	
 t = primal.nodes;
-x = [h; v ;m ;gamma; alpha];
+x = [h; v ;m ;gamma; alpha; zeta];
 
 u = primal.controls/AOAScale;
 phase = 'postpitch';
 global scattered
 
 global q
-[dz,q] = rocketDynamics(x,u,t,phase,scattered);
+global phi
+[dz,q,phi] = rocketDynamics(x,u,t,phase,scattered);
 dz(5) = dz(5)*AOAScale;
 xdot = dz;
 

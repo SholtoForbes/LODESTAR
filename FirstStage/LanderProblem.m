@@ -5,7 +5,8 @@
 clear all;		
 clc
 %==============================================================
-
+% global zeta
+global phi
 
 %-----------------------------------
 % Define the problem function files:
@@ -44,8 +45,8 @@ m0_prepitch = mTotal;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
-tspan = [0 15];
-y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
+tspan = [0 30];
+y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
@@ -53,7 +54,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0];
 phase = 'postpitch';
 Tratio = 1;
 tspan = [0 mFuel/156]; % flies for way too long
-postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(0)];
+postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(0) 0];
 [t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,0,phase,scattered), tspan, postpitch0);
 
 y
@@ -110,14 +111,16 @@ bounds.upper.time	= [0 tfMax];
 % of motion have a singularity at m = 0.
 
 
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(3)*AOAScale];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(3)*AOAScale;0];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
 
+zetaF = deg2rad(97);
+
 % bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; gammaF];	
-bounds.lower.events = [h0; v0; m0; gamma0; hF; mF];	
+bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; zetaF];	
 % bounds.lower.events = [h0; v0; m0; gamma0; mF; gammaF];	
 bounds.upper.events = bounds.lower.events;
 
@@ -133,7 +136,7 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [50];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [90];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
@@ -153,6 +156,7 @@ guess.states(2,:)	= [v0, vF];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,gammaF];
 guess.states(5,:)	= [-deg2rad(0.03)*AOAScale, -deg2rad(0.03)*AOAScale];
+guess.states(6,:)	= [1.35, zetaF];
 % guess.states(5,:)	= [0, 0];
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
@@ -179,6 +183,7 @@ v = primal.states(2,:);
 m = primal.states(3,:);
 gamma = primal.states(4,:);
 alpha = primal.states(5,:);
+zeta = primal.states(6,:);
 figure;
 hold on
 plot(primal.nodes, gamma);
@@ -207,13 +212,20 @@ title('Validation')
 %=============================================================================
 
 % FOR TESTINGm, see where it gets 
-dalphadt = [diff(alpha)./diff(primal.nodes) 0];
+% dalphadt = [diff(alpha)./diff(primal.nodes) 0];
+% 
+% phase = 'postpitch';
+% Tratio = 1;
+% tspan = primal.nodes; 
+% postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) alpha(1)];
+% [t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamics(postpitch_f,ControlFunction(t,primal.nodes,dalphadt),phase,scattered), tspan, postpitch0_f);
 
-phase = 'postpitch';
-Tratio = 1;
+
+ phase = 'postpitch';
 tspan = primal.nodes; 
-postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) alpha(1)];
-[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamics(postpitch_f,ControlFunction(t,primal.nodes,dalphadt),phase,scattered), tspan, postpitch0_f);
+postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)];
+[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered), tspan, postpitch0_f);
+
 
 % y
 % postpitch_f

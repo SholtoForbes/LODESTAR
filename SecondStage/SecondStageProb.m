@@ -271,7 +271,7 @@ elseif const == 1
 algorithm.nodes		= [82]; 
 elseif const == 12 
 % algorithm.nodes		= [80];
-algorithm.nodes		= [82];
+algorithm.nodes		= [80];
 elseif const == 13
 % algorithm.nodes		= [78];
 algorithm.nodes		= [80];

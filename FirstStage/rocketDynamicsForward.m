@@ -1,14 +1,15 @@
-function [dz,q,phi] = rocketDynamics(z,u,t,phase,scattered)
+function [dz] = rocketDynamicsForward(z,zeta,alpha,phase,scattered)
 global mach
 Atmosphere = dlmread('atmosphere.txt');
 h = z(1,:);   %Height
 v = z(2,:);   %Velocity
 m = z(3,:);   %Mass
 gamma = z(4,:);
-alpha = z(5,:);
-zeta = z(6,:);
+% zeta = z(5,:);
+phi = z(5,:);
 
-dalphadt = u(1,:);
+
+dalphadt = 0;
 
 if isnan(gamma)
     gamma = 1.5708;
@@ -59,39 +60,23 @@ L = 0.5*Cl.*Area.*density.*v.^2;
 switch phase
     case 'prepitch'
     gamma = 1.5708*ones(1,length(h)); % Control Trajectory Angle 
-    zeta = 0;
     case 'postpitch'
     %Do nothing
 end
 
 xi = 0; 
-phi = -0.2220;
-% phi = -0.2138;
-% zeta = deg2rad(97);
-% zeta = 1.33;
-i = 1;
-[dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
-for i= 2:length(t)
 
-phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));
-% zeta(i) = zeta(i-1) + dzeta(i-1)*(t(i) - t(i-1));
-[dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi,phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
-end
+
+[dr,dxi,dphi,dgamma,dv,dzeta] = RotCoords(h+rEarth,xi,phi,gamma,v,zeta,L,D,T,m,alpha,phase);
+
 % dzeta
-% if isnan(dgamma)
-% dgamma = 0;
-% end
-
-switch phase
-    case 'prepitch'
-    dgamma = 0; % Control Trajectory Angle 
-    dzeta = 0;
-    case 'postpitch'
-    %Do nothing
+if isnan(dgamma)
+dgamma = 0;
 end
 
 
-dz = [dr;dv;dm;dgamma;dalphadt;dzeta];
+
+dz = [dr;dv;dm;dgamma;dphi;dzeta];
 
 if any(isnan(dz))
     disp('NaN Values Detected')
