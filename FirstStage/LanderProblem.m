@@ -7,6 +7,8 @@ clc
 %==============================================================
 % global zeta
 global phi
+global q
+
 
 %-----------------------------------
 % Define the problem function files:
@@ -27,10 +29,16 @@ global SPARTANscale
 % SPARTANscale = 0.75
 SPARTANscale = 1
 
-% mRocket = 27000; %(kg)  %Total lift-off mass
-mRocket = 27100; %(kg)  %Total lift-off mass
-mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
+% mRocket = 27100; %(kg)  %Total lift-off mass
+% mRocket = 21000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
+ mRocket = 20000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
+% mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
+% mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
+mEngine = 470; % Mass of Merlin 1C
+% mFuel = 0.939*mRocket; 
+mFuel = 0.946*(mRocket-mEngine);  %smf without engine
+% mFuel = 0.939*mRocket -mEngine; 
 mSpartan = 8755.1*SPARTANscale;
 
 mTotal = mSpartan + mRocket;
@@ -88,7 +96,7 @@ vUpp = 3000;
 mLow = mEmpty;
 mUpp = mTotal;
 
-gammaLow = deg2rad(-1);
+gammaLow = deg2rad(1);
 gammaUpp = deg2rad(89.9);
 
 
@@ -120,8 +128,10 @@ bounds.upper.controls = uUpp;
 zetaF = deg2rad(97);
 
 % bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; gammaF];	
-bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; zetaF];	
+% bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; zetaF];	
 % bounds.lower.events = [h0; v0; m0; gamma0; mF; gammaF];	
+
+bounds.lower.events = [h0; v0; m0; gamma0; mF; zetaF];	
 bounds.upper.events = bounds.lower.events;
 
 
@@ -136,7 +146,7 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [90];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [70];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
@@ -186,10 +196,13 @@ alpha = primal.states(5,:);
 zeta = primal.states(6,:);
 figure;
 hold on
-plot(primal.nodes, gamma);
-plot(primal.nodes, v/1000);
-plot(primal.nodes, V/10000);
-plot(primal.nodes, alpha*10);
+plot(primal.nodes, gamma,'color','k','linestyle','-');
+plot(primal.nodes, v/1000,'color','k','linestyle','--');
+plot(primal.nodes, V/10000,'color','k','linestyle',':');
+plot(primal.nodes, rad2deg(alpha)/10,'color','k','linestyle','-.');
+legend('Trajectory Angle (degrees/10)','velocity (m/s / 1000)','Altitude (km /10)','angle of attack (rad)')
+xlabel('Time (s)')
+xlim([0,primal.nodes(end)]);
 
 mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);

@@ -163,9 +163,15 @@ lift = lift_search;
 
 [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
 
+% for i = 1:length(time)
+%   if q(i) < 20000
+%         Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);
+%   end  
+% end
+
 for i = 1:length(time)
-  if q(i) < 20000
-        Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);
+  if q(i) < 30000
+        Isp(i) = Isp(i)*gaussmf(q(i),[1000,30000]);
   end  
 end
 

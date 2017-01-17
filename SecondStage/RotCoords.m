@@ -1,6 +1,7 @@
 function [xidot,phidot,zetadot, lift_search] = RotCoords(r,xi,phi,gamma,v,zeta,m,eta, gammadot,const)
 % Determination of motion in rotating coordinates
-% East North Up coordinate system
+% from pontani
+% geodetic (LLA) rotational reference frame
 %xi  Longitude (rad)
 %phi  Latitude (rad)
 %gamma  Flight Path Angle (rad)

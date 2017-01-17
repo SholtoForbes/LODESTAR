@@ -14,7 +14,7 @@ Atmosphere = dlmread('atmosphere.txt');
 
 
 colormap jet
-scatter3(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),30,ThirdStageData(:,6), 'filled')
+scatter3(ThirdStageData(1009:2016,3),ThirdStageData(1009:2016,4),ThirdStageData(1009:2016,5),30,ThirdStageData(1009:2016,6), 'filled')
 
 ylabel('Trajectory Angle (deg)')
 xlabel('Velocity (m/s)')
@@ -37,64 +37,54 @@ ylabel(c,'Payload Mass, kg')
 %     end
 % end
 
-[meshAlt,meshAngle,meshVel] = meshgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
-meshPayload = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[2 3 1]);
-
-% 
-% figure(2)
-% ax1 = subplot(2,2,1);
-% colormap(gray)
-% C = contourf(meshAngle(:,:,1),meshAlt(:,:,1)/1000,meshPayload(:,:,1),13)
-% 
-% xlabel('Trajectory Angle (deg)')
-% ylabel('Altitude (km)')
-% title('2800 m/s')
-% 
-% 
-% ax2 = subplot(2,2,2);
-% colormap(gray)
-% C = contourf(meshAngle(:,:,3),meshAlt(:,:,3)/1000,meshPayload(:,:,3),13)
-% 
-% xlabel('Trajectory Angle (deg)')
-% ylabel('Altitude (km)')
-% 
-% title('2850 m/s')
-% 
-% ax3 = subplot(2,2,3);
-% colormap(gray)
-% C = contourf(meshAngle(:,:,5),meshAlt(:,:,5)/1000,meshPayload(:,:,5),13)
-% 
-% xlabel('Trajectory Angle (deg)')
-% ylabel('Altitude (km)')
-% 
-% title('2900 m/s')
-% 
+[meshAlt,meshAngle,meshVel] = meshgrid(ThirdStageData(1009:2016,3),Angle,Vel);
 
 
 
-% ax4 = subplot(2,2,4);
-% colormap(gray)
-% C = contourf(meshAngle(:,:,6),meshAlt(:,:,6)/1000,meshPayload3,13)
-% c=colorbar('southoutside')
-% c.LimitsMode = 'manual'
-% c.Limits = [200 320]
-% xlabel('Trajectory Angle (deg)')
-% ylabel('Altitude (km)')
-% ylabel(c,'Payload Mass, kg')
-% 
-% set([ax1 ax2 ax3 ax4],'clim',[200 320]);
-
-
- figure(2)
-
+figure(2)
+ax1 = subplot(2,2,1);
 colormap(gray)
-C = contourf(meshAngle(:,:,3),meshAlt(:,:,3)/1000,meshPayload(:,:,3),13)
+C = contourf(meshAngle(:,:,4),meshAlt(:,:,4)/1000,meshPayload(:,:,10),13)
 
 xlabel('Trajectory Angle (deg)')
 ylabel('Altitude (km)')
-title('2850 m/s')
-c = colorbar;
-c.Label.String = 'Payload (kg)';
+
+title('2600 m/s')
+
+
+ax2 = subplot(2,2,2);
+colormap(gray)
+C = contourf(meshAngle(:,:,5),meshAlt(:,:,5)/1000,meshPayload2,13)
+
+xlabel('Trajectory Angle (deg)')
+ylabel('Altitude (km)')
+
+title('2800 m/s')
+
+ax3 = subplot(2,2,3);
+colormap(gray)
+C = contourf(meshAngle(:,:,6),meshAlt(:,:,6)/1000,meshPayload3,13)
+
+xlabel('Trajectory Angle (deg)')
+ylabel('Altitude (km)')
+
+title('3000 m/s')
+
+
+
+
+ax4 = subplot(2,2,4);
+colormap(gray)
+C = contourf(meshAngle(:,:,6),meshAlt(:,:,6)/1000,meshPayload3,13)
+c=colorbar('southoutside')
+c.LimitsMode = 'manual'
+c.Limits = [200 320]
+xlabel('Trajectory Angle (deg)')
+ylabel('Altitude (km)')
+ylabel(c,'Payload Mass, kg')
+
+set([ax1 ax2 ax3 ax4],'clim',[200 320]);
+
 
 % slice(threeDMAT,[1,3,5],[],[])
 % colormap hsv

@@ -1,6 +1,6 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 
-SCALE_Engine = 1.0; % changes characteristic length
+SCALE_Engine = 1; % changes characteristic length
 
 time1 = cputime;
 
@@ -11,6 +11,8 @@ Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 
 Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
 
+CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
+
 Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
 
 iteration = 1;
@@ -18,34 +20,45 @@ iteration = 1;
 
 rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), k);
 c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), k);
+
 q_init = 0.5*rho_init*u^2;
 M_init = u/c_init;
 
-CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at q=50kPa conditions) This is an assumption, to form a baseline for allowable force
+% CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at q=50kPa conditions) This is an assumption, to form a baseline for allowable force
+% CN_50 = 0.3; %maximum allowable normal force coefficient
+
+%% this determines the maximum allowable normal coefficient with a 5 degree limit at 50kPa dynamic pressure
+Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
+c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
+M_50 = u(1)/c_50;
+CN_50 = CN_interp(M_50,10);
+
 
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50))*50000/q_init; %maximum allowable AoA
-
+if rad2deg(AoA_max) < 5
+    AoA_max = deg2rad(5);
+end
 
 AoA_init = x(2); 
-% AoA_init = AoA_max; 
-if AoA_init > deg2rad(20)
-    AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
-elseif AoA_init < deg2rad(0)
-% if AoA_init < deg2rad(0)
-    AoA_init = deg2rad(0);
-end
+% % AoA_init = AoA_max; 
+% if AoA_init > deg2rad(20)
+%     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
+% elseif AoA_init < deg2rad(0)
+% % if AoA_init < deg2rad(0)
+%     AoA_init = deg2rad(0);
+% end
 
 if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
 AoA_end = x(3); 
-% AoA_end = x(2); 
-if AoA_end > deg2rad(20)
-    AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
-elseif AoA_end < deg2rad(0)
-    AoA_end = deg2rad(0);
-end
+% % AoA_end = x(2); 
+% if AoA_end > deg2rad(20)
+%     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
+% elseif AoA_end < deg2rad(0)
+%     AoA_end = deg2rad(0);
+% end
 
 if AoA_end > AoA_max
     AoA_end = AoA_max;
@@ -93,7 +106,7 @@ Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessa
 
 %Reference area from Dawids Cadin
 % A = 0.87;
-A = 1.72*SCALE_Engine^2;
+A = 1.838*SCALE_Engine^2;
 
 g = 9.81; %standard gravity
 
@@ -178,7 +191,7 @@ while gamma(i) >= 0 || t(i) < 60;
     q(i) = 1/2*rho(i)*v(i)^2;
     
     if Fuel == true
-        T = 99100*1.72/1.83*SCALE_Engine^2 - p(i)*1.72;
+        T = 99100*SCALE_Engine^2 - p(i)*1.72;
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
         

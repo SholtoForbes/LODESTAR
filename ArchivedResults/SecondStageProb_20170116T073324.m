@@ -291,10 +291,10 @@ constq = dlmread('primalconstq.txt');
 % tfGuess = tfMax; % this needs to be close to make sure solution stays within Out_Force bounds
 
 if const == 1
-
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]/scale.V; %50kpa limited
+% 
+% guess.states(1,:) =[30000,33000]/scale.V; %50kpa limited
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36000 ];
-
 
 % guess.states(1,:) = constq(1,:);
 elseif const == 12

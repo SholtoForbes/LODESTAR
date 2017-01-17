@@ -149,14 +149,14 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = Penalty + [0 abs(diff(flapdeflection))]/100;
 % RunningCost = Penalty + abs(omegadot);
 %   RunningCost = Penalty + [0 10*abs(diff(omegadot))];
-IspCost = zeros (1:length(IspNet))
+IspCost = zeros(1,length(IspNet));
 for i = 1:length(IspNet)
 if IspNet(i) < 0
-    
+    IspCost(i) = IspNet(i)^2;
 end
 end
 
-RunningCost =Penalty + 0.1*abs(omegadot);
+RunningCost =Penalty + 0.1*abs(omegadot) + IspCost;
 
 %   RunningCost =Penalty + 0.1*abs(omegadot);
 

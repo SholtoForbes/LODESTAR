@@ -8,7 +8,7 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 
 AoA_max
 
-x0 = [1800  AoA_max-0.01 AoA_max-0.01];
+x0 = [2000  AoA_max-0.01 AoA_max-0.01];
 options.Display = 'iter';
 options.TypicalX = x0;
 % options.Algorithm = 'active-set';

@@ -3,9 +3,9 @@ function [x,y,z,Payload] = thirdstagemanipulation(file)
 ThirdStageData = dlmread(file);
 ThirdStageData = sortrows(ThirdStageData);
 
-Vvals = unique(ThirdStageData(:,1));
-thetavals = unique(ThirdStageData(:,2));
-vvals = unique(ThirdStageData(:,3));
+Vvals = unique(ThirdStageData(1009:2016,3));
+thetavals = unique(ThirdStageData(1009:2016,4));
+vvals = unique(ThirdStageData(1009:2016,5));
 
 x = Vvals;
 y = thetavals;

@@ -292,8 +292,8 @@ constq = dlmread('primalconstq.txt');
 
 if const == 1
 
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36000 ];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,36000 ];
 
 
 % guess.states(1,:) = constq(1,:);

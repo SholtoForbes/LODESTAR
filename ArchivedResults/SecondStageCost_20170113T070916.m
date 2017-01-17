@@ -58,7 +58,6 @@ omegadot  = primal.controls(1,:)*scale.thetadot;
 
 [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,gridded,const,thetadot, Atmosphere, SPARTAN_SCALE);
 
-IspNet = (Thrust-Fd)./Fueldt./9.81;
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
 
@@ -149,17 +148,7 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = Penalty + [0 abs(diff(flapdeflection))]/100;
 % RunningCost = Penalty + abs(omegadot);
 %   RunningCost = Penalty + [0 10*abs(diff(omegadot))];
-IspCost = zeros (1:length(IspNet))
-for i = 1:length(IspNet)
-if IspNet(i) < 0
-    
-end
-end
-
-RunningCost =Penalty + 0.1*abs(omegadot);
-
-%   RunningCost =Penalty + 0.1*abs(omegadot);
-
+ RunningCost =Penalty + 0.1*abs(omegadot);
 %     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
     %Omegadot cost smooths the trajectory 
 % RunningCost = 0;
