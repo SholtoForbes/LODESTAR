@@ -13,7 +13,7 @@ Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
 
 CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 
-Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
+Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,3),Aero(:,2));
 
 iteration = 1;
 
@@ -31,10 +31,10 @@ M_init = u/c_init;
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
 M_50 = u(1)/c_50;
-CN_50 = CN_interp(M_50,10);
+CN_50 = CN_interp(M_50,10)
 
 
-AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50))*50000/q_init; %maximum allowable AoA
+AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)) %maximum allowable AoA
 if rad2deg(AoA_max) < 5
     AoA_max = deg2rad(5);
 end
@@ -298,7 +298,7 @@ inc = asin(v(end)*sin(pi-zeta(end))/vexo);  % orbit inclination angle
 
 v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo;
 
-v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3;
+v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-zeta(end))); % Final term of this is inclination change cost
 
 v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
 

@@ -119,9 +119,10 @@ j = j+1;
 
 
             %% Determine AoA ==============================================================
+            T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), alt); 
+            P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), alt); 
             
-            
-            Alpha = fminsearch(@(Alpha)LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift),5);
+            Alpha = fminsearch(@(Alpha)LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift,T0,P0),5);
 %             error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline);
             
 
@@ -129,7 +130,7 @@ j = j+1;
 
             %Fuel Cost ===========================================================================
             
-            [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
+            [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,T0,P0);
 
             Thrust = Isp.*Fueldt*9.81;
 
@@ -183,6 +184,7 @@ end
 % Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
 % % 
 % else
+
 [vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
 
 AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
@@ -196,4 +198,4 @@ Drag_spline = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','line
 
 Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
 Flap_pitchingmoment_spline = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
-% end
+end

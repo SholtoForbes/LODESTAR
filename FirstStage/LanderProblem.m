@@ -31,8 +31,10 @@ SPARTANscale = 1
 
 % mRocket = 27100; %(kg)  %Total lift-off mass
 % mRocket = 21000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
- mRocket = 20000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
-% mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
+ mRocket = 20000; %(kg) 
+ % half size would be about 9.5 m if engine length of 3m is kept..
+mRocket = 17000;
+ % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
 mEngine = 470; % Mass of Merlin 1C
@@ -53,7 +55,7 @@ m0_prepitch = mTotal;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
-tspan = [0 30];
+tspan = [0 20];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
@@ -146,13 +148,13 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [70];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [80];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
 
 
-
+% algorithm.nodes = [70]; this works
     
 
 
@@ -196,13 +198,13 @@ alpha = primal.states(5,:);
 zeta = primal.states(6,:);
 figure;
 hold on
-plot(primal.nodes, gamma,'color','k','linestyle','-');
-plot(primal.nodes, v/1000,'color','k','linestyle','--');
-plot(primal.nodes, V/10000,'color','k','linestyle',':');
-plot(primal.nodes, rad2deg(alpha)/10,'color','k','linestyle','-.');
-legend('Trajectory Angle (degrees/10)','velocity (m/s / 1000)','Altitude (km /10)','angle of attack (rad)')
+plot([t_prepitch.' primal.nodes+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k','linestyle','-');
+plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,2).'/1000 v/1000],'color','k','linestyle','--');
+plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,1).'/10000 V/10000],'color','k','linestyle',':');
+plot([t_prepitch.' primal.nodes+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha)/10],'color','k','linestyle','-.');
+legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /10)','AoA (degrees/10)')
 xlabel('Time (s)')
-xlim([0,primal.nodes(end)]);
+xlim([0,primal.nodes(end)+t_prepitch(end)]);
 
 mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);

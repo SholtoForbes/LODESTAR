@@ -30,7 +30,7 @@ AoA_control2 = x(3)
 
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 
-
+zeta
 figure(9)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])

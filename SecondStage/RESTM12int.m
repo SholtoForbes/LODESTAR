@@ -1,16 +1,17 @@
-function [Isp,wf] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE)
+function [Isp,wf] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,T0,P0)
 % Engine Interpolator for RESTM12 Data
 % Reading from RESTM12DATA 
 
-
-% T150kPa = scattered.temp(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
+% OLD- ORIGINAL SPARTAN MODEL
+% T150kPa = scattered.tempgridded(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
 % T1 = T150kPa.*t_ratio;
-% P1 = scattered.pres(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
-% M1 = scattered.M1(M, Alpha);
+% P1 = scattered.presgridded(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
+% M1 = scattered.M1gridded(M, Alpha);
 
-T150kPa = scattered.tempgridded(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
-T1 = T150kPa.*t_ratio;
-P1 = scattered.presgridded(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
+% NEW SPARTAN MODEL
+
+T1 = scattered.tempgridded(M,Alpha).*T0;
+P1 = scattered.presgridded(M,Alpha).*Efficiency.*P0; % note this is at 50kPa, modified by efficiency
 M1 = scattered.M1gridded(M, Alpha);
 
 

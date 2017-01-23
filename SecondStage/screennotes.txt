@@ -1,0 +1,35 @@
+1- old communicator with 5deg -- this works
+3 - old com with 10 deg -- doesnt work... i thought this should.. something wrong with 10 deg
+4 old com with linear interp -  same as spline, doesnt work. I THINK THAT THE 10 DEG LIMITED MATRIX HAS ERRORS 
+SEEMS TO HIT A MAXIMUM AT 34.5km
+it does... at 0.03 rad trajectory angle
+
+using 5 deg for now
+
+5 const q new com
+6 const q new com slow srarting point
+-- doesnt work but gets close...
+
+
+3 - new com with 5 deg third stage, starting from 1764m/s
+this worked really well!!!
+great news
+
+
+need to remember that third stage is not currently taking into account inclination change
+
+screen 2 in fist stage, which work, but hits -1 deg aoa for ages because it is the best to fly at
+
+
+
+i think that the way Im doing the angle of attack limit is weird.
+
+
+5 - new om starting at 1700m/s, for comparison with screen 3
+
+4 - new com starting at 1650, for comparison with 5 and 3
+
+1 - monitoring times to see why its taking so long
+I think its just DIDO
+
+

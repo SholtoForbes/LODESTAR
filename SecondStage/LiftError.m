@@ -1,9 +1,9 @@
-function error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift)
+function error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift,Atmosphere,alt)
 
 
             %Fuel Cost ===========================================================================
             
-            [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE);
+            [Isp,Fueldt] = RESTM12int(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,Atmosphere,alt);
 
             Thrust = Isp.*Fueldt*9.81;
 
