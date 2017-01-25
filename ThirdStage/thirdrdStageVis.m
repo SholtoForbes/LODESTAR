@@ -1,6 +1,6 @@
 % visualising third stage cost results
 clear all
-ThirdStageData = sortrows(dlmread('thirdstage.dat'));
+ThirdStageData = sortrows(dlmread('thirdstageforvis.dat'));
 Atmosphere = dlmread('atmosphere.txt');
 % map = [0, 0, 0
 %     0, 0, 0
@@ -92,7 +92,7 @@ C = contourf(meshAngle(:,:,3),meshAlt(:,:,3)/1000,meshPayload(:,:,3),13)
 
 xlabel('Trajectory Angle (deg)')
 ylabel('Altitude (km)')
-title('2850 m/s')
+title('2750 m/s')
 c = colorbar;
 c.Label.String = 'Payload (kg)';
 

@@ -26,10 +26,51 @@ i think that the way Im doing the angle of attack limit is weird.
 
 
 5 - new om starting at 1700m/s, for comparison with screen 3
+this worked decently...
 
 4 - new com starting at 1650, for comparison with 5 and 3
 
 1 - monitoring times to see why its taking so long
 I think its just DIDO
+
+6 - 1650m/s start, 2700m./s end guess --didnt work
+
+2- 1600m/s start 2700m/s end guess
+
+3 - 1550m/s --this worked!
+
+some of these closed...
+
+
+
+24/01
+
+2 constq - 1550m/s start, 2700m/s end guess
+3 const 12 got close
+4 const 13 ''
+
+realised that liftforceinterp still had temp ratio included
+not used though, so its ok
+need to remove completely
+done
+
+
+disovered error in LiftError, restm12 was taking inputs of atmosphere and alt?? how did this work...
+was just calling them that, wasnt actually that
+
+
+fixed error in third stage, was using axial instead of normal coefficient
+
+
+
+
+
+25/01
+made new third stage matrix
+at 38km payload starts decreasing, as this is where it hits 20 deg AoA
+
+I need to see if its hitting 38km, 
+running 50kPa limit screen 2
+
 
 

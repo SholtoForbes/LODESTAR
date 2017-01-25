@@ -11,9 +11,9 @@ Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 
 Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
 
-CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
+CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
-Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,3),Aero(:,2));
+Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
 
 iteration = 1;
 
@@ -31,10 +31,11 @@ M_init = u/c_init;
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
 M_50 = u(1)/c_50;
-CN_50 = CN_interp(M_50,10)
-
-
-AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)) %maximum allowable AoA
+CN_50 = CN_interp(M_50,10);
+CN_50*50000/q_init;
+M_init;
+M_50;
+AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 if rad2deg(AoA_max) < 5
     AoA_max = deg2rad(5);
 end

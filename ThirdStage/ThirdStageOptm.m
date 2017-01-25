@@ -8,12 +8,12 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 
 AoA_max
 
-x0 = [2000  AoA_max-0.01 AoA_max-0.01];
+x0 = [1500  AoA_max-0.01 AoA_max-0.01];
 options.Display = 'iter';
 options.TypicalX = x0;
 % options.Algorithm = 'active-set';
 
-options.TolFun = 0.1;
+options.TolFun = 1;
 options.TolX = 100;
 
 % k = 35500;
@@ -30,7 +30,7 @@ AoA_control2 = x(3)
 
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 
-zeta
+
 figure(9)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])

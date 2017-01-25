@@ -4,13 +4,13 @@ mat = [];
 
 
 % u = [2500:100:2800 2800:20:2900 3000];
-u = [2800:25:2950 3000];
+u = [2700:25:2900 3000];
 % u = [2880:20:2940];
 
 
 % options.Display = 'iter';
 options.Display = 'final';
-options.TolFun = 0.1;
+options.TolFun = 1;
 options.TolX = 10;
 for phi0 = [-deg2rad(7.5) -deg2rad(7)]
 for zeta0 = [deg2rad(96) deg2rad(98)]
@@ -45,7 +45,7 @@ for k = [30000:500:40000]
         parfor i = 1:length(u)
         [AltF_temp, vF_temp, Alt_temp, v_temp, t_temp, mpayload_temp, Alpha_temp, m_temp,AoA_temp,q_temp,gamma_temp,D_temp,AoA_max] = ThirdStageSim([0 0 0],k,j,u(i), phi0, zeta0);
         
-        guess = [2000 AoA_max-0.01 AoA_max-0.01];
+        guess = [1500 AoA_max-0.01 AoA_max-0.01];
         
 %         x0 = guess(:,i); 
         x0 = guess; 

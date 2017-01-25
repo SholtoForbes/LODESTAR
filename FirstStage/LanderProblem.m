@@ -31,15 +31,16 @@ SPARTANscale = 1
 
 % mRocket = 27100; %(kg)  %Total lift-off mass
 % mRocket = 21000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
- mRocket = 20000; %(kg) 
+%  mRocket = 20000; %(kg) 
  % half size would be about 9.5 m if engine length of 3m is kept..
-mRocket = 17000;
+% mRocket = 17000;
+mRocket = 16000;
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
 mEngine = 470; % Mass of Merlin 1C
-% mFuel = 0.939*mRocket; 
-mFuel = 0.946*(mRocket-mEngine);  %smf without engine
+mFuel = 0.939*mRocket; % Michaael said to just use this for simplicity
+% mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
 mSpartan = 8755.1*SPARTANscale;
 
@@ -133,7 +134,9 @@ zetaF = deg2rad(97);
 % bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; zetaF];	
 % bounds.lower.events = [h0; v0; m0; gamma0; mF; gammaF];	
 
-bounds.lower.events = [h0; v0; m0; gamma0; mF; zetaF];	
+alpha0 = 0;
+
+bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];	
 bounds.upper.events = bounds.lower.events;
 
 
@@ -148,7 +151,7 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [80];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [90];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
