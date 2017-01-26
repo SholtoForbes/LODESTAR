@@ -70,7 +70,48 @@ made new third stage matrix
 at 38km payload starts decreasing, as this is where it hits 20 deg AoA
 
 I need to see if its hitting 38km, 
-running 50kPa limit screen 2
+running 50kPa limit screen 2 -- doesnt work at all
+trying 2800m/s guess
+3 12 -- seems to work half decently... but forward sim is pretty off
+	trying with 2800m/s vel guess
+4 13  failed instantly...
+	trying with 2800m/s vel guess
+
+none of these worked
+
+trying just const =1	2700m/s guess (i thought i used this, but looks like it was 2800)
+screen
+2	33km end guess
+3 	32
+4	35
+
+all of these look like theyre moving in the right direction,  none are great though
+also i think one didnt work, probably 35km
+trying these again with 2700m./s end guess
+
+35km guess tries to get there.. trying 34km guess
+33km guess tries, but goes pretty weird
+
+screen 2 const q with 1524 m/s start
+
+
+screen 3- trying 33km guess with penalty *10  -- worked decently, not much of a pull up though, wobbles
+screen 4 34km penalty*10  -- THIS NEARLY WORKED!!!!!!
+
+
+screen 1 trying 35km with no omegadot 1*penalty -- finds a false maxime somehow... thats a little worrying
+5 33km as above -- this worked best
+6 31km -- wobbles, but kinda tries
+screen 7 33.5km penaltyx10 -- didnt work
+
+
+
+screen 1 - 33km no omegadot to verify
+2 33.5
+3 33km end, +100 q start alt
+4 33km end -1000 q
+5 2800m/s v guess
+
 
 
 

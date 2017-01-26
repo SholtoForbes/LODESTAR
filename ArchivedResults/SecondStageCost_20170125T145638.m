@@ -149,16 +149,25 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = Penalty + [0 abs(diff(flapdeflection))]/100;
 % RunningCost = Penalty + abs(omegadot);
 %   RunningCost = Penalty + [0 10*abs(diff(omegadot))];
-IspCost = zeros (1:length(IspNet))
-for i = 1:length(IspNet)
-if IspNet(i) < 0
-    
-end
-end
 
-RunningCost =Penalty + 0.1*abs(omegadot);
 
-%   RunningCost =Penalty + 0.1*abs(omegadot);
+% IspCost = zeros(1,length(IspNet));
+% for i = 1:length(IspNet)
+% if IspNet(i) < 0
+%     IspCost(i) = IspNet(i)^2;
+% end
+% end
+
+% qCost = zeros(1,length(q));
+% for i = 1:length(q)
+% if q(i) < 20000
+%     qCost(i) =(q(i)-20000)^2;
+% end
+% end
+
+% RunningCost =Penalty + 0.1*abs(omegadot) + IspCost + qCost;
+
+  RunningCost =Penalty + 0.1*abs(omegadot);
 
 %     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
     %Omegadot cost smooths the trajectory 
@@ -170,7 +179,7 @@ global iterative_t
 global iterative_V_f
 
 if rem(iteration,5000) == 0
-    
+    q
     
     iterative_V_f(end+1,:) = cumtrapz(time,v.*sin(theta));
     

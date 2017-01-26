@@ -167,9 +167,9 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 
 % RunningCost =Penalty + 0.1*abs(omegadot) + IspCost + qCost;
 
-%   RunningCost =Penalty*10 + 0.1*abs(omegadot);
+  RunningCost =Penalty*10 + 0.1*abs(omegadot);
 
-    RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
+%     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
     %Omegadot cost smooths the trajectory 
 % RunningCost = 0;
 end

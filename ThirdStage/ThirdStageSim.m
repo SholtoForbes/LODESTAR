@@ -27,7 +27,7 @@ M_init = u/c_init;
 % CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at q=50kPa conditions) This is an assumption, to form a baseline for allowable force
 % CN_50 = 0.3; %maximum allowable normal force coefficient
 
-%% this determines the maximum allowable normal coefficient with a 5 degree limit at 50kPa dynamic pressure
+%% this determines the maximum allowable normal coefficient with a 10 degree limit at 50kPa dynamic pressure
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
 M_50 = u(1)/c_50;
