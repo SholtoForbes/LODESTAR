@@ -1,4 +1,4 @@
-function [Isp,wf] = RESTM12int(M, Alpha, Efficiency, scattered, SPARTAN_SCALE,T0,P0)
+function [Isp,wf,eq] = RESTM12int(M, Alpha, Efficiency, scattered, SPARTAN_SCALE,T0,P0)
 % Engine Interpolator for RESTM12 Data
 % Reading from RESTM12DATA 
 
@@ -22,7 +22,9 @@ Isp = scattered.IspGridded(M1,T1);
 % 
 % phi = scattered.phi(M1,T1)
 
-phi = scattered.equivalence(M1,T1);
+eq = scattered.equivalence(M1,T1);
+% phi = scattered.eqGridded(M1,T1);
+
 % data = scattered.data;
 
 % Isp = griddata(data(:,1),data(:,2),data(:,6),M1,T1,'cubic');
@@ -50,7 +52,7 @@ mc     = a1 + a2*M1 + a3*M1.^2 + a4*M1.^3;
 w = mc.*Acap.*P1.*M1.*sqrt(gam0./r./T1).*4.0; % 4 engine modules in Full capture engine 
 
 fst = 0.0291;
-wf = fst.*w.*phi; %(kg/s)
+wf = fst.*w.*eq; %(kg/s)
 end
 
 

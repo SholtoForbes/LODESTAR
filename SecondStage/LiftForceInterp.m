@@ -116,7 +116,10 @@ j = j+1;
             P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), alt); 
             
             Alpha = fminsearch(@(Alpha)LiftError(M, Alpha, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift,T0,P0),5);
-%             error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline);
+
+%             Alpha = fminbnd(@(Alpha)LiftError(M, Alpha, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift,T0,P0),2,10);
+
+            %             error = LiftError(M, Alpha, t_ratio, Efficiency, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline);
             
 
     %         Alpha = Alpha_spline(M, Liftq/A); % first approximation of alpha using only body lift
@@ -139,11 +142,12 @@ j = j+1;
 
             error = abs(total_lift - Lift);
             
-%             if error>1000
-%              v
-%              alt
-%              Lift
-%             end
+            if error>1000
+             v
+             alt
+             Lift
+             Alpha
+            end
             
 
             flapdeflection = flapdeflection_spline(M,Alpha,-body_pitchingmoment);

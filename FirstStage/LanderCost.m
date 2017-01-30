@@ -11,6 +11,6 @@ density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
 q = 0.5*density.*v.^2;
 % eventCost   = -v(end);
 % eventCost   = 0;
-eventCost   = -v(end)*1000 + (q(end)-50000)^2;
+eventCost   = -v(end)*1000 + (q(end)-55000)^2;
 % runningCost =0;
 runningCost =abs(alpha);

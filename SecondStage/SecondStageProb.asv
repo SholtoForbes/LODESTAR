@@ -41,7 +41,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -112,12 +112,29 @@ scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng
 % scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'linear','linear');
 % scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
 scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,4));
+% grid.eq_eng = scattered.equivalence(grid.Mgrid_eng,grid.T_eng);
+% scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'spline','linear');
 
 
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
 % settings required for trim at any flight conditions
-[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm,liftarray] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, SPARTAN_SCALE);
+% [scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm,liftarray] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere, scattered, SPARTAN_SCALE);
+liftarray = dlmread('liftarray');
+[vList,altList,liftList] = ndgrid(unique(liftarray(:,1)),unique(liftarray(:,2)),unique(liftarray(:,3)));
+
+AoA_Grid = permute(reshape(liftarray(:,4),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+scattered.AoA = griddedInterpolant(vList,altList,liftList,AoA_Grid,'spline','linear');
+
+flapdeflection_Grid = permute(reshape(liftarray(:,5),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+scattered.flapdeflection = griddedInterpolant(vList,altList,liftList,flapdeflection_Grid,'spline','linear');
+
+Drag_Grid = permute(reshape(liftarray(:,6),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+scattered.drag = griddedInterpolant(vList,altList,liftList,Drag_Grid,'spline','linear');
+
+Flap_pitchingmoment_Grid = permute(reshape(liftarray(:,7),[length(unique(liftarray(:,3))),length(unique(liftarray(:,2))),length(unique(liftarray(:,1)))]),[3 2 1]);
+scattered.flap_pm = griddedInterpolant(vList,altList,liftList,Flap_pitchingmoment_Grid,'spline','linear');
+
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
@@ -139,12 +156,19 @@ scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 ThirdStageData = dlmread('thirdstage.dat'); %Import Third Stage Data Raw 
 ThirdStageData = sortrows(ThirdStageData);
 
-% test of using griddedinterpolant
-PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,1)))]),[5 4 3 2 1]);
-[phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
-global PayloadGrid
-PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
+% This uses phi and zeta
+% PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,1)))]),[5 4 3 2 1]);
+% [phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% global PayloadGrid
+% PayloadGrid = griddedInterpolant(phiGrid,zetaGrid,VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 
+%This does not
+%This just uses third stage data that is close to the actual heading and
+%latitude
+PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
+[VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+global PayloadGrid
+PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 %=============================================== 
 
 V0 = 20000.;
@@ -249,7 +273,11 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 
 % v0 = 1764; 
+if const == 1 || 14
 v0 = 1524; 
+elseif const == 13
+    v0 = 1527;
+end
 % v0 = 1550; 
 vf = 2839.51;
 
@@ -312,7 +340,7 @@ if const == 1
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
 
 
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,33500 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
 
 
 % guess.states(1,:) = constq(1,:);
@@ -325,7 +353,7 @@ elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,34500];%45kPa limited
 elseif const == 14
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33500]; %High Drag
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; %High Drag
 
 else
 % guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
@@ -346,8 +374,8 @@ guess.states(3,:) = [0,0]/scale.theta;
 % guess.states(3,:) = [deg2rad(1.0),thetaU]/scale.theta;
 % guess.states(3,:) = [deg2rad(0.5),0.04]/scale.theta;
 else
-guess.states(3,:) = [0,0.05]/scale.theta;  
-% guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+% guess.states(3,:) = [0,0.05]/scale.theta;  
+guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
 
 % guess.states(3,:) = constq(3,:);
 end 
@@ -443,6 +471,7 @@ global Thrust
 global flapdeflection
 global Alpha
 global a
+global eq
 
 Thrust = Thrust./cos(deg2rad(Alpha));
 
@@ -620,8 +649,8 @@ line(t, Alpha,'Parent',ax2,'Color','k', 'LineStyle','-')
 line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')
 
 
+% line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
 line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
-
 
 line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
@@ -750,7 +779,8 @@ end
 forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),8755.1];
 
 
-[f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
+% [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t)),t,forward0);
 
 figure(12)
 hold on

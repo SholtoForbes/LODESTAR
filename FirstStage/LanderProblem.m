@@ -10,6 +10,7 @@ global phi
 global q
 
 
+
 %-----------------------------------
 % Define the problem function files:
 %-----------------------------------
@@ -56,7 +57,8 @@ m0_prepitch = mTotal;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
-tspan = [0 20];
+% tspan = [0 20];
+tspan = [0 25];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  

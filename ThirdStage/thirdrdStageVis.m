@@ -93,6 +93,7 @@ C = contourf(meshAngle(:,:,3),meshAlt(:,:,3)/1000,meshPayload(:,:,3),13)
 xlabel('Trajectory Angle (deg)')
 ylabel('Altitude (km)')
 title('2750 m/s')
+ylim([30 36])
 c = colorbar;
 c.Label.String = 'Payload (kg)';
 

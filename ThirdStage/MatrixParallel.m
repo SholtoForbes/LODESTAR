@@ -15,8 +15,8 @@ options.TolX = 10;
 for phi0 = [-deg2rad(7.5) -deg2rad(7)]
 for zeta0 = [deg2rad(96) deg2rad(98)]
     
-%     phi0 = -deg2rad(7)
-%     zeta0 = deg2rad(96)
+%     phi0 = -0.1271
+%     zeta0 = 1.7011
 %     
 %     guess = [1500; deg2rad(13); deg2rad(13)]*ones(1,length(u));
 %     guess = [1500; deg2rad(20); deg2rad(20)]*ones(1,length(u));
@@ -24,7 +24,7 @@ for zeta0 = [deg2rad(96) deg2rad(98)]
 % zeta0 = deg2rad(96.9);
 
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
-for k = [37000:500:40000]
+for k = [30000:500:40000]
     for j = [0:0.01:0.05]
         
         

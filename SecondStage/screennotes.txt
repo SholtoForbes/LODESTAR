@@ -106,12 +106,178 @@ screen 7 33.5km penaltyx10 -- didnt work
 
 
 
-screen 1 - 33km no omegadot to verify
-2 33.5
-3 33km end, +100 q start alt
-4 33km end -1000 q
-5 2800m/s v guess
+screen 1 - 33km no omegadot to verify -- definitely works
+2 33.5 -- works ok, decreases pull-up and payload
+3 33km end, +100 q start alt -- gets kind of close, wobbles a lot at start and pull-up isnt very big
+4 33km end -1000 q -- doesnt work at all, stays at high q... thats weird
+5 2800m/s v guess -- nearly works.. wobbly though
+6 const q see below
+
+
+3 trying 34km end -- worked ok, wobbly all through though
+
+some of these issues may stem from linear payload grid interpolation
+NOPE its spline interp
+
+4 exact q start -- didnt work
+5 1.3 deg start btheta guess -- doesnt do much
+
+
+1 32.5km -- didnt work ... thats odd
+2 33km 90 nodes --  didnt work
+5 70 nodes -- worked ok, bit wobbly
+
+5 100 nodes -- didnt work
+3 34km 90 nodes -- didnt work
+
+the const q result is not very good
+6 trying const q with omegadot cost
+4 looser const q with omegadot
+1 just much looser cost no omegadt
+
+2 60 nodes 33km
+
+3 linear liftforceinterp 33km -- doesnt do much, works but still shakey
+
+testing flap deflection spline, noticed that it is inconsistent when lift is increased, may be an issue?
+checking
+i think its ok
+
+Checked engine, equivalence is going greater than 1!
+this is not OK..
+
+wait, might not be
+its not. good
+
+
+I think that the odd shapes that I am getting are due to the way equivalence ratio changes!!
+when it jumps to 1 it causes a large thrust spike
+
+I may not be able to get a smooth solution
+
+55kPa first stage is not working
+
+testing a spline interp for equivalence
+screen 3
+this is the most important screen
+-- doesnt change much. the problem area is definitely in the area of <1 equivalance ratio
+
+
+screen 1 82 nodes 34km 0 theta initial guess
+
+screen 7 testing a 15s pitchover for first stage 55kPa -- i think this worked
+
+-- none of the const q results are very good, the forward sims are not working properly...
+but they are producing the exact same result... 
+i think that i didnt actually test them properly, i must have changed cost back
+
+1 with omegadot const q -- this works well, but there is still ad issue with forward sim
+2 33km q limited 2800m/s guess
+not working.. why
+trying with 2700m/s? -- didnt work...
+4 2800 -- definitely didnt work
+
+
+tested phi values, it definitely looks like the wobbly startit to find higher phi values
+
+4 70 nodes --  doesnt work great, but confirmed it does work
+
+why is my main result not working with 80 nodes...
+
+2 trying 80 nodes 34km -- doesnt work
+WHAT IS HAPPENING!i have changed something
+
+2 trying 82 nodes... -- THIS WORKS ok good
+
+4 34km 82 nodes
+
+trying 34km with different node nos
+
+3 95 --  not working, really bad result
+5 105
+
+2 trying 33km 95 nodes worked ok
+testing this with 0.01*omegadot on screen 1 -- doesnt work at all
+with 0 deg theta
+5 105 -- doesnt work at all
+6 115
+7 82 -- works, pretty bad forward sim. i should leave 1.3deg theta
+7 120 
+1 70 works
+
+what if i use thetadot derived from theta instead of thetadot for lift force?? maybe this would help with forward sim disparity
+
+5 trying using theta diff instead of thetadot -- didnt work
+
+1 trying half liftforceinterp -- didnt seem to help a lot, but did change it. pretty sure this is my issue
+
+it could be that the error is too high in places, or that my interpolation is too course
+looking at the communicator, the pitchingmoment is all over the place... this may be causing issues
+removing this still has errors..
+
+5 trying modifies communicator (removed weird points) --  didnt do much
+
+the lift force errors dont seem to be in too important places...
+and it doesnt seem to come up in trajectory...
+
+i think that increase liftforceinterp fidelity did improve it...
+
+making liftforceinterp separate
+
+increasing liftforceinterp fidelity does seem to reduce error
+
+making a really fine liftforceinterp
+
+1 const q course liftarray
+3 fine -- works
+5 extrafine -- works, but still doesnt have a good forward sim. also derivative check looks wonky...
+6extrafine limited -- doesnt seem to have improved it
+
+
+JUST NOTICED THAT THE THIRD STAGE SIM IS GIVING VERY DIFFERENT ANSWERS TO THE INTERP
+weird..
+might be the payload spline?
+
+weird...
+not sure what this is
+
+i just need to add in an extra payload matrix near the expected point
+
+
+doesnt look like increasing liftforceinterp fidelity helped
+
+
+it seems to be producing less lift in forward sim
+
+the lifts are fairly different, thrusts are the same
+
+wait, this is because i have different definitions of lift.
+one includes thrust
+
+even including thrust its a bit different in forward sim
+
+testing modifying forward sim to include calculated lift drag etc
+changing lift completely changes answer (as expected) i think lift is definitely the cause
+
+
+i think that the changing phi is making the forward sim especially bad.
+
+i dont think that this is fixable. I think that the foward sim is just not going to match.
+dont know what to do about this.
+
+
+running third stage matrix with actual end latitude and heading, check that this produces payload close to interpolated payload
+
+
+realised that i would need to run a huge amount of third stage results... 
+i am just going to use one close to the actual heading/latitude and correct after
+
+realised that the heading angle change makes the wide heading angle bounds a bit silly
 
 
 
+screen 6 45kpa -- didnt work at all
+6 33km guess
 
+5 high drag -- nearly works
+  5 33km guess
