@@ -58,7 +58,7 @@ gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
 % tspan = [0 20];
-tspan = [0 25];
+tspan = [0 15]; %15s for 45kpa & 55kPa
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
@@ -153,13 +153,13 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [90];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [70];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
+%70 for 55kPa, 90 for others
 
 
-% algorithm.nodes = [70]; this works
     
 
 
@@ -168,7 +168,7 @@ t0			= 0;
 tfGuess 	= 120;			
 % slightly educated guess of final time (for the scaled problem!)
 
-guess.states(1,:)	= [h0, hF];
+guess.states(1,:)	= [h0, 23000]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, vF];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,gammaF];

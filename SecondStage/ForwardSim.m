@@ -85,7 +85,7 @@ temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
 Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 t_ratio = 1;
 end
-
+Efficiency = 1;
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
 P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 
 

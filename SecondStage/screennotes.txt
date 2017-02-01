@@ -281,3 +281,64 @@ screen 6 45kpa -- didnt work at all
 
 5 high drag -- nearly works
   5 33km guess
+
+3 first stage 55kPa 20s pitchover, changed hf guess to 23000
+
+
+none of these worked... thats not good.
+the 45kpa one had the right shape... 
+
+trying to get 50kPa working...
+
+5 70 nodes
+6 70 nodes 34km --  works decently.. goes over 50kPa a bit though
+7 82 nodes 34km
+6 75 nodes 34km
+
+cant get 55kPa first stage to work
+
+2 trying 45kpa first stage with 20s pitchover -- failed very quickly...
+2 tryning with 15s pitchover to be sure it works -- doesnt give the same result as before... thats weird...
+ive changed the guess.. 
+2 45kpa 70 nodes 20s -- doesnt work
+2 45kpa 15s 90 nodes 24.5km guess -- worked
+
+1 55kpa 70 nodes -- this works
+1 trying this with 20s pitchover 23km ghuess -- weird result
+1 trying 24.5 km guess -- this worked
+
+5 70 nodes 35km -- works decently, not amazingly
+5 72 nodes 34km 
+
+2 trying first stage 55kPa 22km guess 90 nodes 15s ptchover --  doesnt work at all
+2 trying 23km guess 70 nodes 15s pitchover again -- worked
+
+2 const = 1 75 nodes -- got windows memory problems....
+
+tried const q with current liftforceinterp and got bad result...
+switching liftforceinterp
+
+im using the extra fine one accidentally...
+
+using course
+this will change other results too....
+
+closing screens 5 6 7
+1 q limited 82 nodes 34km
+2 82 nodes 33km -- doesnt work at all... thats weird
+3 constq
+2 70 nodes 33km -- this works, but its wobbly
+4 70 nodes 34km -- gets close.. goes over 50kPa
+trying to reduce wobblyness
+2 70 n 33km penalty*10 -- doesnt work
+5 penalty*5
+2 penalty*2 -- this works pretty well!
+4 71 nodes normal otherwise
+starting at different height to first stage release isnt good, constraining this
+6 trying penalty*2 with starting alt constrained -- worked pretty well!
+
+
+KEEP SCREEN 3
+KEEP SCREEN 6
+
+CHANGE  STARTING V CONSTRAINT FOR 45kPA and 55kPa

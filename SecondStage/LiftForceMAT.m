@@ -153,16 +153,16 @@ A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
 j = 1;
-for v = 1500:10:3000 % Velocity (m/s)
-% for v = 1500:50:3000 % Velocity (m/s)
+% for v = 1500:10:3000 % Velocity (m/s)
+for v = 1500:25:3000 % Velocity (m/s)
 todisp = [num2str(j/length(1500:25:3000)*100),' % complete '];
 disp(todisp)
 j = j+1;
-    for alt = 22000:100:40000 % Altitude (m)
-% for alt = 20000:500:50000 % Altitude (m)
+%     for alt = 22000:100:40000 % Altitude (m)
+for alt = 20000:250:50000 % Altitude (m)
 
-%         for Lift = 0:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
-Lift = 25000:500:150000; % Lift force (N)   max mass of vehicle is 8755.1
+%         for Lift = 0:2500:200000 % Lift force (N)   max mass of vehicle is 8755.1
+Lift = 25000:2500:150000; % Lift force (N)   max mass of vehicle is 8755.1
 
 Alphatemp = [];
 flapdeflection=[];
@@ -226,7 +226,7 @@ Efficiency = [];
 
             end
 
-
+Efficiency = 1;
 
             %% Determine AoA ==============================================================
             T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), alt); 

@@ -108,7 +108,7 @@ j = j+1;
             Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 
             end
-
+Efficiency =1;
 
 
             %% Determine AoA ==============================================================

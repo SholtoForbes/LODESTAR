@@ -41,7 +41,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 13
+const = 1
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -171,8 +171,8 @@ global PayloadGrid
 PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 %=============================================== 
 
-V0 = 20000.;
-Vf = 50000.; %
+% V0 = 20000.;
+% Vf = 50000.; %
 
 %===================
 % Problem variables:
@@ -191,8 +191,8 @@ Vf = 50000.; %
 % search space, but tight enough that a solution can be found efficiently.  These bounds must be
 % chosen carefully, with the physical model in mind. 
 
-VL = V0;
-VU = 1.0*Vf; 
+VL = 20000;
+VU = 50000; 
 
 vL = 1500;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
@@ -273,17 +273,33 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 
 % v0 = 1764; 
-if const == 1 || 14
+if const == 1 || const == 14
 v0 = 1524; 
+elseif const == 12
+    v0 = 1524;
 elseif const == 13
-    v0 = 1527;
+    v0 = 1521;
 end
 % v0 = 1550; 
 vf = 2839.51;
 
+
+if const == 1 || const == 14
+
+    V0 = 24460;
+    
+elseif const == 12
+    V0 = 23860;
+
+elseif const == 13
+    V0 = 25090;
+end
+
 % See events file for definition of events function
 if const == 1 || const == 12 || const == 14 || const == 13
-    bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % 
+%     bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % 
+
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0];
 end
 
 
@@ -313,16 +329,19 @@ if const == 3 || const == 31
 algorithm.nodes		= [80]; 
 elseif const == 1
 % algorithm.nodes		= [82];
-algorithm.nodes		= [82]; 
+
+% algorithm.nodes		= [73]; 
+
+algorithm.nodes		= [70]; 
 elseif const == 12 
 % algorithm.nodes		= [80];
-algorithm.nodes		= [80];
+algorithm.nodes		= [72];
 elseif const == 13
 % algorithm.nodes		= [78];
-algorithm.nodes		= [80];
+algorithm.nodes		= [73];
 % algorithm.nodes		= [110];
 elseif const == 14
-algorithm.nodes		= [80];
+algorithm.nodes		= [70];
 end
 
 global nodes
@@ -340,18 +359,18 @@ if const == 1
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
 
 
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
-
 
 % guess.states(1,:) = constq(1,:);
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35600];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,32000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33000];
 elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-99 ,35800];%45kPa limited
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,33000];%45kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,34000];%45kPa limited
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; %High Drag
 
@@ -762,30 +781,34 @@ subplot(5,1,4)
 plot(t,thetadot_F,t,thetadot);
 
 % Compute difference with CADAC for constant dynamic pressure path
+
+t_diff = t - [0 t(1:end-1)];
 if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
-    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),linspace(0,CADAC_DATA(end,1),nodes));
-    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),linspace(0,CADAC_DATA(end,1),nodes));
-    MeanError_V = sum((CADAC_V - V)./V)/nodes
-    MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha)/nodes
+    CADAC_Alpha = interp1(CADAC_DATA(:,2),CADAC_DATA(:,4),linspace(CADAC_DATA(1,2),CADAC_DATA(end,2),nodes));
+    CADAC_V = interp1(CADAC_DATA(:,2),CADAC_DATA(:,11),linspace(CADAC_DATA(1,2),CADAC_DATA(end,2),nodes));
+    MeanError_V = sum((CADAC_V - V)./V.*t_diff)/t(end)
+    MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha.*t_diff)/t(end)
 end
 
 
 
-if PayloadGrid(phi(end),zeta(end),V(end)+10,theta(end),v(end)) - PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end)) < 0
+% if PayloadGrid(phi(end),zeta(end),V(end)+10,theta(end),v(end)) - PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end)) < 0
+%     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
+% end
+if PayloadGrid(V(end)+10,theta(end),v(end)) - PayloadGrid(V(end),theta(end),v(end)) < 0
     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
-
 
 forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),8755.1];
 
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t)),t,forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t)),t(1:end),forward0);
 
 figure(12)
 hold on
-plot(t,f_y(:,1));
+plot(f_t(1:end),f_y(:,1));
 plot(t,V);
 
 % =========================================================================

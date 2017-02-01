@@ -35,15 +35,18 @@ figure(9)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])
 hold on
-plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.0)
-plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.0)
-plot(t, m/100, 'LineStyle', ':','Color','k', 'lineWidth', 2.0)
-plot(t,v/100, 'LineStyle', '--','Color','k', 'lineWidth', 2.0)
-plot(t(1:end-1),q/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 2.0)
-plot(t(1:end-1),rad2deg(Alpha), 'LineStyle', '-','Color','k', 'lineWidth', 1.0)
+plot(t, Alt/10000, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
+plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
+plot(t, m/100, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
+plot(t,v/100, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
+plot(t(1:end-1),q/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+plot(t(1:end-1),rad2deg(Alpha), 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
 
-legend(  'Altitude (km)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)','Angle of Attack (deg)');
+legend(  'Altitude (km x 10)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)','Angle of Attack (deg)');
+ylim([0 60])
+xlim([0 t(end)])
 
+dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')
 
 Integrated_Drag = cumtrapz(t(1:end-1),D) ;
 Integrated_Drag(end)

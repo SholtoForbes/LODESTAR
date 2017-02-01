@@ -155,7 +155,7 @@ elseif const == 3 || const == 31
 
 end
 
-
+Efficiency = 1;
 
 % [Fd, Alpha, flapdeflection] = OutForce2(theta,M,q,m,scattered,v,V,thetadot,time,t_ratio, Efficiency, SPARTAN_SCALE,A,lift_search);
 lift = lift_search;
