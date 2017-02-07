@@ -1,35 +1,23 @@
-function [Isp,wf,eq] = RESTM12int(M, Alpha, Efficiency, scattered, SPARTAN_SCALE,T0,P0)
+function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0)
 % Engine Interpolator for RESTM12 Data
 % Reading from RESTM12DATA 
-
-% OLD- ORIGINAL SPARTAN MODEL
-% T150kPa = scattered.tempgridded(M,Alpha); % from communicator, get temp behind shock at 50kpa from communicator (T1,50kPa)
-% T1 = T150kPa.*t_ratio;
-% P1 = scattered.presgridded(M,Alpha).*Efficiency; % note this is at 50kPa, modified by efficiency
-% M1 = scattered.M1gridded(M, Alpha);
 
 % NEW SPARTAN MODEL
 
 T1 = scattered.tempgridded(M,Alpha).*T0;
-P1 = scattered.presgridded(M,Alpha).*Efficiency.*P0; % note this is at 50kPa, modified by efficiency
+P1 = scattered.presgridded(M,Alpha).*P0; % note this is at 50kPa, modified by efficiency
 M1 = scattered.M1gridded(M, Alpha);
-
-
-% Isp = scattered.IspScattered(M1,T1);
 
 Isp = scattered.IspGridded(M1,T1);
 
-% 
-% phi = scattered.phi(M1,T1)
+% eq = scattered.equivalence(M1,T1);
+eq = scattered.eqGridded(M1,T1);
+for i = 1: length(eq)
+    if eq(i) > 1
+        eq(i) = 1;
+    end
+end
 
-eq = scattered.equivalence(M1,T1);
-% phi = scattered.eqGridded(M1,T1);
-
-% data = scattered.data;
-
-% Isp = griddata(data(:,1),data(:,2),data(:,6),M1,T1,'cubic');
-% 
-% phi = griddata(data(:,1),data(:,2),data(:,7),M1,T1,'cubic');
 
 wcap = 0.65;
 

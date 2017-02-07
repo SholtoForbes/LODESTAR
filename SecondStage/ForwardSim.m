@@ -36,60 +36,13 @@ M = v./c; % Calculating Mach No (Descaled)
 
 % Calculate Thrust Component ==================================
 
-kpa50_V = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2);% Vitude at each velocity, if it were a constant 50kPa q trajectory (used to compare with communicator matrix results) 
-kpa50_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), kpa50_V); % Calculate density using atmospheric data
 
 if const == 1 || const == 14
 
-    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-    Efficiency = zeros(1,length(q));
-    for i = 1:length(q)
-        if q(i) < 50000
-        Efficiency(i) = rho/(50000*2/v^2); % dont change this
-        t_ratio(i) = temp_actual(i)/kpa50_temp(i);
-        else
-        Efficiency(i) = 1; % for 50kPa
-        t_ratio(i) = 1; % 
-        end
-    end
-elseif const == 12
-    constq_V = interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000./v.^2); % Vitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-    constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_V); % Calculate density using atmospheric data
-    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-    Efficiency = zeros(1,length(q));
-    for i = 1:length(q)
-        if q(i) < 55000
-        Efficiency(i) = rho/(50000*2/v^2); % dont change this
-        t_ratio(i) = 1;
-        else
-        Efficiency(i) = 1.1; % for 55kPa
-        t_ratio(i) = 1;
-        end
-    end
-elseif const == 13
-    constq_V = interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000./v.^2); % Vitude at each velocity, if it were a constant q trajectory (used to compare with communicator matrix results) 
-    constq_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), constq_V); % Calculate density using atmospheric data
-    temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-    Efficiency = zeros(1,length(q));
-    for i = 1:length(q)
-        if q(i) < 45000
-            Efficiency(i) = rho/(50000*2/v^2); % dont change this
-            t_ratio(i) = 1;
-        else
-            Efficiency(i) = .9; % for 45kPa
-            t_ratio(i) = 1;
-        end
-    end
-elseif const == 3 || const == 31
-temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
-t_ratio = 1;
-end
-Efficiency = 1;
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
 P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 
 
-[Isp,Fueldt] = RESTM12int(M, alpha, Efficiency, scattered, SPARTAN_SCALE,T0,P0);
+[Isp,Fueldt] = RESTM12int(M, alpha, scattered, SPARTAN_SCALE,T0,P0);
 
 Thrust = Isp.*Fueldt*9.81;
 

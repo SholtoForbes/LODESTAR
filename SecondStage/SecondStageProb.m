@@ -107,13 +107,12 @@ T_eng_interp = floor(T_englist(1)):10:ceil(T_englist(end));
 % T_eng_interp = unique(sort(data(:,2)));
 
 [grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
-grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng);
+grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng); % An 'interpolator' which only interpolates at the data points. This is just an easy way to make a grid.
 scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','linear');
-% scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'linear','linear');
-% scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,7));
+
 scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,4));
-% grid.eq_eng = scattered.equivalence(grid.Mgrid_eng,grid.T_eng);
-% scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'spline','linear');
+grid.eq_eng = scattered.equivalence(grid.Mgrid_eng,grid.T_eng);
+scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'spline','linear');
 
 
 % Call LiftForceInterp
@@ -229,7 +228,7 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1  || const == 12 || const == 14 || const == 13
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.0005/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 
 end
@@ -241,10 +240,14 @@ end
 
 % control bounds
 if const == 1 || const == 12 || const == 13 || const == 14
-omegadotL = -0.0001;
-omegadotU = 0.0001;
+% omegadotL = -0.0001;
+% omegadotU = 0.0001;
+
 % omegadotL = -0.00005;
 % omegadotU = 0.00005;
+% 
+omegadotL = -0.00005;
+omegadotU = 0.0001;
 else
 % omegadotL = -0.001;
 % omegadotU = 0.001;
@@ -330,9 +333,9 @@ algorithm.nodes		= [80];
 elseif const == 1
 % algorithm.nodes		= [82];
 
-% algorithm.nodes		= [73]; 
+% algorithm.nodes		= [70]; 
 
-algorithm.nodes		= [70]; 
+algorithm.nodes		= [90]; 
 elseif const == 12 
 % algorithm.nodes		= [80];
 algorithm.nodes		= [72];

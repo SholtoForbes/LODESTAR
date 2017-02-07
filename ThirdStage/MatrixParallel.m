@@ -12,8 +12,9 @@ u = [2700:25:2900 3000];
 options.Display = 'final';
 options.TolFun = 1;
 options.TolX = 10;
-for phi0 = [-deg2rad(7.5) -deg2rad(7)]
-for zeta0 = [deg2rad(96) deg2rad(98)]
+for phi0 = [-0.1271-0.005 -0.1271 -0.1271+0.005]
+% for zeta0 = [1.70 1.7040 1.7080]
+zeta0 = 1.7040
     
 %     phi0 = -0.1271
 %     zeta0 = 1.7011
@@ -25,7 +26,7 @@ for zeta0 = [deg2rad(96) deg2rad(98)]
 
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
 for k = [30000:500:40000]
-    for j = [0:0.01:0.05]
+    for j = [0:0.01:0.3]
         
         
         
@@ -66,5 +67,5 @@ mat = [mat;[phi0*ones(length(u),1),zeta0*ones(length(u),1),k*ones(length(u),1),j
     end
 end
 end
-end
+% end
 dlmwrite('thirdstagenew.dat', mat,'delimiter','\t')
