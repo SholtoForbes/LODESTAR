@@ -139,7 +139,7 @@ v(1) = u;
 % zeta(1) = deg2rad(84);
 zeta(1) = zeta0;
 
-m(1) = 2700 + 167*SCALE_Engine^3; %vehicle mass, (to match Dawids glasgow paper)
+m(1) = 2400 + 167*SCALE_Engine^3 + 229; %vehicle mass, (to match Dawids glasgow paper)
 
 mdot = 22.4*SCALE_Engine^2;
 
@@ -197,7 +197,7 @@ while gamma(i) >= 0 || t(i) < 60;
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - 302.8 - mdot*dt; %release of heat shield, from dawids glasgow paper
+            m(i+1) = m(i) - 229 - mdot*dt; %release of heat shield, from dawids glasgow paper
             exocond = true;
         else 
             m(i+1) = m(i) - mdot*dt;
@@ -209,7 +209,7 @@ while gamma(i) >= 0 || t(i) < 60;
         mfuel(i+1) = mfuel(i);
         
         if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - 302.8; %release of heat shield, from dawids glasgow paper
+            m(i+1) = m(i) - 229; %release of heat shield, from dawids glasgow paper
             exocond = true;
         else 
             m(i+1) = m(i);
@@ -283,7 +283,7 @@ end
 
 if exocond == false
 %     fprintf('Did not reach exoatmospheric conditions')
-    m(end) = m(end) - 302.8;
+    m(end) = m(end) - 229;
 end
 
 %Hohmann Transfer, from Dawid (3i)

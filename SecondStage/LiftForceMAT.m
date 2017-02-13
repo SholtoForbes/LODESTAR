@@ -70,25 +70,52 @@ scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','lin
 %%
 
 
+
 scattered.data = dlmread('RESTM12DATA.txt');  
 data = scattered.data;
+
+newdata = [];
+j=1;
+
+% this sets the interpolation region! VERY IMPORTANT
+% The interpolators have trouble with equivalence ratio because its 1 over
+% a certain M
+% this makes anything outside of the region where it is actually changing
+% extrapolate to over 1 (which is then set to 1 by RESTM12int)
+for i = 1: length(data(:,1))
+    if data(i,1) < 5.4
+        newdata(j,:) = data(i,:);
+        j=j+1;
+    end
+end
+
 % IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
-IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,3));
+% IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,3));
+
+ p=polyfitn([data(:,1),data(:,2)],data(:,3),4)
+
 M_englist = unique(sort(data(:,1))); % create unique list of Mach numbers from engine data
 M_eng_interp = floor(M_englist(1)):0.1:ceil(M_englist(end)); % enlarge spread, this is not necessary if you have a lot of engine data
-% M_eng_interp = unique(sort(data(:,1)));
+M_eng_interp = unique(sort(data(:,1)));
 
 T_englist = unique(sort(data(:,2))); % create unique list of angle of attack numbers from engine data
 T_eng_interp = floor(T_englist(1)):10:ceil(T_englist(end)); 
-% T_eng_interp = unique(sort(data(:,2)));
+T_eng_interp = unique(sort(data(:,2)));
 
 [grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
-grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng);
-scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','linear');
+% grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng); % An 'interpolator' which only interpolates at the data points. This is just an easy way to make a grid.
 
-scattered.equivalence = scatteredInterpolant(data(:,1),data(:,2),data(:,4));
+for i = 1:30
+    for j= 1:30
+grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+    end
+end
+
+scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','spline');
+
+scattered.equivalence = scatteredInterpolant(newdata(:,1),newdata(:,2),newdata(:,4), 'linear');
 grid.eq_eng = scattered.equivalence(grid.Mgrid_eng,grid.T_eng);
-scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'spline','linear');
+scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
 
 
 

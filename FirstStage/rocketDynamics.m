@@ -65,10 +65,8 @@ switch phase
 end
 
 xi = 0; 
-phi = -0.2220;
-% phi = -0.2138;
-% zeta = deg2rad(97);
-% zeta = 1.33;
+phi = -0.2220; % initial latitude
+
 i = 1;
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
 for i= 2:length(t)
@@ -77,10 +75,7 @@ phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));
 % zeta(i) = zeta(i-1) + dzeta(i-1)*(t(i) - t(i-1));
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi,phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
 end
-% dzeta
-% if isnan(dgamma)
-% dgamma = 0;
-% end
+
 
 switch phase
     case 'prepitch'

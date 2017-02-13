@@ -39,7 +39,7 @@ mRocket = 16000;
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
-mEngine = 470; % Mass of Merlin 1C
+% mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*mRocket; % Michaael said to just use this for simplicity
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
