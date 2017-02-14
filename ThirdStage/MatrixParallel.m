@@ -13,9 +13,9 @@ options.Display = 'final';
 options.TolFun = 1;
 options.TolX = 10;
 % for phi0 = [-0.1271-0.005 -0.1271 -0.1271+0.005]
-    phi0 = -0.1271
+    phi0 = -0.13 % this has very minimal effect
 % for zeta0 = [1.70 1.7040 1.7080]
-zeta0 = 1.7040
+zeta0 = 1.699 % this is the phi to reach close to 1.704 rad heading angle (SSO)
     
 %     phi0 = -0.1271
 %     zeta0 = 1.7011
@@ -27,7 +27,7 @@ zeta0 = 1.7040
 
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
 for k = [30000:500:40000]
-    for j = [0:0.01:0.05]
+    for j = [0:0.01:0.1]
         
         
         

@@ -92,7 +92,7 @@ end
 % IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,6));
 % IspScattered = scatteredInterpolant(data(:,1),data(:,2),data(:,3));
 
- p=polyfitn([data(:,1),data(:,2)],data(:,3),4)
+ p=polyfitn([data(:,1),data(:,2)],data(:,3),3)
 
 M_englist = unique(sort(data(:,1))); % create unique list of Mach numbers from engine data
 M_eng_interp = floor(M_englist(1)):0.1:ceil(M_englist(end)); % enlarge spread, this is not necessary if you have a lot of engine data

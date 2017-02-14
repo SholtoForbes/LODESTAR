@@ -13,6 +13,7 @@ global a
 global Fueldt
 global const
 global scale
+global zetadot
 
 
 V = primal.states(1,:)*scale.V ; 
@@ -36,7 +37,7 @@ Vdot = v.*sin(theta);
 
 %======================================================
 
-XDOT = [Vdot/scale.V;vdot/scale.v; thetadot/scale.thetadot; mfueldot/scale.m; omegadot/scale.thetadot];
+XDOT = [Vdot/scale.V;vdot/scale.v; thetadot/scale.thetadot; mfueldot/scale.m; omegadot/scale.thetadot; zetadot];
 
 end
 

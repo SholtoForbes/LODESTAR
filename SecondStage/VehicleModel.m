@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi,eq] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta)
 
 % =======================================================
 % Vehicle Model
@@ -32,12 +32,12 @@ m = mfuel + mstruct;
 global xi
 xi = zeros(1,length(time));
 phi = zeros(1,length(time));
-zeta = zeros(1,length(time));
+% zeta = zeros(1,length(time));
 
 phi(1) = -0.2138;
 % zeta(1) = deg2rad(97);
 % zeta(1) = 1.696;
-zeta(1) = 1.699;
+% zeta(1) = 1.699;
 
 r = V + 6371000;
 i= 1;
@@ -48,7 +48,7 @@ i= 1;
 for i = 2:length(time)
 xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
 phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
-zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
+% zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
 
 [xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta(i), thetadot(i),const);
 

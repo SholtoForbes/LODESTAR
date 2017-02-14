@@ -17,9 +17,11 @@ mfuelf = primal.states(4,end);
 omega0 = primal.states(5,1);
 omegaf = primal.states(5,end);
 
+zetaf = primal.states(6,end);
+
 if const == 1 || const == 12 || const == 14 || const == 13
 % endpointFunction = zeros(3,1); % 
- endpointFunction = zeros(4,1); % 
+ endpointFunction = zeros(5,1); % 
 end
 
 % if const == 13
@@ -39,6 +41,7 @@ if const == 1 || const == 12 || const == 13 || const == 14
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
 endpointFunction(4) = V0;
+endpointFunction(5) = zetaf;
 end
 
 % if const == 13
