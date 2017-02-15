@@ -24,11 +24,10 @@ iterative_V_f = [];
 %%
 % Copy the current setting to archive
 % This saves the entire problem file every time the program is run. 
-% Disable this for conservatin of hard drive space
+
 Timestamp = datestr(now,30)
 copyfile('SecondStageProb.m',sprintf('../ArchivedResults/SecondStageProb_%s.m',Timestamp))
 copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',Timestamp))
-
 
 %%
 % =========================================================================
@@ -45,9 +44,9 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
-% Inputs ============================================
+%% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
 communicator = importdata('communicator.txt');
 communicator_trim = importdata('communicator_trim.txt');
@@ -71,13 +70,10 @@ scattered.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmomen
 global Atmosphere
 Atmosphere = dlmread('atmosphere.txt');
 
-%produce scattered interpolants for thrust and fuel usage
-% enginedata = dlmread('engineoutput_matrix');
 
-%Produce scattered interpolants for vehicle data
 
-%%
-%NEWMODEL
+%% Shock Data
+% Import conical shock data and create interpolation splines 
 shockdata = dlmread('ShockMat');
 [MList,AOAList] = ndgrid(unique(shockdata(:,1)),unique(shockdata(:,2)));
 M1_Grid = reshape(shockdata(:,3),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
@@ -86,17 +82,19 @@ temp_Grid = reshape(shockdata(:,5),[length(unique(shockdata(:,2))),length(unique
 scattered.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
 scattered.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
 scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
-%%
+%% Engine Data
+% Import engine data
 scattered.data = dlmread('RESTM12DATA.txt');  
 data = scattered.data;
 
 newdata = [];
 j=1;
 
-% this sets the interpolation region! VERY IMPORTANT
-% The interpolators have trouble with equivalence ratio because its 1 over
-% a certain M
-% this makes anything outside of the region where it is actually changing
+% this sets the equivalence ratio interpolation region! VERY IMPORTANT
+% The interpolators have trouble with equivalence ratio because its equal
+% to 1 over a certain Mach no. (causes error in interpolator.
+
+% This makes anything outside of the region where it is actually changing
 % extrapolate to over 1 (which is then set to 1 by RESTM12int)
 for i = 1: length(data(:,1))
     if data(i,1) < 5.4
@@ -219,7 +217,9 @@ end
 
 if const == 1  || const == 12 || const == 13 || const == 14
 % thetaU = 0.1; % 
-thetaU = 0.05; % 
+% thetaU = 0.05; % 
+% thetaU = 0.5; 
+thetaU = deg2rad(4); 
 else
 thetaU = 0.1;  
 end
@@ -318,12 +318,12 @@ end
 % These correspond to the values in SecondStageEvents.m
 
 if const == 1 || const == 12 || const == 14 || const == 13
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.699];
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.699];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
 end
 
 if const == 3 || const == 31
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m];
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
 end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -371,10 +371,10 @@ algorithm.nodes		= [90];
 % algorithm.nodes		= [100]; 
 elseif const == 12 
 % algorithm.nodes		= [80];
-algorithm.nodes		= [72];
+algorithm.nodes		= [90];
 elseif const == 13
 % algorithm.nodes		= [78];
-algorithm.nodes		= [73];
+algorithm.nodes		= [90];
 % algorithm.nodes		= [110];
 elseif const == 14
 algorithm.nodes		= [70];
@@ -805,10 +805,10 @@ plot(t,thetadot_F,t,thetadot);
 t_diff = t - [0 t(1:end-1)];
 if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
-    CADAC_Alpha = interp1(CADAC_DATA(:,2),CADAC_DATA(:,4),linspace(CADAC_DATA(1,2),CADAC_DATA(end,2),nodes));
+    CADAC_Alpha = interp1(CADAC_DATA(:,2),CADAC_DATA(:,4),M(1:);
     CADAC_V = interp1(CADAC_DATA(:,2),CADAC_DATA(:,11),linspace(CADAC_DATA(1,2),CADAC_DATA(end,2),nodes));
-    MeanError_V = sum((CADAC_V - V)./V.*t_diff)/t(end)
-    MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha.*t_diff)/t(end)
+    MeanError_V = sum(abs(CADAC_V - V)./V.*t_diff)/t(end)
+    MeanError_Alpha = sum(abs(CADAC_Alpha - Alpha)./Alpha.*t_diff)/t(end)
 end
 
 
@@ -847,7 +847,7 @@ figure(100)
 hold on
 contourf(gridM,gridT,interpeq);
 scatter(data(:,1),data(:,2),30,data(:,4),'filled');
-plot(M1,T1);
+plot(M1,T1,'r');
 
 error_Isp = scattered.IspGridded(data(:,1),data(:,2))-data(:,3);
 
@@ -855,7 +855,7 @@ figure(101)
 hold on
 contourf(gridM,gridT,interpIsp);
 scatter(data(:,1),data(:,2),30,data(:,3),'filled')
-plot(M1,T1);
+plot(M1,T1,'r');
 
 %%
 

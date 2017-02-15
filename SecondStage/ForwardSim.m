@@ -37,7 +37,6 @@ M = v./c; % Calculating Mach No (Descaled)
 % Calculate Thrust Component ==================================
 
 
-if const == 1 || const == 14
 
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
 P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 

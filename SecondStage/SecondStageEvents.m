@@ -30,7 +30,7 @@ end
 % end
 
 if const == 3
-endpointFunction = zeros(3,1);
+endpointFunction = zeros(4,1);
 end
 
 %===========================================================
@@ -51,6 +51,7 @@ end
 if const == 3
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
+endpointFunction(4) = zetaf;
 end
 
 end

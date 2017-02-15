@@ -17,7 +17,7 @@ global q
 MoonLander.cost 		= 'LanderCost';
 MoonLander.dynamics	    = 'LanderDynamics';
 MoonLander.events		= 'LanderEvents';	
-
+MoonLander.path		= 'LanderPath';
 global scattered
 
 addpath TrajOpt-master
@@ -141,7 +141,8 @@ alpha0 = 0;
 bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];	
 bounds.upper.events = bounds.lower.events;
 
-
+bounds.lower.path = [49999];	
+bounds.upper.path = [50001];
 
 %------------------------------------
 % Tell DIDO the bounds on the problem
