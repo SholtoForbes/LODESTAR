@@ -83,7 +83,7 @@ j=1;
 % this makes anything outside of the region where it is actually changing
 % extrapolate to over 1 (which is then set to 1 by RESTM12int)
 for i = 1: length(data(:,1))
-    if data(i,1) < 5.4
+    if data(i,1) < 5.
         newdata(j,:) = data(i,:);
         j=j+1;
     end

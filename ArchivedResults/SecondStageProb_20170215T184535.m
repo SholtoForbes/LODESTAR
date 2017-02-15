@@ -333,8 +333,8 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14
-bounds.lower.path = [0 ;1524];
-bounds.upper.path = [50000 ;1524];
+bounds.lower.path = [0 1524];
+bounds.upper.path = [50000 1524];
 elseif const == 12
     bounds.lower.path = 0;
 bounds.upper.path = 55000;

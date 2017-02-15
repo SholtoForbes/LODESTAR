@@ -1,5 +1,5 @@
 % visualising third stage cost results
-clear all
+% clear all
 ThirdStageData = sortrows(dlmread('thirdstageforvis.dat'));
 Atmosphere = dlmread('atmosphere.txt');
 % map = [0, 0, 0
@@ -85,7 +85,7 @@ meshPayload = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(
 % set([ax1 ax2 ax3 ax4],'clim',[200 320]);
 
 
- figure(2)
+ figure(200)
 
 colormap(gray)
 C = contourf(rad2deg(meshAngle(:,:,3)),meshAlt(:,:,3)/1000,meshPayload(:,:,3),13)

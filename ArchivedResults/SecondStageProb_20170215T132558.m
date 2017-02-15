@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 13
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -318,9 +318,8 @@ end
 % These correspond to the values in SecondStageEvents.m
 
 if const == 1 || const == 12 || const == 14 || const == 13
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.699];
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.699];
 % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
-bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; 1.699];
 end
 
 if const == 3 || const == 31
@@ -333,8 +332,8 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14
-bounds.lower.path = [0 ;1524];
-bounds.upper.path = [50000 ;1524];
+bounds.lower.path = 0;
+bounds.upper.path = 50000;
 elseif const == 12
     bounds.lower.path = 0;
 bounds.upper.path = 55000;
@@ -859,11 +858,7 @@ scatter(data(:,1),data(:,2),30,data(:,3),'filled')
 plot(M1,T1,'r');
 
 %%
-[gridM2,gridAoA2] =  ndgrid(plotM,plotT);
 
-
-
-%%
 
 % =========================================================================
 % Troubleshooting Procedure
