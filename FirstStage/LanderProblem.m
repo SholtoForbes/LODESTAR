@@ -9,7 +9,14 @@ clc
 global phi
 global q
 
-
+global iterative_V
+iterative_V = [];
+global iterative_t
+iterative_t = [];
+global iteration
+iteration = 1;
+global iterative_V_f
+iterative_V_f = [];
 
 %-----------------------------------
 % Define the problem function files:
@@ -17,7 +24,7 @@ global q
 MoonLander.cost 		= 'LanderCost';
 MoonLander.dynamics	    = 'LanderDynamics';
 MoonLander.events		= 'LanderEvents';	
-MoonLander.path		= 'LanderPath';
+% MoonLander.path		= 'LanderPath';
 global scattered
 
 addpath TrajOpt-master
@@ -26,24 +33,32 @@ Aero = dlmread('FirstStageAeroCoeffs.txt');
 scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
+M_list = unique(sort(Aero(:,1))); % create unique list of Mach numbers from engine data
+M_interp = unique(sort(Aero(:,1)));
+
+AoA_list = unique(sort(Aero(:,2))); % create unique list of angle of attack numbers from engine data 
+AoA_interp = unique(sort(Aero(:,2)));
+
+[grid.M,grid.AoA] =  ndgrid(M_interp,AoA_interp);
+grid.Lift = scattered.Lift(grid.M,grid.AoA);
+grid.Drag = scattered.Drag(grid.M,grid.AoA);
+scattered.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','linear');
+scattered.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
+
 global SPARTANscale
 % SPARTANscale = 0.75
 SPARTANscale = 1
 
-% mRocket = 27100; %(kg)  %Total lift-off mass
-% mRocket = 21000; %(kg)  %Total lift-off mass (this is almost exactly half the mass of a falon 1 first stage, and would give a length of 8.1m scaled to exactly half size (9m with margin of error))
-%  mRocket = 20000; %(kg) 
- % half size would be about 9.5 m if engine length of 3m is kept..
-% mRocket = 17000;
+
 mRocket = 16000; % sets the total wet mass of the rocket (first stage only)
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
-% mEngine = 470; % Mass of Merlin 1C
+mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
-mSpartan = 8755.1*SPARTANscale;
+mSpartan = 8755.1-302+139.4;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
@@ -58,7 +73,7 @@ gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
 % tspan = [0 20];
-tspan = [0 15]; %15s for 45kpa & 55kPa
+tspan = [0 25]; 
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
@@ -67,7 +82,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 phase = 'postpitch';
 Tratio = 1;
 tspan = [0 mFuel/156]; % flies for way too long
-postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(0) 0];
+postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(-1.4) 1.63];
 [t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,0,phase,scattered), tspan, postpitch0);
 
 y
@@ -83,7 +98,7 @@ h0 = y(end,1);
 v0 = y(end,2);  %
 m0 = y(end,3);  
 gamma0 = deg2rad(89.9);    % pitchover 
-% gamma0 = deg2rad(89.999);    % pitchover 
+% gamma0 = deg2rad(89);    % pitchover 
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
@@ -124,7 +139,7 @@ bounds.upper.time	= [0 tfMax];
 % of motion have a singularity at m = 0.
 
 
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(3)*AOAScale;0];
+bounds.lower.states = [hLow; vLow; mF-1;-0.01;-deg2rad(7)*AOAScale;0];
 bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
 
 bounds.lower.controls = uLow;
@@ -132,17 +147,17 @@ bounds.upper.controls = uUpp;
 
 zetaF = deg2rad(97);
 
-% bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; gammaF];	
-% bounds.lower.events = [h0; v0; m0; gamma0; hF; mF; zetaF];	
-% bounds.lower.events = [h0; v0; m0; gamma0; mF; gammaF];	
-
 alpha0 = 0;
 
-bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];	
+bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
+hf = 24500;
+% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
+% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
+% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
 bounds.upper.events = bounds.lower.events;
 
-bounds.lower.path = [49999];	
-bounds.upper.path = [50001];
+% bounds.lower.path = [49999];	
+% bounds.upper.path = [50001];
 
 %------------------------------------
 % Tell DIDO the bounds on the problem
@@ -154,33 +169,40 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [70];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [50];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
 %70 for 55kPa, 90 for others
 
 
-    
-
-
-
+   
 t0			= 0;
 tfGuess 	= 120;			
 % slightly educated guess of final time (for the scaled problem!)
 
-guess.states(1,:)	= [h0, 23000]; %24.5 for 45kpa, 23 for 55kpa
-guess.states(2,:)	= [v0, vF];
+guess.states(1,:)	= [h0, 25000]; %24.5 for 45kpa, 23 for 55kpa
+guess.states(2,:)	= [v0, 1500];
 guess.states(3,:)	= [m0, mF];
-guess.states(4,:)	= [gamma0,gammaF];
-guess.states(5,:)	= [-deg2rad(0.03)*AOAScale, -deg2rad(0.03)*AOAScale];
-guess.states(6,:)	= [1.35, zetaF];
+guess.states(4,:)	= [gamma0,0];
+guess.states(5,:)	= [0, deg2rad(-3)];
+guess.states(6,:)	= [1.63, zetaF];
 % guess.states(5,:)	= [0, 0];
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
 
 
+%% Start Iterative Plot
+figure(10)
+plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes),'k')
+iterative_V(end+1,:) = linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes);
+iterative_t(end+1,:) = linspace(guess.time(1),guess.time(2),algorithm.nodes);
 
+filename = 'testnew51.gif';
+frame = getframe(10);
+im = frame2im(frame);
+[imind,cm] = rgb2ind(im,256);
+imwrite(imind,cm,filename,'gif', 'Loopcount',0);
 %----------------------------
 % Tell DIDO you have a guess:
 

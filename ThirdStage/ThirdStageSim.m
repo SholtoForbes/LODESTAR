@@ -40,8 +40,8 @@ if rad2deg(AoA_max) < 5
     AoA_max = deg2rad(5);
 end
 
-AoA_init = x(2); 
-% % AoA_init = AoA_max; 
+% AoA_init = x(2); 
+AoA_init = AoA_max; 
 % if AoA_init > deg2rad(20)
 %     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
 % elseif AoA_init < deg2rad(0)
@@ -53,8 +53,9 @@ if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
-AoA_end = x(3); 
-% % AoA_end = x(2); 
+% AoA_end = x(3); 
+AoA_end = x(2); 
+% AoA_end = deg2rad(10);
 % if AoA_end > deg2rad(20)
 %     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
 % elseif AoA_end < deg2rad(0)
@@ -101,18 +102,13 @@ r_E = 6371000; % earth radius
 
 Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
 
-% maxturnratepos = deg2rad(8)/80; %rad/s these are from dawids glasgow paper, need to figure out where these come from
-% maxturnrateneg = -deg2rad(8)/110; %rad/s
-% maxturnrateneg = -0.003;
-
-%Reference area from Dawids Cadin
-% A = 0.87;
-A = 1.838*SCALE_Engine^2;
+%Reference area
+A = 0.866;
 
 g = 9.81; %standard gravity
 
-Isp = 451;
-
+% Isp = 437; % from Tom Furgusens Thesis
+Isp = 317;
 %define starting condtions
 t(1) = 0.;
 
@@ -129,20 +125,26 @@ Alt(1) = k;
 
 xi(1) = 0;
     
-% phi(1) = -0.1314;
+
 phi(1) = phi0;
 
 gamma(1) = j;
 
 v(1) = u;
 
-% zeta(1) = deg2rad(84);
 zeta(1) = zeta0;
 
-m(1) = 2400 + 167*SCALE_Engine^3 + 229; %vehicle mass, (to match Dawids glasgow paper)
+mHS = 139.4; % Heat Shield Mass
+% mHS = 302;
 
-mdot = 22.4*SCALE_Engine^2;
+% mEng = 100;
+mEng = 52;
 
+% m(1) = 2400 + 100 + mHS; %vehicle mass, (to match Dawids glasgow paper)
+m(1) = 2400 + mEng + mHS;
+m(1) = 3500;
+% mdot = 14.71;
+mdot = 9.8;
 burntime = mfuel_burn/mdot;
 
 
@@ -152,7 +154,7 @@ Fuel = true;
 j = 1;
 
 
-while gamma(i) >= 0 || t(i) < 60;
+while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 60;
 %     if i == 1
     mfuel_temp = mfuel(i) - mdot*dt;
 %     else
@@ -192,12 +194,12 @@ while gamma(i) >= 0 || t(i) < 60;
     q(i) = 1/2*rho(i)*v(i)^2;
     
     if Fuel == true
-        T = 99100*SCALE_Engine^2 - p(i)*1.72;
+        T = Isp*mdot*9.81 + (1400 - p(i))*1.134; % Thrust (N), exit pressure from http://yarchive.net/space/rocket/rl10.html
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - 229 - mdot*dt; %release of heat shield, from dawids glasgow paper
+            m(i+1) = m(i) - mHS - mdot*dt; %release of heat shield, from dawids glasgow paper
             exocond = true;
         else 
             m(i+1) = m(i) - mdot*dt;
@@ -209,7 +211,7 @@ while gamma(i) >= 0 || t(i) < 60;
         mfuel(i+1) = mfuel(i);
         
         if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - 229; %release of heat shield, from dawids glasgow paper
+            m(i+1) = m(i) - mHS; %release of heat shield, from dawids glasgow paper
             exocond = true;
         else 
             m(i+1) = m(i);
@@ -226,6 +228,12 @@ while gamma(i) >= 0 || t(i) < 60;
     CD(i) = Drag_interp(M(i),rad2deg(Alpha(i)));
     
     CL(i) = Lift_interp(M(i),rad2deg(Alpha(i)));
+
+%     CA(i) = 0.346 + 0.183 - 0.058*M(i)^2 + 0.00382*M(i)^3;
+%     
+%     CN(i) = (5.006 - 0.519*M(i) + 0.031*M(i)^2)*rad2deg(Alpha(i));
+    
+    
 
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
     
@@ -275,15 +283,18 @@ AltF_actual = Alt(end);
 
 
 vF = v(end);
-
+mult = 1;
 if AltF > 566.89*1000
+    mult = gaussmf(AltF,[50000 566.89*1000]);
     AltF = 566.89*1000;
 end
-
+if gamma(end) > 0
+    mult = 0;
+end
 
 if exocond == false
 %     fprintf('Did not reach exoatmospheric conditions')
-    m(end) = m(end) - 229;
+    m(end) = m(end) - mHS;
 end
 
 %Hohmann Transfer, from Dawid (3i)
@@ -306,7 +317,7 @@ v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3
 dvtot = v12 + v23 + v34;
 
 %as this is happening in a vacuum we can compute while delta v at once for
-%fuel usage, tsiolkovsky rocket equation. this should have gravity maybe
+%fuel usage, tsiolkovsky rocket equation. 
 
 
 g = 9.81;
@@ -317,15 +328,18 @@ m3 = m2/(exp(v23/(Isp*g)));
 
 m4 = m3/(exp(v34/(Isp*g)));
 
-mpayload = m4 - 247.4 -167*SCALE_Engine^3; % subtract structural mass, from Dawids glasgow paper
+mpayload = m4 - 247.4 -mEng; % subtract structural mass
 
-if exocond == false
-    mpayload = 0;
-end
+% if exocond == false
+%     mpayload = 0;
+% end
 % Alt(end)
 % AltF
-if AltF < 160000
-    mpayload = gaussmf(AltF,[10000 160000]);
-end
 
+if AltF < 160000
+    mult = gaussmf(AltF,[10000 160000]);
+end
+x(1)
+AltF
+mpayload = mult*mpayload
 

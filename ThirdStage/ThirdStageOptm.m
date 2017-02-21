@@ -8,29 +8,33 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 
 AoA_max
 
-x0 = [1500  AoA_max-0.01 AoA_max-0.01];
+% x0 = [1600  AoA_max AoA_max];
+x0 = [1600  AoA_max];
+% x0 = [1650 (AoA_max-0.01)*10000];
+% x0 = [1650];
 options.Display = 'iter';
+% options.Algorithm = 'sqp';
 options.TypicalX = x0;
 % options.Algorithm = 'active-set';
 
 options.TolFun = 1;
-options.TolX = 100;
+options.TolX = 1;
 
 % k = 35500;
 % j = 0.05;
 % u = 2840;
 x = fminsearch(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
 % x = fminunc(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
-% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1300 0.1 0.1],[1900 AoA_max AoA_max],[],options);
-
+% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1100 0],[1800 AoA_max*10000],[],options);
+% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1100],[1800],[],options);
 mfuel_burn = x(1)
-AoA_control1 = x(2)
-AoA_control2 = x(3)
+AoA_control1 = x(2)/10000
+% AoA_control2 = x(3)
 
 
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0);
-
-
+mpayload
+zeta(end)
 figure(9)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])

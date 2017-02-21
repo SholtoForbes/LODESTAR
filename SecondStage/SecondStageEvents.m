@@ -21,7 +21,7 @@ zetaf = primal.states(6,end);
 
 if const == 1 || const == 12 || const == 14 || const == 13
 % endpointFunction = zeros(3,1); % 
- endpointFunction = zeros(3,1); % 
+%  endpointFunction = zeros(3,1); % 
 end
 
 % if const == 13
@@ -52,6 +52,7 @@ if const == 3
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
 endpointFunction(4) = zetaf;
+ endpointFunction(5) = V0;
 end
 
 end

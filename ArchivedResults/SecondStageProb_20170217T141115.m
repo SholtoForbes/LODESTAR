@@ -243,7 +243,7 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1  || const == 12 || const == 14 || const == 13
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.0005/scale.thetadot; 1];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot; 1];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot; 2];
 
 end
@@ -318,12 +318,16 @@ end
 % These correspond to the values in SecondStageEvents.m
 
 if const == 1 || const == 12 || const == 14 || const == 13
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.699];
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; 1.69];
+%  bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
 end
 
 if const == 3 || const == 31
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.699];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69;interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)];
+
 end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -332,7 +336,9 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14
-bounds.lower.path = 0;
+% bounds.lower.path = [0 ;1524];
+% bounds.upper.path = [50000 ;1524];
+    bounds.lower.path = 0;
 bounds.upper.path = 50000;
 elseif const == 12
     bounds.lower.path = 0;
@@ -350,9 +356,9 @@ end
 TwoStage2d.cost 		= 'SecondStageCost';
 TwoStage2d.dynamics	    = 'SecondStageDynamics';
 TwoStage2d.events		= 'SecondStageEvents';	
-if const  == 1 || const  == 12 || const  == 13 || const  == 14 
+% if const  == 1 || const  == 12 || const  == 13 || const  == 14 
 TwoStage2d.path		= 'SecondStagePath';
-end
+% end
 TwoStage2d.bounds       = bounds;
 
 
@@ -395,6 +401,7 @@ constq = dlmread('primalconstq.txt');
 % expected.
 if const == 1
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+1000 ,33000 ];
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33000];
 elseif const == 13
@@ -413,7 +420,7 @@ guess.states(2,:) = [v0, 2700]/scale.v;
 if const ==3 || const == 31 
 guess.states(3,:) = [0,0]/scale.theta;
 else 
-guess.states(3,:) = [deg2rad(1.3),0.05]/scale.theta;  
+guess.states(3,:) = [0,0.05]/scale.theta;  
 end 
 
 % Mass guess. Simply the exact values at beginning and end (also constraints).

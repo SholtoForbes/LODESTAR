@@ -36,8 +36,10 @@ dm = -T./Isp./g*SCALE;
 
 
 mach = v./speedOfSound;
-Cd = scattered.Drag(mach,rad2deg(alpha));
-Cl = scattered.Lift(mach,rad2deg(alpha));
+% Cd = scattered.Drag(mach,rad2deg(alpha));
+% Cl = scattered.Lift(mach,rad2deg(alpha));
+Cd = scattered.DragGridded(mach,rad2deg(alpha));
+Cl = scattered.LiftGridded(mach,rad2deg(alpha));
 
 %%%% Compute the drag:
 global SPARTANscale

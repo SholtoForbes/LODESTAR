@@ -3,19 +3,19 @@ mat = [];
 
 
 
-% u = [2500:100:2800 2800:20:2900 3000];
+
 u = [2700:25:2900 3000];
-% u = [2880:20:2940];
+% u = 2750
 
 
 % options.Display = 'iter';
 options.Display = 'final';
 options.TolFun = 1;
-options.TolX = 10;
+options.TolX = 1;
 % for phi0 = [-0.1271-0.005 -0.1271 -0.1271+0.005]
     phi0 = -0.13 % this has very minimal effect
 % for zeta0 = [1.70 1.7040 1.7080]
-zeta0 = 1.699 % this is the phi to reach close to 1.704 rad heading angle (SSO)
+zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
     
 %     phi0 = -0.1271
 %     zeta0 = 1.7011
@@ -26,8 +26,8 @@ zeta0 = 1.699 % this is the phi to reach close to 1.704 rad heading angle (SSO)
 % zeta0 = deg2rad(96.9);
 
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
-for k = [30000:500:40000]
-    for j = [0:0.01:0.1]
+for k = [32000:1000:40000]
+    for j = [0:0.02:0.1]
         
         
         
@@ -47,15 +47,16 @@ for k = [30000:500:40000]
         parfor i = 1:length(u)
         [AltF_temp, vF_temp, Alt_temp, v_temp, t_temp, mpayload_temp, Alpha_temp, m_temp,AoA_temp,q_temp,gamma_temp,D_temp,AoA_max] = ThirdStageSim([0 0 0],k,j,u(i), phi0, zeta0);
         
-        guess = [1500 AoA_max-0.01 AoA_max-0.01];
-        
+%         guess = [1700 AoA_max-0.01 AoA_max/2+AoA_max/2*(0.1-j)/0.1-0.01];
+%         guess = [1600 AoA_max(i)-0.01];
+guess = [800  rad2deg(10) rad2deg(10)];
 %         x0 = guess(:,i); 
         x0 = guess; 
         x = fminsearch(@(x)Payload(x,k,j,u(i),phi0,zeta0),x0,options);
 
         mfuel_burn = x(1);
 
-        [AltF(i), vF(i), Alt, v, t, mpayload(i), Alpha, m,AoA(i)] = ThirdStageSim(x,k,j,u(i),phi0,zeta0);
+        [AltF(i), vF(i), Alt, v, t, mpayload(i), Alpha, m,AoA] = ThirdStageSim(x,k,j,u(i),phi0,zeta0);
         
         temp(:,i) = x;
         

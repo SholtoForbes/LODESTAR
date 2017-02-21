@@ -14,7 +14,7 @@ g = 9.81;
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-mstruct = (8755.1-302.8+229 - 994)*SPARTAN_SCALE; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
+mstruct = (8755.1-302.8+139.4 - 994)*SPARTAN_SCALE; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
 
 m = mfuel + mstruct;
 

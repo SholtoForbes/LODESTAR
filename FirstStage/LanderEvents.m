@@ -14,7 +14,7 @@ gamma0 = primal.states(4,1);		gammaf = primal.states(4,end);
 alpha0 = primal.states(5,1);
 zeta0 = primal.states(6,1);		zetaf = primal.states(6,end);
 
-eventConditions = zeros(7, 1); % alternatively, write "eventConditions(5) = vf" first.
+% eventConditions = zeros(7, 1); % alternatively, write "eventConditions(5) = vf" first.
 
 %===========================================================
 eventConditions(1) = h0;
@@ -23,8 +23,10 @@ eventConditions(3) = m0;
 eventConditions(4) = gamma0;
 eventConditions(5) = alpha0;
 %-----------------------------------------------------------
-% eventConditions(5) = hf;
+
 eventConditions(6) = mf;
 eventConditions(7) = zetaf;
+% eventConditions(8) = hf;
+% eventConditions(8) = gammaf;
 %===========================================================
 % all done!
