@@ -4,8 +4,8 @@ mat = [];
 
 
 
-u = [2700:25:2900 3000];
-% u = 2750
+% u = [2700:25:2900 3000];
+u = 2900
 
 
 % options.Display = 'iter';
@@ -49,7 +49,7 @@ for k = [32000:1000:40000]
         
 %         guess = [1700 AoA_max-0.01 AoA_max/2+AoA_max/2*(0.1-j)/0.1-0.01];
 %         guess = [1600 AoA_max(i)-0.01];
-guess = [800  rad2deg(10) rad2deg(10)];
+guess = [2200  deg2rad(10) deg2rad(10)];
 %         x0 = guess(:,i); 
         x0 = guess; 
         x = fminsearch(@(x)Payload(x,k,j,u(i),phi0,zeta0),x0,options);

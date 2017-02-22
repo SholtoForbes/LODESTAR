@@ -9,7 +9,8 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 AoA_max
 
 % x0 = [1600  AoA_max AoA_max];
-x0 = [1600  AoA_max];
+x0 = [2200  deg2rad(10) deg2rad(10)]
+% x0 = [1600  AoA_max];
 % x0 = [1650 (AoA_max-0.01)*10000];
 % x0 = [1650];
 options.Display = 'iter';

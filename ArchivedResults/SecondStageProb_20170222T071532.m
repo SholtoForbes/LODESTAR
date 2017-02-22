@@ -225,8 +225,8 @@ thetaU = 0.1;
 end
 
 mfuelL = 0;
-% mfuelU = 994*SPARTAN_SCALE; % 
- mfuelU = 1562*SPARTAN_SCALE; % 
+mfuelU = 994*SPARTAN_SCALE; % 
+
 % Define bounds of primals and controls ---------------------------------
 
 %these must include every logical solution. For fuel mass I have found that
@@ -358,9 +358,9 @@ end
 TwoStage2d.cost 		= 'SecondStageCost';
 TwoStage2d.dynamics	    = 'SecondStageDynamics';
 TwoStage2d.events		= 'SecondStageEvents';	
-if const  == 1 || const  == 12 || const  == 13 || const  == 14 
+% if const  == 1 || const  == 12 || const  == 13 || const  == 14 
 TwoStage2d.path		= 'SecondStagePath';
-end
+% end
 TwoStage2d.bounds       = bounds;
 
 
@@ -830,7 +830,7 @@ if PayloadGrid(V(end)+10,theta(end),v(end)) - PayloadGrid(V(end),theta(end),v(en
     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
 
-forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03];
+forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),8755.1];
 
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);

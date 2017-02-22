@@ -17,7 +17,7 @@ q = 0.5*density.*v.^2;
 
 % eventCost   = (q(end)-50000)^2;
 
-eventCost   = (V(end)-25000)^2 + (10000*(gamma(end)-0.0))^2 - v(end);
+eventCost   = (V(end)-26000)^2 + (10000*(gamma(end)-0.0))^2 - v(end);
 % eventCost   = (10000*(gamma(end)-0))^2 - v(end);
 runningCost =0;
 % runningCost =abs(alpha);

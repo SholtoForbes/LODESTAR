@@ -50,7 +50,7 @@ global SPARTANscale
 SPARTANscale = 1
 
 
-mRocket = 16000; % sets the total wet mass of the rocket (first stage only)
+mRocket = 18000; % sets the total wet mass of the rocket (first stage only)
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
@@ -58,7 +58,8 @@ mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
-mSpartan = 8755.1-302+139.4;
+% mSpartan = 8755.1-302+139.4;
+mSpartan = 9.7725e+03;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)

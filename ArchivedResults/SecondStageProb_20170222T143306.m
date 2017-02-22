@@ -830,7 +830,7 @@ if PayloadGrid(V(end)+10,theta(end),v(end)) - PayloadGrid(V(end),theta(end),v(en
     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
 
-forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03];
+forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.6725e+03];
 
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);

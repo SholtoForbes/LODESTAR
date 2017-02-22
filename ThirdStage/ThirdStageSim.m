@@ -40,8 +40,8 @@ if rad2deg(AoA_max) < 5
     AoA_max = deg2rad(5);
 end
 
-% AoA_init = x(2); 
-AoA_init = AoA_max; 
+AoA_init = x(2); 
+% AoA_init = AoA_max; 
 % if AoA_init > deg2rad(20)
 %     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
 % elseif AoA_init < deg2rad(0)
@@ -53,8 +53,8 @@ if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
-% AoA_end = x(3); 
-AoA_end = x(2); 
+AoA_end = x(3); 
+% AoA_end = x(2); 
 % AoA_end = deg2rad(10);
 % if AoA_end > deg2rad(20)
 %     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
@@ -134,15 +134,16 @@ v(1) = u;
 
 zeta(1) = zeta0;
 
-mHS = 139.4; % Heat Shield Mass
+mHS = 125; % Heat Shield Mass
 % mHS = 302;
 
 % mEng = 100;
 mEng = 52;
 
 % m(1) = 2400 + 100 + mHS; %vehicle mass, (to match Dawids glasgow paper)
-m(1) = 2400 + mEng + mHS;
-m(1) = 3500;
+% m(1) = 2400 + mEng + mHS;
+% m(1) = 2900;
+m(1) = 3300;
 % mdot = 14.71;
 mdot = 9.8;
 burntime = mfuel_burn/mdot;
@@ -154,7 +155,7 @@ Fuel = true;
 j = 1;
 
 
-while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 60;
+while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 %     if i == 1
     mfuel_temp = mfuel(i) - mdot*dt;
 %     else
@@ -291,6 +292,9 @@ end
 if gamma(end) > 0
     mult = 0;
 end
+if max(q) > q(1)+5000
+    mult = gaussmf(max(q),[1000 q(1)+5000]);
+end
 
 if exocond == false
 %     fprintf('Did not reach exoatmospheric conditions')
@@ -328,8 +332,8 @@ m3 = m2/(exp(v23/(Isp*g)));
 
 m4 = m3/(exp(v34/(Isp*g)));
 
-mpayload = m4 - 247.4 -mEng; % subtract structural mass
-
+% mpayload = m4 - 247.4 -mEng; % subtract structural mass
+mpayload = m4 - 189 -mEng; % subtract structural mass
 % if exocond == false
 %     mpayload = 0;
 % end
@@ -339,7 +343,9 @@ mpayload = m4 - 247.4 -mEng; % subtract structural mass
 if AltF < 160000
     mult = gaussmf(AltF,[10000 160000]);
 end
-x(1)
-AltF
-mpayload = mult*mpayload
+% x(1)
+% AltF
+% q
+% mult
+mpayload = mult*mpayload;
 
