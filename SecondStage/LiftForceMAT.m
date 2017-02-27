@@ -144,17 +144,18 @@ A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
 j = 1;
-% for v = 1500:10:3000 % Velocity (m/s)
-for v = 1500:25:3000 % Velocity (m/s)
+for v = 1500:10:3000 % Velocity (m/s)
+% for v = 1500:25:3000 % Velocity (m/s)
+% for v = 1950
 todisp = [num2str(j/length(1500:25:3000)*100),' % complete '];
 disp(todisp)
 j = j+1;
-%     for alt = 22000:100:40000 % Altitude (m)
-for alt = 20000:250:50000 % Altitude (m)
-
-%         for Lift = 0:2500:200000 % Lift force (N)   max mass of vehicle is 8755.1
-Lift = 25000:2500:150000; % Lift force (N)   max mass of vehicle is 8755.1
-
+    for alt = 22000:100:40000 % Altitude (m)
+% for alt = 20000:250:50000 % Altitude (m)
+% for alt = 27000
+ Lift = 0:1000:200000; % Lift force (N)   max mass of vehicle is 8755.1
+% Lift = 25000:2500:150000; % Lift force (N)   max mass of vehicle is 8755.1
+% Lift = 70000
 Alphatemp = [];
 flapdeflection=[];
 Drag=[];
@@ -178,7 +179,9 @@ parfor i=1:length(Lift)
             T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), alt); 
             P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), alt); 
 
-           
+%             alphaguess = 5;
+%             error(i) = 2;
+%            while error(i) > 1 && alphaguess < 7
             Alphatemp(i) = fminsearch(@(Alpha)LiftError(M, Alpha, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift(i),T0,P0),5);
 
             %Fuel Cost ===========================================================================
@@ -198,6 +201,8 @@ parfor i=1:length(Lift)
             total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(Alphatemp(i))); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
             error(i) = abs(total_lift - Lift(i));
+%             alphaguess = alphaguess + 0.2;
+%            end
             
 
             flapdeflection(i) = flapdeflection_spline(M,Alphatemp(i),-body_pitchingmoment(i));

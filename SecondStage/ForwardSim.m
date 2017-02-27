@@ -1,4 +1,4 @@
-function dz = ForwardSim(y,alpha,communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,liftact,dragact,thrustact)
+function dz = ForwardSim(y,alpha,communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,liftact,dragact,thrustact,flapdeflection)
 
 V = y(1);
 phi = y(2);
@@ -10,8 +10,10 @@ xi = 0; % longitude doesnt matter
 r = V + 6371000;
 
 flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+% flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+% flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
+flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6));
 
 
 [MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
@@ -51,15 +53,15 @@ Cl1 = Cl_spline(M,alpha);
 
 body_pitchingmoment = pitchingmoment_spline(M, alpha);% first approximation of pitchingmoment using only body lift
 
-Flap_lift = q./50000*flaplift_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
-
+% Flap_lift = q./50000*flaplift_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
+Flap_lift =q./50000*flaplift_spline(M,alpha,flapdeflection);
 % total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(alpha)) %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
 lift = Cl1*A*q + Flap_lift ;
 
-Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);
-
-flapdeflection = flapdeflection_spline(M,alpha,-body_pitchingmoment);
+% Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);
+Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,flapdeflection);
+% flapdeflection = flapdeflection_spline(M,alpha,-body_pitchingmoment);
 
 [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsForward(r,xi,phi,gamma,v,zeta,lift,Drag,Thrust,m,alpha);
 

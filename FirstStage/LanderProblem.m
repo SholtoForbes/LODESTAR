@@ -50,7 +50,7 @@ global SPARTANscale
 SPARTANscale = 1
 
 
-mRocket = 18000; % sets the total wet mass of the rocket (first stage only)
+mRocket = 18500; % sets the total wet mass of the rocket (first stage only)
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
@@ -59,7 +59,7 @@ mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
 % mSpartan = 8755.1-302+139.4;
-mSpartan = 9.7725e+03;
+mSpartan = 9.9725e+03;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
@@ -73,8 +73,8 @@ m0_prepitch = mTotal;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
-% tspan = [0 20];
-tspan = [0 25]; 
+tspan = [0 25];
+% tspan = [0 40]; 
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
@@ -122,8 +122,8 @@ gammaUpp = deg2rad(89.9);
 
 
 
-uLow = [-.005]*AOAScale; % Can do either AoA or thrust
-uUpp = [.005]*AOAScale; 
+uLow = [-.01]*AOAScale; % Can do either AoA or thrust
+uUpp = [.01]*AOAScale; 
 
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
@@ -140,7 +140,7 @@ bounds.upper.time	= [0 tfMax];
 % of motion have a singularity at m = 0.
 
 
-bounds.lower.states = [hLow; vLow; mF-1;-0.01;-deg2rad(7)*AOAScale;0];
+bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0];
 bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
 
 bounds.lower.controls = uLow;
@@ -150,11 +150,14 @@ zetaF = deg2rad(97);
 
 alpha0 = 0;
 
-bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
-hf = 24500;
+% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
+hf = 25000;
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
+
+bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
+%  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0];
 bounds.upper.events = bounds.lower.events;
 
 % bounds.lower.path = [49999];	
@@ -170,7 +173,7 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [50];  % somewhat arbitrary number; theoretically, the 
+algorithm.nodes = [60];  % somewhat arbitrary number; theoretically, the 
                          % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
@@ -179,14 +182,14 @@ algorithm.nodes = [50];  % somewhat arbitrary number; theoretically, the
 
    
 t0			= 0;
-tfGuess 	= 120;			
+tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
 
-guess.states(1,:)	= [h0, 25000]; %24.5 for 45kpa, 23 for 55kpa
+guess.states(1,:)	= [h0, 25500]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1500];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,0];
-guess.states(5,:)	= [0, deg2rad(-3)];
+guess.states(5,:)	= [0, deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaF];
 % guess.states(5,:)	= [0, 0];
 guess.controls		= [0.0, 0.0];

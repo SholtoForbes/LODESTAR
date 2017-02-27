@@ -29,9 +29,9 @@ end
 % % endpointFunction = zeros(3,1); 
 % end
 
-if const == 3
-endpointFunction = zeros(4,1);
-end
+% if const == 3
+% endpointFunction = zeros(4,1);
+% end
 
 %===========================================================
 
@@ -49,10 +49,10 @@ end
 % end
 
 if const == 3
-endpointFunction(2) = mfuel0;
-endpointFunction(3) = mfuelf;
-endpointFunction(4) = zetaf;
- endpointFunction(5) = V0;
+endpointFunction(1) = mfuel0;
+endpointFunction(2) = mfuelf;
+endpointFunction(3) = zetaf;
+%  endpointFunction(5) = V0;
 end
 
 end

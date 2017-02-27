@@ -53,7 +53,26 @@ if AoA_init > AoA_max
     AoA_init = AoA_max;
 end
 
-AoA_end = x(3); 
+
+AoA_mid1 = x(3);
+if AoA_mid1 > AoA_max
+    AoA_mid1 = AoA_max;
+end
+
+AoA_mid2 = x(4);
+if AoA_mid2 > AoA_max
+    AoA_mid2 = AoA_max;
+end
+
+% AoA_mid3 = x(5);
+% if AoA_mid3 > AoA_max
+%     AoA_mid3 = AoA_max;
+% end
+
+
+
+% AoA_end = x(3); 
+AoA_end = x(5); 
 % AoA_end = x(2); 
 % AoA_end = deg2rad(10);
 % if AoA_end > deg2rad(20)
@@ -143,7 +162,7 @@ mEng = 52;
 % m(1) = 2400 + 100 + mHS; %vehicle mass, (to match Dawids glasgow paper)
 % m(1) = 2400 + mEng + mHS;
 % m(1) = 2900;
-m(1) = 3300;
+m(1) = 3500;
 % mdot = 14.71;
 mdot = 9.8;
 burntime = mfuel_burn/mdot;
@@ -175,7 +194,8 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
         
     if t(i) < burntime
 
-        Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(burntime) * t(i)  + tan(AoA_list(1)));
+%         Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(burntime) * t(i)  + tan(AoA_list(1)));
+    Alpha(i) = spline([0 burntime/3 2*burntime/3 burntime],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
     elseif t(i) >= burntime
         Alpha(i) = 0;
     end
@@ -195,7 +215,7 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
     q(i) = 1/2*rho(i)*v(i)^2;
     
     if Fuel == true
-        T = Isp*mdot*9.81 + (1400 - p(i))*1.134; % Thrust (N), exit pressure from http://yarchive.net/space/rocket/rl10.html
+        T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from http://yarchive.net/space/rocket/rl10.html
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
@@ -242,9 +262,9 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
    
     [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
     
-    if i == 1 && gammadot < 0 && x(1) ~= 0
-        fprintf('BAD CONDITIONS!');
-    end
+%     if i == 1 && gammadot < 0 && x(1) ~= 0
+%         fprintf('BAD CONDITIONS!');
+%     end
    
 %     if i == 1
     r(i+1) = r(i) + rdot*dt;
@@ -284,17 +304,33 @@ AltF_actual = Alt(end);
 
 
 vF = v(end);
-mult = 1;
+mult1 = 1;
 if AltF > 566.89*1000
-    mult = gaussmf(AltF,[50000 566.89*1000]);
+    mult1 = gaussmf(AltF,[50000 566.89*1000]);
     AltF = 566.89*1000;
 end
+mult2=1;
 if gamma(end) > 0
-    mult = 0;
+    mult2 = 0;
 end
-if max(q) > q(1)+5000
-    mult = gaussmf(max(q),[1000 q(1)+5000]);
+
+mult3=1;
+
+% if max(q) > 60000
+%     mult3 = gaussmf(max(q),[1000 60000]);
+% end
+
+% if max(q) > 50000
+%     mult3 = gaussmf(max(q),[1000 50000])
+% end
+
+ if min(gamma) < 0
+    mult3 = gaussmf(min(gamma),[.001 0]);
 end
+
+%  if min(Alt) < Alt(1)
+%     mult3 = gaussmf(min(Alt),[100 Alt(1)]);
+% end
 
 if exocond == false
 %     fprintf('Did not reach exoatmospheric conditions')
@@ -333,19 +369,20 @@ m3 = m2/(exp(v23/(Isp*g)));
 m4 = m3/(exp(v34/(Isp*g)));
 
 % mpayload = m4 - 247.4 -mEng; % subtract structural mass
-mpayload = m4 - 189 -mEng; % subtract structural mass
+% mpayload = m4 - 189 -mEng; % subtract structural mass
+mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
 % if exocond == false
 %     mpayload = 0;
 % end
 % Alt(end)
 % AltF
-
+mult4=1;
 if AltF < 160000
-    mult = gaussmf(AltF,[10000 160000]);
+    mult4 = gaussmf(AltF,[10000 160000]);
 end
 % x(1)
 % AltF
 % q
 % mult
-mpayload = mult*mpayload;
+mpayload = mult1*mult2*mult3*mult4*mpayload;
 
