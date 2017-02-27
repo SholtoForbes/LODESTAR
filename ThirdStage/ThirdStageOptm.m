@@ -49,15 +49,15 @@ figure(9)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])
 hold on
-plot(t, Alt/10000, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
+plot(t, Alt/100000, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
 plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
-plot(t, m/100, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
+plot(t, m/1000, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
 plot(t,v/1000, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
-plot(t(1:end-1),q/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-plot(t(1:end-1),rad2deg(Alpha), 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
+plot(t(1:end-1),q/10000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
 
-legend(  'Altitude (km x 10)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (kPa)','Angle of Attack (deg)');
-ylim([0 60])
+legend(  'Altitude (km x 100)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^3)', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
+ylim([0 8])
 xlim([0 t(end)])
 
 dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')

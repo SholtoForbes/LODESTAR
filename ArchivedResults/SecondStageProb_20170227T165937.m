@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 14
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -418,7 +418,7 @@ if const == 1
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500 ];
 
 elseif const == 12
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33500];
 elseif const == 13
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,35000];%45kPa limited
 elseif const == 14

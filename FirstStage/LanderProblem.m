@@ -173,8 +173,8 @@ MoonLander.bounds = bounds;
 % Select the number of nodes for the spectral algorithm
 %------------------------------------------------------
 
-algorithm.nodes = [60];  % somewhat arbitrary number; theoretically, the 
-                         % larger the number of nodes, the more accurate 
+% algorithm.nodes = [60];  % somewhat arbitrary number; theoretically, the 
+  algorithm.nodes = [90];                        % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
 %70 for 55kPa, 90 for others

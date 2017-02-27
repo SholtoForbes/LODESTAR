@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 13
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -186,7 +186,7 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
-FirstStagev = scatteredI
+scattered.FirstStagev = scatteredInterpolant(FirstStageData(:,2),FirstStageData(:,3),FirstStageData(:,4));
 
 
 %=============================================== 
@@ -326,18 +326,18 @@ end
 % This defines set values along the trajectory.
 % These correspond to the values in SecondStageEvents.m
 
-if const == 1 || const == 12 || const == 14 || const == 13
+% if const == 1 || const == 12 || const == 14 || const == 13
 % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
 % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
 bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; 1.69];
 %  bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
-end
+% end
 
-if const == 3 || const == 31
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69;interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)];
-
-end
+% if const == 3 || const == 31
+% % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69;interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)];
+% 
+% end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -352,11 +352,14 @@ bounds.upper.path = [50000 ;0];
 %     bounds.lower.path = 0;
 % bounds.upper.path = 50000;
 elseif const == 12
-    bounds.lower.path = 0;
-bounds.upper.path = 55000;
+    bounds.lower.path = [0;0];
+bounds.upper.path = [55000;0];
 elseif const == 13
-    bounds.lower.path = 0;
-bounds.upper.path = 45000;
+    bounds.lower.path = [0;0];
+bounds.upper.path = [45000;0];
+elseif const ==3
+        bounds.lower.path = 0;
+bounds.upper.path = 0;
 end
 
 %% 
@@ -367,9 +370,9 @@ end
 TwoStage2d.cost 		= 'SecondStageCost';
 TwoStage2d.dynamics	    = 'SecondStageDynamics';
 TwoStage2d.events		= 'SecondStageEvents';	
-if const  == 1 || const  == 12 || const  == 13 || const  == 14 
+% if const  == 1 || const  == 12 || const  == 13 || const  == 14 
 TwoStage2d.path		= 'SecondStagePath';
-end
+% end
 TwoStage2d.bounds       = bounds;
 
 
@@ -417,7 +420,7 @@ guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,33000];
 elseif const == 13
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,34000];%45kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,35000];%45kPa limited
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; %High Drag
 else
