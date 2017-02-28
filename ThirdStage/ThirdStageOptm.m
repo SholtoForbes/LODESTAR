@@ -14,10 +14,10 @@ AoA_max
 % x0 = [2700  deg2rad(8) deg2rad(10) deg2rad(10) deg2rad(10)]
 
 % x0 = [2750  deg2rad(14) deg2rad(10) deg2rad(14) deg2rad(12)]
-% x0 = [2750  deg2rad(6) AoA_max-0.01 AoA_max-0.01 deg2rad(10)]
+x0 = [2750  deg2rad(6) AoA_max-0.01 AoA_max-0.01 deg2rad(8)]
 
 
-x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(10)-deg2rad(12))*j/0.05)]
+% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(10)-deg2rad(8))*j/0.05)]
 
 % x0 = [1600  AoA_max];
 % x0 = [1650 (AoA_max-0.01)*10000];
