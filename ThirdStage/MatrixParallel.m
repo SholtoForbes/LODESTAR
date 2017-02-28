@@ -26,7 +26,7 @@ zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
 % zeta0 = deg2rad(96.9);
 
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
-for k = [32500:1000:39500]
+for k = [32000:1000:39000]
     for j = [0:0.01:0.05]
         
         
