@@ -4,39 +4,46 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 % x0 = [1200*mScale deg2rad(15) deg2rad(15)] % 
 % x0 = [1500  deg2rad(13) deg2rad(13)];
 
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0],k,j,u, phi0, zeta0);
-
+[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0 10],k,j,u, phi0, zeta0);
+% [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0 0 10],k,j,u, phi0, zeta0);
 AoA_max
 
-% x0 = [1600  AoA_max AoA_max];
+% x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 100];
+% x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 200];
+x0 = [2550/10000  AoA_max AoA_max AoA_max AoA_max 250/1000];
+
 % x0 = [2700  deg2rad(7.5) deg2rad(10)]
 % x0 = [2750  deg2rad(6) AoA_max AoA_max deg2rad(11) deg2rad(10)]
 % x0 = [2700  deg2rad(8) deg2rad(10) deg2rad(10) deg2rad(10)]
 
 % x0 = [2750  deg2rad(14) deg2rad(10) deg2rad(14) deg2rad(12)]
-x0 = [2750  deg2rad(6) AoA_max-0.01 AoA_max-0.01 deg2rad(8)]
+% x0 = [2750  deg2rad(6) AoA_max-0.01 AoA_max-0.01 deg2rad(8)]
 
 
-% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(10)-deg2rad(8))*j/0.05)]
+% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(8)-deg2rad(12))*j/0.05)]
+% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(8)-deg2rad(12))*j/0.05) 200]
+
 
 % x0 = [1600  AoA_max];
 % x0 = [1650 (AoA_max-0.01)*10000];
 % x0 = [1650];
-options.Display = 'iter';
+options.Display = 'iter-detailed';
 % options.Algorithm = 'sqp';
 options.TypicalX = x0;
 % options.UseParallel = 1;
 % options.Algorithm = 'active-set';
 
-options.TolFun = 1;
-options.TolX = 1;
+% options.TolFun = 1e-10;
+% options.TolX = 1e-10;
 
 % k = 35500;
 % j = 0.05;
 % u = 2840;
-x = fminsearch(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
+% x = fminsearch(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
 % x = fminunc(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
-%  x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2600 deg2rad(5) deg2rad(5) deg2rad(5) deg2rad(5) deg2rad(5)],[2900 AoA_max AoA_max AoA_max AoA_max AoA_max],[],options);
+%  x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 0 50],[2900 AoA_max AoA_max AoA_max AoA_max AoA_max 300],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 50],[3200 AoA_max AoA_max AoA_max AoA_max 250],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 mfuel_burn = x(1)
 AoA_control1 = x(2)

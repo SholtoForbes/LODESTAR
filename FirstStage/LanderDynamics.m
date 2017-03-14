@@ -18,8 +18,12 @@ m = primal.states(3,:);
 gamma = primal.states(4,:);	
 alpha = primal.states(5,:)/AOAScale;	
 zeta = primal.states(6,:);	
+
+alphadot = primal.states(7,:);
+
 t = primal.nodes;
-x = [h; v ;m ;gamma; alpha; zeta];
+% x = [h; v ;m ;gamma; alpha; zeta];
+x = [h; v ;m ;gamma; alpha; zeta; alphadot];
 
 u = primal.controls/AOAScale;
 phase = 'postpitch';

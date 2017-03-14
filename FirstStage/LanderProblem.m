@@ -51,11 +51,14 @@ SPARTANscale = 1
 
 
 mRocket = 18500; % sets the total wet mass of the rocket (first stage only)
+% mRocket = 16000;
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
 mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
+% mFuel = 0.9*mRocket;
+
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
 % mSpartan = 8755.1-302+139.4;
@@ -74,21 +77,24 @@ gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
 tspan = [0 25];
-% tspan = [0 40]; 
-y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
+% tspan = [0 15];
+
+% y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
+y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
+
 % [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
 % FOR TESTINGm, see where it gets 
-phase = 'postpitch';
-Tratio = 1;
-tspan = [0 mFuel/156]; % flies for way too long
-postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(-1.4) 1.63];
-[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,0,phase,scattered), tspan, postpitch0);
-
-y
-postpitch
-postpitch(end,4)
+% phase = 'postpitch';
+% Tratio = 1;
+% tspan = [0 mFuel/156]; % flies for way too long
+% postpitch0 = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) deg2rad(-1.4) 1.63];
+% [t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,0,0,phase,scattered), tspan, postpitch0);
+% 
+% y
+% postpitch
+% postpitch(end,4)
 % 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
@@ -122,9 +128,10 @@ gammaUpp = deg2rad(89.9);
 
 
 
-uLow = [-.01]*AOAScale; % Can do either AoA or thrust
-uUpp = [.01]*AOAScale; 
-
+% uLow = [-.01]*AOAScale; % Can do either AoA or thrust
+% uUpp = [.01]*AOAScale; 
+uLow = [-.001]*AOAScale; % Can do either AoA or thrust
+uUpp = [.001]*AOAScale; 
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
 %-------------------------------------------
@@ -140,8 +147,12 @@ bounds.upper.time	= [0 tfMax];
 % of motion have a singularity at m = 0.
 
 
-bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
+% bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0];
+% bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
+
+
+bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0;-0.1];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
@@ -179,7 +190,7 @@ MoonLander.bounds = bounds;
                          % always true!)
 %70 works well for quite a few, 25km with 70 nodes is nearly perfect
 
-
+algorithm.nodes = [90];
    
 t0			= 0;
 tfGuess 	= 90;			
@@ -189,9 +200,11 @@ guess.states(1,:)	= [h0, 25500]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1500];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,0];
-guess.states(5,:)	= [0, deg2rad(-2)];
+guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaF];
-% guess.states(5,:)	= [0, 0];
+
+guess.states(7,:)	= [0, 0];
+
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
 
@@ -277,3 +290,6 @@ postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)];
 % y
 % postpitch_f
 % postpitch_f(end,4)
+
+
+fuel_left = mFuel - (m(1) - m(end))

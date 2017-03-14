@@ -415,7 +415,7 @@ constq = dlmread('primalconstq.txt');
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35500 ];
 
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];

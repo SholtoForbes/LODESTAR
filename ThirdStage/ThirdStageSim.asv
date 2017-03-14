@@ -1,6 +1,5 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
-x(1) = x(1)*10000;
-x(6) = x(6)*1000;
+
 SCALE_Engine = 1; % changes characteristic length
 
 time1 = cputime;
@@ -66,16 +65,16 @@ AoA_mid2 = x(4);
 %     AoA_mid2 = AoA_max;
 % end
 
-% AoA_mid3 = x(5);
+AoA_mid3 = x(5);
 % if AoA_mid3 > AoA_max
 %     AoA_mid3 = AoA_max;
 % end
 
 
 
-% AoA_end = x(6); 
+% AoA_end = x(3); 
 
-AoA_end = x(5); 
+AoA_end = x(6); 
 
 % AoA_end = x(2); 
 % AoA_end = deg2rad(10);
@@ -135,7 +134,7 @@ Isp = 317;
 %define starting condtions
 t(1) = 0.;
 
-dt_main = 1; %time step
+dt_main = .3; %time step
 dt = dt_main;
 
 i=1;
@@ -211,9 +210,9 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 %         Alpha(i) = 0;
 %     end
 % Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(x(4)) * t(i)  + tan(AoA_list(1)));
-Alpha(i) = spline([0 x(6)/3 2*x(6)/3 x(6)],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
-% Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-if t(i) > x(6)
+% Alpha(i) = spline([0 x(5)/2 x(5)],[AoA_init,AoA_mid1,AoA_end],t(i));
+Alpha(i) = spline([0 x(7)/6 x(7)/2 x(7)],[AoA_init,AoA_mid1,AoA_end],t(i));
+if t(i) > x(5)
     Alpha(i) = 0;
 end
     

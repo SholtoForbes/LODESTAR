@@ -8,11 +8,11 @@ gamma = z(4,:);
 alpha = z(5,:);
 zeta = z(6,:);
 
-dalphadt = z(7,:);
+dalphadt = z(6,:);
 
 % dalphadt = u(1,:);
 
-dalphadt2 = u(1,:);
+dalphadt2= u(1,:);
 
 if isnan(gamma)
     gamma = 1.5708;
@@ -92,7 +92,7 @@ switch phase
 end
 
 
-dz = [dr;dv;dm;dgamma;dalphadt;dzeta;dalphadt2];
+dz = [dr;dv;dm;dgamma;dalphadt;dzeta];
 
 if any(isnan(dz))
     disp('NaN Values Detected')
