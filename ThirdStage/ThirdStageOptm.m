@@ -10,14 +10,14 @@ AoA_max
 
 % x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 100];
 % x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 200];
-x0 = [2550/10000  AoA_max AoA_max AoA_max AoA_max 250/1000];
 
-% x0 = [2700  deg2rad(7.5) deg2rad(10)]
-% x0 = [2750  deg2rad(6) AoA_max AoA_max deg2rad(11) deg2rad(10)]
-% x0 = [2700  deg2rad(8) deg2rad(10) deg2rad(10) deg2rad(10)]
 
-% x0 = [2750  deg2rad(14) deg2rad(10) deg2rad(14) deg2rad(12)]
-% x0 = [2750  deg2rad(6) AoA_max-0.01 AoA_max-0.01 deg2rad(8)]
+% x0 = [2550/10000  AoA_max AoA_max AoA_max AoA_max 250/1000];
+
+x0 = [2500/10000  AoA_max AoA_max AoA_max AoA_max 200/1000];
+% x0 = [2000/10000  deg2rad(5) deg2rad(10) deg2rad(10) deg2rad(5) 200/1000];
+
+
 
 
 % x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(8)-deg2rad(12))*j/0.05)]
@@ -33,8 +33,8 @@ options.TypicalX = x0;
 % options.UseParallel = 1;
 % options.Algorithm = 'active-set';
 
-% options.TolFun = 1e-10;
-% options.TolX = 1e-10;
+% options.TolFun = 1e-3;
+% options.TolX = 1e-3;
 
 % k = 35500;
 % j = 0.05;
@@ -44,6 +44,7 @@ options.TypicalX = x0;
 %  x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 0 50],[2900 AoA_max AoA_max AoA_max AoA_max AoA_max 300],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 % x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 50],[3200 AoA_max AoA_max AoA_max AoA_max 250],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[00/10000 0 0 0 0 00/1000],[2000/10000 AoA_max AoA_max AoA_max AoA_max 200/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 mfuel_burn = x(1)
 AoA_control1 = x(2)

@@ -130,8 +130,9 @@ A = 0.866;
 
 g = 9.81; %standard gravity
 
-% Isp = 437; % from Tom Furgusens Thesis
-Isp = 317;
+% Isp = 437; % from Tom Furgusens Thesis %RL10
+Isp = 317; %Kestrel
+% Isp = 446; %HM7B
 %define starting condtions
 t(1) = 0.;
 
@@ -160,15 +161,22 @@ zeta(1) = zeta0;
 mHS = 125; % Heat Shield Mass
 % mHS = 302;
 
-% mEng = 100;
-mEng = 52;
+% mEng = 100; %RL10
+mEng = 52; %Kestrel
+% mEng = 165; %HM7B
 
 % m(1) = 2400 + 100 + mHS; %vehicle mass, (to match Dawids glasgow paper)
 % m(1) = 2400 + mEng + mHS;
 % m(1) = 2900;
-m(1) = 3500;
-% mdot = 14.71;
-mdot = 9.8;
+
+
+% m(1) = 3500; 
+m(1) = 3300;
+% m(1) = 3200;
+% mdot = 14.71; %RL10
+mdot = 9.8; %Kestrel
+% mdot = 14.8105; %HM7B
+
 burntime = mfuel_burn/mdot;
 
 
@@ -211,12 +219,13 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 %         Alpha(i) = 0;
 %     end
 % Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(x(4)) * t(i)  + tan(AoA_list(1)));
+if t(i) <= x(6)
 Alpha(i) = spline([0 x(6)/3 2*x(6)/3 x(6)],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
 % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-if t(i) > x(6)
+elseif t(i) > x(6)
     Alpha(i) = 0;
 end
-    
+ 
     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
     if Alt(i) < 85000
@@ -401,5 +410,7 @@ mult4=1;
 % AltF
 % q
 % mult
+
+% Alt(end)
 mpayload = mult1*mult2*mult3*mult4*mpayload;
 

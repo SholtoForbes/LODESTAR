@@ -27,6 +27,7 @@ eventConditions(5) = alpha0;
 % eventConditions(6) = mf;
 eventConditions(6) = zetaf;
 % eventConditions(7) = hf;
-% eventConditions(7) = gammaf;
+eventConditions(7) = gammaf;
+% eventConditions(8) = hf;
 %===========================================================
 % all done!

@@ -62,7 +62,7 @@ mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
 % mFuel = 0.946*(mRocket-mEngine);  %smf without engine
 % mFuel = 0.939*mRocket -mEngine; 
 % mSpartan = 8755.1-302+139.4;
-mSpartan = 9.9725e+03;
+mSpartan = 9.7725e+03;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
@@ -112,7 +112,7 @@ mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 gammaF = deg2rad(1);
 % hF = 26550;
 % hF = 45000;
-hF = 26300;
+% hF = 26300;
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 70000;  
@@ -162,13 +162,15 @@ zetaF = deg2rad(97);
 alpha0 = 0;
 
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
-hf = 25000;
+global hf
+hf = 23000;
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
 
-bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
-%  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0];
+% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
+ bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0];
+%   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
 bounds.upper.events = bounds.lower.events;
 
 % bounds.lower.path = [49999];	
@@ -196,7 +198,7 @@ t0			= 0;
 tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
 
-guess.states(1,:)	= [h0, 25500]; %24.5 for 45kpa, 23 for 55kpa
+guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1500];
 guess.states(3,:)	= [m0, mF];
 guess.states(4,:)	= [gamma0,0];
