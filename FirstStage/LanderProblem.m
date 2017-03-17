@@ -50,7 +50,7 @@ global SPARTANscale
 SPARTANscale = 1
 
 
-mRocket = 18500; % sets the total wet mass of the rocket (first stage only)
+mRocket = 19000; % sets the total wet mass of the rocket (first stage only)
 % mRocket = 16000;
  % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
 % mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
@@ -76,16 +76,19 @@ m0_prepitch = mTotal;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
-tspan = [0 25];
-% tspan = [0 15];
+tspan = [0 25]; % time to fly before pitchover (ie. straight up)
 
-% y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
 
-% [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
+% this performs a forward simulation before pitchover. The end results of
+% this are used as initial conditions for the optimiser. 
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
-% FOR TESTINGm, see where it gets 
+
+
+% FOR TESTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%this is a forward simulation for a set amount of time, at a constant AoA
+% use this o test if your rocket can actually get close to where you need it
 % phase = 'postpitch';
 % Tratio = 1;
 % tspan = [0 mFuel/156]; % flies for way too long
@@ -96,23 +99,24 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
 % postpitch
 % postpitch(end,4)
 % 
+
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 global AOAScale
 AOAScale = 1;
+
+%Define initial conditions
 h0 = y(end,1);  
-v0 = y(end,2);  %
+v0 = y(end,2);  
 m0 = y(end,3);  
-gamma0 = deg2rad(89.9);    % pitchover 
-% gamma0 = deg2rad(89);    % pitchover 
+gamma0 = deg2rad(89.9);    % set pitchover amount (start flight angle). This pitchover is 'free' movement, and should be kept small. 
+
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 gammaF = deg2rad(1);
-% hF = 26550;
-% hF = 45000;
-% hF = 26300;
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 70000;  
@@ -163,15 +167,22 @@ alpha0 = 0;
 
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
 global hf
-hf = 23000;
+hf = 26000; % set final desired altitude
+gammaf = 0; % set final desired flight angle
+
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
 
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
- bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0];
+
+ bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
+ 
+ 
 %   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
 bounds.upper.events = bounds.lower.events;
+
+
 
 % bounds.lower.path = [49999];	
 % bounds.upper.path = [50001];
@@ -187,12 +198,12 @@ MoonLander.bounds = bounds;
 %------------------------------------------------------
 
   % somewhat arbitrary number; theoretically, the 
-  algorithm.nodes = [70];                        % larger the number of nodes, the more accurate 
+  algorithm.nodes = [80];                        % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
 %70 works well for quite a few, 25km with 70 nodes is nearly perfect
 
-algorithm.nodes = [90];
+% algorithm.nodes = [90];
    
 t0			= 0;
 tfGuess 	= 90;			

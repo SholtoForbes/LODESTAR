@@ -20,7 +20,7 @@ AoA_max
 
 nodesalt = [33000; 33000; 34000; 36000 ;36000];
 nodesgam = [0;0.05; 0; 0; 0.05];
-vals =  [deg2rad(2);deg2rad(2); deg2rad(.5); 0 ;0];
+vals =  [deg2rad(2);deg2rad(.5); deg2rad(2); 0 ;0];
 interp = scatteredInterpolant(nodesalt,nodesgam,vals);
 x0 = [2590/10000  AoA_max*ones(1,16)-interp(k,j) 250/1000] % this problem is extremely sensitive to initital guess! mostly at low altitude low gamma
 
