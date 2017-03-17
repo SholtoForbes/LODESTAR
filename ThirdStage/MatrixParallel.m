@@ -72,13 +72,19 @@ for k = [33000:1000:38000]
 % elseif temp_guess_no > 1
 %    x0 =  guess(i,:);
 % end
-x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
+% x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
+nodesalt = [33000; 33000; 34000; 36000 ;36000];
+nodesgam = [0;0.05; 0; 0; 0.05];
+vals =  [deg2rad(2);deg2rad(.5); deg2rad(2); 0 ;0];
+interp = scatteredInterpolant(nodesalt,nodesgam,vals);
+x0 = [2590/10000  AoA_max*ones(1,16)-interp(k,j) 250/1000] % this problem is extremely sensitive to initital guess! mostly at low altitude low gamma
+
 
 %         x = fminsearch(@(x)Payload(x,k,j,u(i),phi0,zeta0),x0,options);
 % x = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 50],[3200 AoA_max AoA_max AoA_max AoA_max 250],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options);
 x0;
 % x = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options);
-x = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max 260/1000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options);
+x = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 200/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max 270/1000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options);
 
         mfuel_burn = x(1);
 
