@@ -1,4 +1,4 @@
-function mpayload = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x] = ThirdStageOptmX(k,j,u, phi0, zeta0,x0)
 
 mScale = 1; % This needs to be manually changed in altitude and velocity files as well
 % x0 = [1200*mScale deg2rad(15) deg2rad(15)] % 
@@ -22,11 +22,12 @@ AoA_max
 % x0 = [2500/10000  0 AoA_max AoA_max AoA_max 200/1000];
 % x0 = [2500/10000  deg2rad(5) deg2rad(13) deg2rad(13) deg2rad(13) 200/1000];
 
-x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
-x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
+% x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
+% x0 = [2590/10000  0*ones(1,2) AoA_max*ones(1,11) 0*ones(1,3)  250/1000];
 
 options.Display = 'iter-detailed';
 options.Algorithm = 'sqp';
+
 % options.TypicalX = x0;
 % options.UseParallel = 1;
 % options.Algorithm = 'active-set';
@@ -45,7 +46,15 @@ options.TolX = 1e-4;
 % x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 % x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max 200/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
+x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 deg2rad(0)*ones(1,16) 200/1000],[3000/10000 AoA_max*ones(1,16) 270/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
+
+% options.Display = 'iter';
+% 
+% options.InitialPopulationMatrix = x0;
+% x = ga(@(x)Payload(x,k,j,u, phi0, zeta0),18,[],[],[],[],[2200/10000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 200/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max AoA_max 270/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
 
 mfuel_burn = x(1)
 AoA_control1 = x(2)

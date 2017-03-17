@@ -88,7 +88,7 @@ meshPayload = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(
  figure(200)
 
 colormap(gray)
-C = contourf(rad2deg(meshAngle(:,:,3)),meshAlt(:,:,3)/1000,meshPayload(:,:,3),20)
+C = contourf(rad2deg(meshAngle(:,:,2)),meshAlt(:,:,2)/1000,meshPayload(:,:,3),20)
 % C = contourf(rad2deg(meshAngle),meshAlt/1000,meshPayload,13)
 
 xlabel('Release Angle (deg)')

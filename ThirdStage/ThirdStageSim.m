@@ -1,6 +1,10 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 x(1) = x(1)*10000;
-x(6) = x(6)*1000;
+x(1) = 2600;
+% x(6) = x(6)*1000;
+x(18) = x(18)*1000;
+x(18) = 250;
+% x(18) = 300;
 SCALE_Engine = 1; % changes characteristic length
 
 time1 = cputime;
@@ -37,9 +41,11 @@ CN_50*50000/q_init;
 M_init;
 M_50;
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
-if rad2deg(AoA_max) < 5
-    AoA_max = deg2rad(5);
-end
+
+% AoA_max = deg2rad(10);
+% if rad2deg(AoA_max) < 5
+%     AoA_max = deg2rad(5);
+% end
 
 AoA_init = x(2); 
 
@@ -71,11 +77,21 @@ AoA_mid2 = x(4);
 %     AoA_mid3 = AoA_max;
 % end
 
+AoA_mid3 = x(5);
+AoA_mid4 = x(6);
+AoA_mid5 = x(7);
+AoA_mid6 = x(8);
+AoA_mid7 = x(9);
+AoA_mid8 = x(10);
+AoA_mid9 = x(11);
+AoA_mid10 = x(12);
+AoA_mid11 = x(13);
+AoA_mid12 = x(14);
+AoA_mid13 = x(15);
+AoA_mid14 = x(16);
+AoA_end = x(17); 
 
-
-% AoA_end = x(6); 
-
-AoA_end = x(5); 
+% AoA_end = x(5); 
 
 % AoA_end = x(2); 
 % AoA_end = deg2rad(10);
@@ -130,8 +146,10 @@ A = 0.866;
 
 g = 9.81; %standard gravity
 
+% the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
 Isp = 317; %Kestrel
+
 % Isp = 446; %HM7B
 %define starting condtions
 t(1) = 0.;
@@ -172,7 +190,7 @@ mEng = 52; %Kestrel
 
 % m(1) = 3500; 
 m(1) = 3300;
-% m(1) = 3200;
+% m(1) = 3350;
 % mdot = 14.71; %RL10
 mdot = 9.8; %Kestrel
 % mdot = 14.8105; %HM7B
@@ -186,7 +204,9 @@ Fuel = true;
 j = 1;
 
 
-while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
+% while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
+while gamma(i) >= 0 && t(i) < 1000 || t(i) < 150;
+
 %     if i == 1
     mfuel_temp = mfuel(i) - mdot*dt;
 %     else
@@ -219,12 +239,30 @@ while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 %         Alpha(i) = 0;
 %     end
 % Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(x(4)) * t(i)  + tan(AoA_list(1)));
-if t(i) <= x(6)
-Alpha(i) = spline([0 x(6)/3 2*x(6)/3 x(6)],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
+
+
+% if t(i) <= x(6)
+% Alpha(i) = spline([0 x(6)/3 2*x(6)/3 x(6)],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
+% % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
+% elseif t(i) > x(6)
+%     Alpha(i) = 0;
+% end
+
+% if t(i) <= x(10)
+% Alpha(i) = interp1([0 x(10)/7 2*x(10)/7 3*x(10)/7 4*x(10)/7 5*x(10)/7 6*x(10)/7 x(10)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_end],t(i));
+% % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
+% elseif t(i) > x(10)
+%     Alpha(i) = 0;
+% end
+% [0 x(16)/13 2*x(16)/13 3*x(16)/13 4*x(16)/13 5*x(16)/13 6*x(16)/13 7*x(16)/13 8*x(16)/13 9*x(16)/13 10*x(16)/13 11*x(16)/13 12*x(16)/13 x(16)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_mid7,AoA_mid8,AoA_mid9,AoA_mid10,AoA_mid11,AoA_mid12,AoA_end]
+% x(16)
+if t(i) <= x(18)
+Alpha(i) = interp1([0 x(18)/15 2*x(18)/15 3*x(18)/15 4*x(18)/15 5*x(18)/15 6*x(18)/15 7*x(18)/15 8*x(18)/15 9*x(18)/15 10*x(18)/15 11*x(18)/15 12*x(18)/15 13*x(18)/15 14*x(18)/15 x(18)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_mid7,AoA_mid8,AoA_mid9,AoA_mid10,AoA_mid11,AoA_mid12,AoA_mid13,AoA_mid14,AoA_end],t(i));
 % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-elseif t(i) > x(6)
+elseif t(i) > x(18)
     Alpha(i) = 0;
 end
+
  
     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
@@ -241,7 +279,7 @@ end
     q(i) = 1/2*rho(i)*v(i)^2;
     
     if Fuel == true
-        T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from 
+        T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from program
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
@@ -332,7 +370,7 @@ AltF_actual = Alt(end);
 vF = v(end);
 mult1 = 1;
 if AltF > 566.89*1000
-    mult1 = gaussmf(AltF,[50000 566.89*1000]);
+%     mult1 = gaussmf(AltF,[50000 566.89*1000]);
     AltF = 566.89*1000;
 end
 mult2=1;
@@ -412,5 +450,6 @@ mult4=1;
 % mult
 
 % Alt(end)
+% gamma(end)
 mpayload = mult1*mult2*mult3*mult4*mpayload;
 

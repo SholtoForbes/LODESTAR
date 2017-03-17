@@ -1,50 +1,44 @@
-function mpayload = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x] = ThirdStageOptm(k,j,u, phi0, zeta0)
 
 mScale = 1; % This needs to be manually changed in altitude and velocity files as well
-% x0 = [1200*mScale deg2rad(15) deg2rad(15)] % 
-% x0 = [1500  deg2rad(13) deg2rad(13)];
 
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0 10],k,j,u, phi0, zeta0);
-% [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0 0 10],k,j,u, phi0, zeta0);
+
+[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10],k,j,u, phi0, zeta0);
 AoA_max
 
-% x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 100];
-% x0 = [1600  deg2rad(10) deg2rad(10) deg2rad(10) deg2rad(10) 200];
 
 
-% x0 = [2550/10000  AoA_max AoA_max AoA_max AoA_max 250/1000];
+% x0 = [2590/10000  AoA_max*ones(1,16) 250/1000]; % Works for 36km 
 
-x0 = [2500/10000  AoA_max AoA_max AoA_max AoA_max 200/1000];
-% x0 = [2000/10000  deg2rad(5) deg2rad(10) deg2rad(10) deg2rad(5) 200/1000];
+% x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(.5) 250/1000]; % this works well for 33 and 34km, except for 0 gamma 34km, doesnt work for 36km
+% works for 35km 0 gamma
 
+% 
+% x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(2) 250/1000]; % seems to do well for 0 gamma 33km and 34km
 
+% x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(1) 250/1000]; % 
 
+nodesalt = [33000; 33000; 34000; 36000 ;36000];
+nodesgam = [0;0.05; 0; 0; 0.05];
+vals =  [deg2rad(2);deg2rad(2); deg2rad(.5); 0 ;0];
+interp = scatteredInterpolant(nodesalt,nodesgam,vals);
+x0 = [2590/10000  AoA_max*ones(1,16)-interp(k,j) 250/1000] % this problem is extremely sensitive to initital guess! mostly at low altitude low gamma
 
-% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(8)-deg2rad(12))*j/0.05)]
-% x0 = [2750  (deg2rad(14)+(deg2rad(6)-deg2rad(14))*j/0.05) (deg2rad(10)+((AoA_max-0.01)-deg2rad(10))*j/0.05) (deg2rad(14)+((AoA_max-0.01)-deg2rad(14))*j/0.05) (deg2rad(12)+(deg2rad(8)-deg2rad(12))*j/0.05) 200]
+% x0 = [2590/10000  0*ones(1,2) AoA_max*ones(1,11) 0*ones(1,3)  250/1000];
 
-
-% x0 = [1600  AoA_max];
-% x0 = [1650 (AoA_max-0.01)*10000];
-% x0 = [1650];
 options.Display = 'iter-detailed';
-% options.Algorithm = 'sqp';
-options.TypicalX = x0;
+options.Algorithm = 'sqp';
+
+% options.TypicalX = x0;
 % options.UseParallel = 1;
 % options.Algorithm = 'active-set';
 
-% options.TolFun = 1e-3;
-% options.TolX = 1e-3;
+options.TolFun = 1e-4;
+options.TolX = 1e-4;
 
-% k = 35500;
-% j = 0.05;
-% u = 2840;
-% x = fminsearch(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
-% x = fminunc(@(x)Payload(x,k,j,u, phi0, zeta0),x0,options);
-%  x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 0 50],[2900 AoA_max AoA_max AoA_max AoA_max AoA_max 300],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[1400 0 0 0 0 50],[3200 AoA_max AoA_max AoA_max AoA_max 250],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 0 0 0 0 50/1000],[3000/10000 AoA_max AoA_max AoA_max AoA_max 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-% x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[00/10000 0 0 0 0 00/1000],[2000/10000 AoA_max AoA_max AoA_max AoA_max 200/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
+x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 deg2rad(0)*ones(1,16) 200/1000],[3000/10000 AoA_max*ones(1,16) 270/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
 
 mfuel_burn = x(1)
 AoA_control1 = x(2)
