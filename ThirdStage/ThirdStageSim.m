@@ -1,9 +1,11 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 x(1) = x(1)*10000;
 x(1) = 2600;
-% x(6) = x(6)*1000;
-x(18) = x(18)*1000;
-x(18) = 250;
+% x(end) = deg2rad(10);
+x(end) = x(end)*1000;
+
+
+% x(end) = 300;
 % x(18) = 300;
 SCALE_Engine = 1; % changes characteristic length
 
@@ -62,12 +64,12 @@ AoA_init = x(2);
 % end
 % 
 % 
-AoA_mid1 = x(3);
+% AoA_mid1 = x(3);
 % if AoA_mid1 > AoA_max
 %     AoA_mid1 = AoA_max;
 % end
 % 
-AoA_mid2 = x(4);
+% AoA_mid2 = x(4);
 % if AoA_mid2 > AoA_max
 %     AoA_mid2 = AoA_max;
 % end
@@ -77,19 +79,19 @@ AoA_mid2 = x(4);
 %     AoA_mid3 = AoA_max;
 % end
 
-AoA_mid3 = x(5);
-AoA_mid4 = x(6);
-AoA_mid5 = x(7);
-AoA_mid6 = x(8);
-AoA_mid7 = x(9);
-AoA_mid8 = x(10);
-AoA_mid9 = x(11);
-AoA_mid10 = x(12);
-AoA_mid11 = x(13);
-AoA_mid12 = x(14);
-AoA_mid13 = x(15);
-AoA_mid14 = x(16);
-AoA_end = x(17); 
+% AoA_mid3 = x(5);
+% AoA_mid4 = x(6);
+% AoA_mid5 = x(7);
+% AoA_mid6 = x(8);
+% AoA_mid7 = x(9);
+% AoA_mid8 = x(10);
+% AoA_mid9 = x(11);
+% AoA_mid10 = x(12);
+% AoA_mid11 = x(13);
+% AoA_mid12 = x(14);
+% AoA_mid13 = x(15);
+% AoA_mid14 = x(16);
+% AoA_end = x(17); 
 
 % AoA_end = x(5); 
 
@@ -203,7 +205,7 @@ Fuel = true;
 
 j = 1;
 
-
+% Alpha(1) = x(end);
 % while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 while gamma(i) >= 0 && t(i) < 1000 || t(i) < 150;
 
@@ -224,46 +226,35 @@ while gamma(i) >= 0 && t(i) < 1000 || t(i) < 150;
     dt = dt_main;
         t(i+1) = t(i) + dt;
         
-%     if t(i) < burntime
-% 
-% %         Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(burntime) * t(i)  + tan(AoA_list(1)));
-%     Alpha(i) = spline([0 burntime/3 2*burntime/3 burntime],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
-%     elseif t(i) >= burntime
-%         Alpha(i) = 0;
-%     end
-
-%     if exocond == false
-% 
-%     Alpha(i) = AoA_init;
-%     elseif exocond == true
-%         Alpha(i) = 0;
-%     end
-% Alpha(i) = atan((tan(AoA_list(end)) - tan(AoA_list(1)))/(x(4)) * t(i)  + tan(AoA_list(1)));
-
-
-% if t(i) <= x(6)
-% Alpha(i) = spline([0 x(6)/3 2*x(6)/3 x(6)],[AoA_init,AoA_mid1,AoA_mid2,AoA_end],t(i));
-% % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-% elseif t(i) > x(6)
-%     Alpha(i) = 0;
-% end
-
-% if t(i) <= x(10)
-% Alpha(i) = interp1([0 x(10)/7 2*x(10)/7 3*x(10)/7 4*x(10)/7 5*x(10)/7 6*x(10)/7 x(10)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_end],t(i));
-% % Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-% elseif t(i) > x(10)
-%     Alpha(i) = 0;
-% end
-% [0 x(16)/13 2*x(16)/13 3*x(16)/13 4*x(16)/13 5*x(16)/13 6*x(16)/13 7*x(16)/13 8*x(16)/13 9*x(16)/13 10*x(16)/13 11*x(16)/13 12*x(16)/13 x(16)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_mid7,AoA_mid8,AoA_mid9,AoA_mid10,AoA_mid11,AoA_mid12,AoA_end]
-% x(16)
-if t(i) <= x(18)
-Alpha(i) = interp1([0 x(18)/15 2*x(18)/15 3*x(18)/15 4*x(18)/15 5*x(18)/15 6*x(18)/15 7*x(18)/15 8*x(18)/15 9*x(18)/15 10*x(18)/15 11*x(18)/15 12*x(18)/15 13*x(18)/15 14*x(18)/15 x(18)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_mid4,AoA_mid5,AoA_mid6,AoA_mid7,AoA_mid8,AoA_mid9,AoA_mid10,AoA_mid11,AoA_mid12,AoA_mid13,AoA_mid14,AoA_end],t(i));
-% Alpha(i) = spline([0 x(7)/4 x(7)/2 3*x(7)/4 x(7)],[AoA_init,AoA_mid1,AoA_mid2,AoA_mid3,AoA_end],t(i));
-elseif t(i) > x(18)
+if t(i) <= x(end)
+Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i));
+elseif t(i) > x(end)
     Alpha(i) = 0;
 end
+% Fuel
 
- 
+% if t(i) < 200
+% Alpha(i) = interp1(0:200/(length(x)-4):200,x(2:end-2),t(i));
+% elseif t(i) >= 200 && Alt(i) < 85000
+%     Alpha(i) = x(end-1);
+% else
+%     Alpha(i) = 0;
+% end
+
+
+% if t(i) <= burntime
+% Alpha(i) = interp1(0:burntime/(length(x)-3):burntime,x(2:end-1),t(i));
+% elseif t(i) > burntime
+%     Alpha(i) = 0;
+% end
+
+% if t(i) <= 200
+% Alpha(i+1) = Alpha(i) + dt*interp1(0:200/(length(x)-3):200,x(2:end-1),t(i));
+% elseif t(i) >= 200 && Alt(i) < 85000
+%     Alpha(i+1) = Alpha(i);
+% else Alpha(i+1) = 0;
+% end
+%  Alpha
     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
     if Alt(i) < 85000
@@ -363,11 +354,20 @@ end
     i = i+1;
 end
 
+% Alt(end) = x(end-1);
+
+
+
+
+gamma(end) = 0;
+
 AltF = Alt(end);
 AltF_actual = Alt(end);
-
-
 vF = v(end);
+
+
+
+
 mult1 = 1;
 if AltF > 566.89*1000
 %     mult1 = gaussmf(AltF,[50000 566.89*1000]);

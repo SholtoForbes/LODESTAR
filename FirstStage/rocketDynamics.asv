@@ -1,8 +1,4 @@
 function [dz,q,phi] = rocketDynamics(z,u,t,phase,scattered)
-
-%This function determines the dynamics of the system as time derivatives,
-%from input primals. Called by LanderDynamics
-
 global mach
 Atmosphere = dlmread('atmosphere.txt');
 h = z(1,:);   %Height
@@ -14,8 +10,9 @@ zeta = z(6,:);
 
 dalphadt = z(7,:);
 
+% dalphadt = u(1,:);
 
-dalphadt2 = u(1,:); % control is second derivative of AoA with time
+dalphadt2 = u(1,:);
 
 if isnan(gamma)
     gamma = 1.5708;
@@ -43,12 +40,12 @@ dm = -T./Isp./g*SCALE;
 
 
 mach = v./speedOfSound;
-
-% interpolate coefficients
+% Cd = scattered.Drag(mach,rad2deg(alpha));
+% Cl = scattered.Lift(mach,rad2deg(alpha));
 Cd = scattered.DragGridded(mach,rad2deg(alpha));
 Cl = scattered.LiftGridded(mach,rad2deg(alpha));
 
-%%%% Compute the drag and lift:
+%%%% Compute the drag:
 global SPARTANscale
 Area = 62.77*SPARTANscale^(2/3);  
 D = 0.5*Cd.*Area.*density.*v.^2;
@@ -77,7 +74,7 @@ xi = 0;
 phi = -0.2220; % initial latitude
 
 % This determines the dynamics of the system.
-% Set up like this because phi is a quasi-forward sim instead of a primal
+% Set up like this because phi is a qusi-forward sim instead of a 
 i = 1;
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
 for i= 2:length(t)

@@ -46,22 +46,23 @@ scattered.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','l
 scattered.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
 
 global SPARTANscale
-% SPARTANscale = 0.75
-SPARTANscale = 1
+
+SPARTANscale = 1;
+
+
+% TARGET ==================================================================
+%target final altitude and trajectory angle
+global hf
+hf = 25000; % set final desired altitude
+gammaf = 0; % set final desired flight angle
+% =========================================================================
 
 
 mRocket = 19000; % sets the total wet mass of the rocket (first stage only)
-% mRocket = 16000;
- % mFuel = 0.89*mRocket;  %(kg)  %mass of the fuel
-% mFuel = 0.939*mRocket;  %(kg)  %mass of the fuel ( from falcon 1 users manual)
 
 mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
-% mFuel = 0.9*mRocket;
 
-% mFuel = 0.946*(mRocket-mEngine);  %smf without engine
-% mFuel = 0.939*mRocket -mEngine; 
-% mSpartan = 8755.1-302+139.4;
 mSpartan = 9.7725e+03;
 
 mTotal = mSpartan + mRocket;
@@ -83,7 +84,6 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
 % this performs a forward simulation before pitchover. The end results of
 % this are used as initial conditions for the optimiser. 
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
-
 
 
 % FOR TESTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,9 +114,7 @@ m0 = y(end,3);
 gamma0 = deg2rad(89.9);    % set pitchover amount (start flight angle). This pitchover is 'free' movement, and should be kept small. 
 
 
-vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
-gammaF = deg2rad(1);
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 70000;  
@@ -127,13 +125,10 @@ vUpp = 3000;
 mLow = mEmpty;
 mUpp = mTotal;
 
-gammaLow = deg2rad(1);
+gammaLow = deg2rad(-.1);
 gammaUpp = deg2rad(89.9);
 
-
-
-% uLow = [-.01]*AOAScale; % Can do either AoA or thrust
-% uUpp = [.01]*AOAScale; 
+% This sets the control limits, this is second derivative of AoA
 uLow = [-.001]*AOAScale; % Can do either AoA or thrust
 uUpp = [.001]*AOAScale; 
 %-------------------------------------------
@@ -142,48 +137,43 @@ uUpp = [.001]*AOAScale;
 
 tfMax 	    = 300;     % large upper bound; do not choose Inf
 
-
 bounds.lower.time 	= [0 0];				
 bounds.upper.time	= [0 tfMax];			 
 
-
 % Note: DO NOT set mfmin to zero because the equations 
 % of motion have a singularity at m = 0.
-
 
 % bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0];
 % bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
 
 
-bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0;-0.1];
+% These define the search space of the solution, including maximum AoA limits
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(4)*AOAScale;0;-0.1];
 bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
 
-zetaF = deg2rad(97);
+zetaF = deg2rad(97); %Targets a specific heading angle. This is about right to get into a SSO by the end of third stage flight
 
-alpha0 = 0;
+alpha0 = 0; %Set initial angle of attack to 0
 
+
+% Commented out bounds are for different end states
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
-global hf
-hf = 26000; % set final desired altitude
-gammaf = 0; % set final desired flight angle
-
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
-
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
-
- bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
- 
- 
 %   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
+
 bounds.upper.events = bounds.lower.events;
 
 
-
+% To be used if a 50kPa end state is desired
 % bounds.lower.path = [49999];	
 % bounds.upper.path = [50001];
 
@@ -198,13 +188,15 @@ MoonLander.bounds = bounds;
 %------------------------------------------------------
 
   % somewhat arbitrary number; theoretically, the 
-  algorithm.nodes = [80];                        % larger the number of nodes, the more accurate 
+                       % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
-%70 works well for quite a few, 25km with 70 nodes is nearly perfect
-
-% algorithm.nodes = [90];
-   
+  algorithm.nodes = [80]; 
+  % Change this by a few nodes to potentially change the solution slightly
+  
+  
+  
+% Initial Guess ===========================================================   
 t0			= 0;
 tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
@@ -294,6 +286,7 @@ title('Validation')
 % [t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamics(postpitch_f,ControlFunction(t,primal.nodes,dalphadt),phase,scattered), tspan, postpitch0_f);
 
 
+% Forward Integrator
  phase = 'postpitch';
 tspan = primal.nodes; 
 postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)];
