@@ -54,8 +54,8 @@ x0 = [2590/10000  AoA_max*ones(1,25) 250/1000];
 % x0 = [2590/10000  AoA_max*ones(1,10) 300000/1e7 250/1000];
 
 % x0 = [2590/10000  0*ones(1,30) AoA_max-deg2rad(1)];
-% options.DiffMinChange = 0.0006 + 0.0001*i;
-options.DiffMinChange =  0.001*i;
+options.DiffMinChange = 0.0005 + 0.0001*i;
+% options.DiffMinChange =  0.001*i;
 [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,25) 200/1000],[3000/10000 AoA_max*ones(1,25) 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 % [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,10) 160000/1e7 200/1000],[3000/10000 AoA_max*ones(1,10) 580000/1e7 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
