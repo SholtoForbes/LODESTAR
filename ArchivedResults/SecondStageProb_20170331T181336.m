@@ -178,7 +178,6 @@ ThirdStageData = sortrows(ThirdStageData);
 %This does not
 %This just uses third stage data that is close to the actual heading and
 %latitude
-
 PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
 [VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
 global PayloadGrid
@@ -189,7 +188,6 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
 FirstStageData = dlmread('FirstStageDat.txt');
 scattered.FirstStagev = scatteredInterpolant(FirstStageData(:,2),FirstStageData(:,3),FirstStageData(:,4));
 
-scattered.FirstStageData = FirstStageData; 
 
 %=============================================== 
 
@@ -387,7 +385,7 @@ TwoStage2d.bounds       = bounds;
 
 if const == 3 || const == 31
 % algorithm.nodes		= [60]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [80]; 
 elseif const == 1
 algorithm.nodes		= [90]; 
 % algorithm.nodes		= [100]; 

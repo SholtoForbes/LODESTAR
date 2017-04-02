@@ -97,9 +97,7 @@ if const == 3
 % RunningCost =((q-50000).^2+50000)/50000 + [0.005*abs(omegadot)]; % tighter, this works as of 1/2/17
 % RunningCost =((q-50000).^2+100000)/100000 + [0.005*abs(omegadot)]; % tighter
 % RunningCost =((q-50000).^2+500000)/500000 + [0.005*abs(omegadot)]; % tighter
-% RunningCost =((q-50000).^2+5000000)/5000000 + [0.005*abs(omegadot)]; % tighter
-
-RunningCost =((q-50000).^2+100000)/100000;
+RunningCost =((q-50000).^2+5000000)/5000000 + [0.005*abs(omegadot)]; % tighter
 
 elseif const == 1  || const == 12 || const == 13 || const == 14
     

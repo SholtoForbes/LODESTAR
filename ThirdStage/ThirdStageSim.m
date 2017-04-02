@@ -1,8 +1,8 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
-x(1) = x(1)*10000;
+x(1) = x(1)*100000;
 x(1) = 2600;
 % x(end) = deg2rad(10);
-x(end) = x(end)*1000;
+x(end) = x(end)*10000;
 
 
 % x(end) = 300;
@@ -207,7 +207,14 @@ j = 1;
 
 % Alpha(1) = x(end);
 % while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
-while gamma(i) >= 0 && t(i) < 1000 || t(i) < 150;
+
+p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3));
+
+        c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
+
+        rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
+
+while gamma(i) >= 0 && t(i) < 2000 || t(i) < 150;
 
 %     if i == 1
     mfuel_temp = mfuel(i) - mdot*dt;
@@ -227,7 +234,8 @@ while gamma(i) >= 0 && t(i) < 1000 || t(i) < 150;
         t(i+1) = t(i) + dt;
         
 if t(i) <= x(end)
-Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i));
+Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i),'pchip');
+% Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i));
 elseif t(i) > x(end)
     Alpha(i) = 0;
 end
@@ -255,15 +263,21 @@ end
 % else Alpha(i+1) = 0;
 % end
 %  Alpha
-    p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
-    
+
+%     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
+
+    p(i) = ppval(p_spline, Alt(i));
     if Alt(i) < 85000
-        c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(i)); % Calculate speed of sound using atmospheric data
+%         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(i)); % Calculate speed of sound using atmospheric data
+% 
+%         rho(i) = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(i)); % Calculate density using atmospheric data
 
-        rho(i) = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(i)); % Calculate density using atmospheric data
+c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
+
+        rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
     else
-        c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000); % if altitude is over 85km, set values of atmospheric data not change. i will need to look at this
-
+%         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000); % if altitude is over 85km, set values of atmospheric data not change. i will need to look at this
+c(i) = ppval(c_spline, 85000);
         rho(i) = 0;
     end
     

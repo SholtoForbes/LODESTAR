@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -178,7 +178,6 @@ ThirdStageData = sortrows(ThirdStageData);
 %This does not
 %This just uses third stage data that is close to the actual heading and
 %latitude
-
 PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
 [VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
 global PayloadGrid

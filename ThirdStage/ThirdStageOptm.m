@@ -46,17 +46,21 @@ options.TolX = 1e-3;
 mpayload = 0;
 x=0;
 
-for i = 1:5
+for i3 = 0:3
+for i2 = 0:10
+    for i4 = 0:2
 % x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(i/2) 250/1000];
 % x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
-x0 = [2590/10000  AoA_max*ones(1,25) 250/1000];
-
+% x0 = [2590/10000  AoA_max*ones(1,20) 280/1000];
+% x0 = [2600/100000  AoA_max*ones(1,20) 250/10000+i*10/10000]; %[mfuel (constrained to 2600 currently) aoa t_aoa variation- this guess is very important!]
+x0 = [2600/10000  AoA_max*ones(1,10)-i4*AoA_max*0.1 250/10000+i2*5/10000]; 
 % x0 = [2590/10000  AoA_max*ones(1,10) 300000/1e7 250/1000];
 
 % x0 = [2590/10000  0*ones(1,30) AoA_max-deg2rad(1)];
-options.DiffMinChange = 0.0005 + 0.0001*i;
-% options.DiffMinChange =  0.001*i;
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,25) 200/1000],[3000/10000 AoA_max*ones(1,25) 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+% options.DiffMinChange = 0.0005 + 0.0001*i;
+% options.DiffMinChange =  0.0010;
+options.DiffMinChange = 0.0005*i3;
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/100000 deg2rad(0)*ones(1,10) 200/10000],[3000/100000 AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 % [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,10) 160000/1e7 200/1000],[3000/10000 AoA_max*ones(1,10) 580000/1e7 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
@@ -67,6 +71,8 @@ exitflag
 if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3)
     mpayload = mpayload_temp;
     x = x_temp;
+end
+end
 end
 end
 %     mpayload = mpayload_temp;

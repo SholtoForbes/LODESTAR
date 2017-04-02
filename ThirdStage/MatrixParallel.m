@@ -6,7 +6,7 @@ mat = [];
 
 % u = [2850:25:2925];
 % u = 2900
-u = [2900:25:2975];
+u = [2900:25:2950];
 
 % options.Display = 'iter';
 % options.Display = 'final';
@@ -37,7 +37,7 @@ zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
 
 % options.TypicalX = [2600 0.2 0.2 0.2 0.2 250];
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
-for k = [33000:1000:38000]
+for k = [35000:1000:38000]
     for j = [0.00:0.025:0.05]
         
         temp_guess_no = 1;
@@ -102,11 +102,24 @@ mpayload(i) = 0;
 options{i}.Algorithm = 'sqp';
 options{i}.TolFun = 1e-3;
 options{i}.TolX = 1e-3;
-for i2 = 0:5
+for i3 = 0:3
+for i2 = 0:10
+    for i4 = 0:2
 % x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(i/2) 250/1000];
-x0 = [2590/10000  AoA_max*ones(1,20) 250/1000];
-options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,20) 200/1000],[3000/10000 AoA_max*ones(1,20) 270/1000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
+% x0 = [2590/10000  AoA_max*ones(1,20) 250/1000];
+x0 = [2600/10000  AoA_max*ones(1,10)-i4*AoA_max*0.1 250/10000+i2*5/10000]; 
+% options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
+options{i}.DiffMinChange = 0.0005*i3;
+% if i2 < 6
+% x0 = [2590/10000  AoA_max*ones(1,20) 250/10000+i2*10/10000]; 
+% % options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
+% options{i}.DiffMinChange = 0.0005;
+% else
+%     x0 = [2590/10000  AoA_max*ones(1,20) 250/1000+(i2-6)*10/1000]; 
+% % options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
+% options{i}.DiffMinChange = 0.001;
+% end
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,10) 200/10000],[3000/10000 AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
 [AltF(i), vF(i), Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x_temp,k,j,u(i), phi0, zeta0);
 % mpayload_temp
 % mpayload_temp = 1;
@@ -117,7 +130,8 @@ if mpayload_temp > mpayload(i) && (exitflag ==1 || exitflag ==2|| exitflag ==3)
 %     x = x_temp;
 end
 end
-
+end
+end
 
 % [AltF(i), vF(i), Alt, v, t, mpayload(i), Alpha, m,AoA] = ThirdStageSim(x,k,j,u(i),phi0,zeta0);
 
