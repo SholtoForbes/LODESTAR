@@ -7,6 +7,7 @@ mat = [];
 % u = [2850:25:2925];
 % u = 2900
 u = [2900:25:2950];
+% u = [2925 2950]
 
 % options.Display = 'iter';
 % options.Display = 'final';
@@ -37,9 +38,9 @@ zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
 
 % options.TypicalX = [2600 0.2 0.2 0.2 0.2 250];
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
-for k = [35000:1000:38000]
+for k = [33000:1000:38000]
     for j = [0.00:0.025:0.05]
-        
+%         for j = [0]
         temp_guess_no = 1;
         
         phi0
@@ -57,7 +58,7 @@ for k = [35000:1000:38000]
         options = cell(1,8);
 
         parfor i = 1:length(u)
-     [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0*ones(1,5) 10],k,j,u(i), phi0, zeta0);
+     [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0*ones(1,5) 10],k,j,u(i), phi0, zeta0);
 %         guess = [1700 AoA_max-0.01 AoA_max/2+AoA_max/2*(0.1-j)/0.1-0.01];
 %         guess = [1600 AoA_max(i)-0.01];
 % guess = [2700  deg2rad(7.5) deg2rad(10)];
@@ -100,14 +101,25 @@ mpayload(i) = 0;
 % options{i}.Display = 'final';
 % options{i}.Display = 'iter';
 options{i}.Algorithm = 'sqp';
+% options{i}.Algorithm = 'active-set';
+% options(i).ScaleProblem = 'iter-and-constr'
+
 options{i}.TolFun = 1e-3;
 options{i}.TolX = 1e-3;
-for i3 = 0:3
+% for i3 = 0:3
+% for i2 = 0:10
+
+% for i3 = 0:4 %works decently 
+% for i2 = 0:0.5:10
+    
+    for i3 = 0:.5:6
 for i2 = 0:10
-    for i4 = 0:2
+    
+%     for i4 = 0:2
 % x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(i/2) 250/1000];
 % x0 = [2590/10000  AoA_max*ones(1,20) 250/1000];
-x0 = [2600/10000  AoA_max*ones(1,10)-i4*AoA_max*0.1 250/10000+i2*5/10000]; 
+i4 = 0;
+x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01 250/10000+i2*5/10000]; 
 % options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
 options{i}.DiffMinChange = 0.0005*i3;
 % if i2 < 6
@@ -119,7 +131,7 @@ options{i}.DiffMinChange = 0.0005*i3;
 % % options{i}.DiffMinChange = 0.0005 + 0.0001*i2;
 % options{i}.DiffMinChange = 0.001;
 % end
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,10) 200/10000],[3000/10000 AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
 [AltF(i), vF(i), Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x_temp,k,j,u(i), phi0, zeta0);
 % mpayload_temp
 % mpayload_temp = 1;
@@ -131,7 +143,7 @@ if mpayload_temp > mpayload(i) && (exitflag ==1 || exitflag ==2|| exitflag ==3)
 end
 end
 end
-end
+% end
 
 % [AltF(i), vF(i), Alt, v, t, mpayload(i), Alpha, m,AoA] = ThirdStageSim(x,k,j,u(i),phi0,zeta0);
 

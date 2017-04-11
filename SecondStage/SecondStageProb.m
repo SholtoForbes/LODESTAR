@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -169,6 +169,8 @@ clear liftarray
 ThirdStageData = dlmread('thirdstage.dat'); %Import Third Stage Data Raw 
 ThirdStageData = sortrows(ThirdStageData);
 
+
+
 % This uses phi and zeta
 % PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3))),length(unique(ThirdStageData(:,2))),length(unique(ThirdStageData(:,1)))]),[5 4 3 2 1]);
 % [phiGrid,zetaGrid,VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,1)),unique(ThirdStageData(:,2)),unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
@@ -179,11 +181,23 @@ ThirdStageData = sortrows(ThirdStageData);
 %This just uses third stage data that is close to the actual heading and
 %latitude
 
-PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
-[VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
+% [VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% global PayloadGrid
+% PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
+
+
+%THIS INTERPOLATED FOR ANY MISSING THIRD STAGE POINTS, BE CAREFUL WITH THIS
+[VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.025 0.05],[2900 2925 2950]);
+
+PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
+PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
+
+
+
+
 global PayloadGrid
 PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
-
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
@@ -426,12 +440,13 @@ guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000]; %High Drag
 else
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,32000 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,32000 ]/scale.V; 
 end
 
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
-guess.states(2,:) = [v0, 2900]/scale.v; 
+guess.states(2,:) = [v0, 2950]/scale.v; 
 
 % Trajectoy angle guess. Sort of important, but easy to define. 
 if const ==3 || const == 31 
@@ -453,8 +468,8 @@ guess.states(6,:) = [1.694,1.699];
 guess.controls(1,:)    = [0,0]; 
 
 % Time guess. This should be sort of close to expected (ie. not ridiculous)
-% guess.time        = [t0 ,230];
-guess.time        = [t0 ,400];
+guess.time        = [t0 ,350];
+% guess.time        = [t0 ,400];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;

@@ -1,6 +1,6 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0)
-x(1) = x(1)*100000;
-x(1) = 2600;
+
+
 % x(end) = deg2rad(10);
 x(end) = x(end)*10000;
 
@@ -49,7 +49,7 @@ AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable
 %     AoA_max = deg2rad(5);
 % end
 
-AoA_init = x(2); 
+AoA_init = x(1); 
 
 % AoA_init = AoA_max; 
 % if AoA_init > deg2rad(20)
@@ -134,7 +134,7 @@ AoA_init = x(2);
         
 
 
-mfuel_burn = x(1);
+mfuel_burn = 2600;
 mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
@@ -214,9 +214,8 @@ p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3));
 
         rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
-while gamma(i) >= 0 && t(i) < 2000 || t(i) < 150;
-
-%     if i == 1
+while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
+    %     if i == 1
     mfuel_temp = mfuel(i) - mdot*dt;
 %     else
 %         mfuel_temp = mfuel(i-1) - mdot*2*dt;
@@ -234,7 +233,7 @@ while gamma(i) >= 0 && t(i) < 2000 || t(i) < 150;
         t(i+1) = t(i) + dt;
         
 if t(i) <= x(end)
-Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i),'pchip');
+Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip');
 % Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i));
 elseif t(i) > x(end)
     Alpha(i) = 0;
@@ -387,6 +386,9 @@ if AltF > 566.89*1000
 %     mult1 = gaussmf(AltF,[50000 566.89*1000]);
     AltF = 566.89*1000;
 end
+% if AltF < 0.1
+%     AltF = 0.1;
+% end
 mult2=1;
 % if gamma(end) > 0
 %     mult2 = 0;
@@ -445,10 +447,21 @@ m2 = m(end)/(exp(v12/(Isp*g)));
 m3 = m2/(exp(v23/(Isp*g)));
 
 m4 = m3/(exp(v34/(Isp*g)));
-
+% x(1)
+% m4
+% m(1)
+% mHS
+% mEng
 % mpayload = m4 - 247.4 -mEng; % subtract structural mass
 % mpayload = m4 - 189 -mEng; % subtract structural mass
+% vexo
+% v12
+% m(end)
 mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
+% if isinf(mpayload) || isnan(mpayload)
+%     mpayload = 0;
+% end
+
 % if exocond == false
 %     mpayload = 0;
 % end

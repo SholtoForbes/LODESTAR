@@ -19,8 +19,8 @@ ceq = 0;
 % Target = [160000-Alt(end) gamma(end)-deg2rad(1)];
 % Target = [160000-Alt(end) Alt(end)-567000 gamma(end)-deg2rad(1)];
 
-Target = [160000-Alt(end) Alt(1)-(min(Alt)) Alt(end)-567000 gamma(end)-deg2rad(1)]; % 36km and over
-% Target = [100000-Alt(end-1) Alt(1)-(min(Alt)) Alt(end-1)-567000 gamma(end-1)-deg2rad(1)]; % 36km and over
+Target = [160000-Alt(end) Alt(1)-(min(Alt)) Alt(end)-567000 gamma(end)-deg2rad(1)]; 
+% Target = [100000-Alt(end-1) Alt(1)-(min(Alt)) Alt(end-1)-567000 gamma(end-1)-deg2rad(1)];
 % x
 % Alt
 % Target = [100000-Alt(end-1) (max(Alpha)-AoA_max)*10 Alt(1)-(min(Alt)) Alt(end-1)-567000 gamma(end-1)-deg2rad(1)]; % 36km and over
