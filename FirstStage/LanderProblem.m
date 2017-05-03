@@ -18,6 +18,7 @@ iteration = 1;
 global iterative_V_f
 iterative_V_f = [];
 
+global mach
 %-----------------------------------
 % Define the problem function files:
 %-----------------------------------
@@ -61,7 +62,7 @@ gammaf = 0; % set final desired flight angle
 mRocket = 19000; % sets the total wet mass of the rocket (first stage only)
 
 mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*mRocket; % Michael said to just use this for simplicity
+mFuel = 0.939*mRocket; % Mass fraction kept constant for simplicity
 
 mSpartan = 9.7725e+03;
 
@@ -71,19 +72,19 @@ mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-h0_prepitch = 0;  %Rocket starts on the ground
-v0_prepitch = 0;  %Rocket starts stationary
-m0_prepitch = mTotal;  %Rocket starts full of fuel
-gamma0_prepitch = deg2rad(90);
-
-phase = 'prepitch';
-tspan = [0 25]; % time to fly before pitchover (ie. straight up)
-
-y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
-
-% this performs a forward simulation before pitchover. The end results of
-% this are used as initial conditions for the optimiser. 
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
+% h0_prepitch = 0;  %Rocket starts on the ground
+% v0_prepitch = 0;  %Rocket starts stationary
+% m0_prepitch = mTotal;  %Rocket starts full of fuel
+% gamma0_prepitch = deg2rad(90);
+% 
+% phase = 'prepitch';
+% tspan = [0 25]; % time to fly before pitchover (ie. straight up)
+% 
+% y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
+% 
+% % this performs a forward simulation before pitchover. The end results of
+% % this are used as initial conditions for the optimiser. 
+% [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
 
 % FOR TESTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,7 +101,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
 % postpitch(end,4)
 % 
 
-
+y = [100 30 0 0 0 0 0] % assume pitchover conditions, will need to back-simulate the necessary pitchover time
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -168,8 +169,8 @@ alpha0 = 0; %Set initial angle of attack to 0
 % bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
 %   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
-
+%  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
+bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; 1500; mEmpty+mSpartan];
 bounds.upper.events = bounds.lower.events;
 
 
@@ -203,7 +204,9 @@ tfGuess 	= 90;
 
 guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1500];
+% guess.states(2,:)	= [v0, 1550];
 guess.states(3,:)	= [m0, mF];
+guess.states(3,:)	= [24500, mF];
 guess.states(4,:)	= [gamma0,0];
 guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaF];
@@ -248,13 +251,17 @@ alpha = primal.states(5,:);
 zeta = primal.states(6,:);
 figure;
 hold on
-plot([t_prepitch.' primal.nodes+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k','linestyle','-');
-plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,2).'/1000 v/1000],'color','k','linestyle','--');
-plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,1).'/10000 V/10000],'color','k','linestyle',':');
-plot([t_prepitch.' primal.nodes+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha)/10],'color','k','linestyle','-.');
+% plot([t_prepitch.' primal.nodes+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k','linestyle','-');
+% plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,2).'/1000 v/1000],'color','k','linestyle','--');
+% plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,1).'/10000 V/10000],'color','k','linestyle',':');
+% plot([t_prepitch.' primal.nodes+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha)/10],'color','k','linestyle','-.');
+plot([primal.nodes], [rad2deg(gamma)/100],'color','k','linestyle','-');
+plot([primal.nodes], [v/1000],'color','k','linestyle','--');
+plot([primal.nodes], [V/10000],'color','k','linestyle',':');
+plot([primal.nodes], [rad2deg(alpha)/10],'color','k','linestyle','-.')
 legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /10)','AoA (degrees/10)')
 xlabel('Time (s)')
-xlim([0,primal.nodes(end)+t_prepitch(end)]);
+xlim([0,primal.nodes(end)]);
 
 mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);
@@ -289,7 +296,9 @@ title('Validation')
 % Forward Integrator
  phase = 'postpitch';
 tspan = primal.nodes; 
-postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)];
+% postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)]; % set mass
+postpitch0_f = [y(end,1) y(end,2) m(1) deg2rad(89.9) phi(1) zeta(1)];
+
 [t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered), tspan, postpitch0_f);
 
 
@@ -298,4 +307,5 @@ postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)];
 % postpitch_f(end,4)
 
 
-fuel_left = mFuel - (m(1) - m(end))
+% fuel_left = mFuel - (m(1) - m(end)) % for fixed mass
+

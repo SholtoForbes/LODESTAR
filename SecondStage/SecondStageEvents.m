@@ -38,10 +38,11 @@ end
 % endpointFunction(1) = v0;
 
 if const == 1 || const == 12 || const == 13 || const == 14
-endpointFunction(1) = mfuel0;
-endpointFunction(2) = mfuelf;
+        endpointFunction(1) = v0;
+endpointFunction(2) = mfuel0;
+endpointFunction(3) = mfuelf;
 % endpointFunction(4) = V0;
-endpointFunction(3) = zetaf;
+endpointFunction(4) = zetaf;
 end
 
 % if const == 13
@@ -49,9 +50,10 @@ end
 % end
 
 if const == 3
-endpointFunction(1) = mfuel0;
-endpointFunction(2) = mfuelf;
-endpointFunction(3) = zetaf;
+    endpointFunction(1) = v0;
+endpointFunction(2) = mfuel0;
+endpointFunction(3) = mfuelf;
+endpointFunction(4) = zetaf;
 %  endpointFunction(5) = V0;
 end
 

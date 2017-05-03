@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 1
+const = 3
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -190,9 +190,9 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
 % 
 % PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
 % PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
+
 % global PayloadGrid
 % PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
-
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
@@ -318,7 +318,7 @@ elseif const == 12
 elseif const == 13
     v0 = 1521;
 end
-v0 = 1500; 
+v0 = 1600; 
 vf = 2839.51;
 
 
@@ -379,8 +379,8 @@ bounds.upper.path = 45000;
 elseif const ==3
 %         bounds.lower.path = 0;
 % bounds.upper.path = 0;
-%         bounds.lower.path = [];
-% bounds.upper.path = [];
+        bounds.lower.path = [];
+bounds.upper.path = [];
 end
 
 %% 
@@ -391,9 +391,9 @@ end
 TwoStage2d.cost 		= 'SecondStageCost';
 TwoStage2d.dynamics	    = 'SecondStageDynamics';
 TwoStage2d.events		= 'SecondStageEvents';	
-if const  == 1 || const  == 12 || const  == 13 || const  == 14 
+% if const  == 1 || const  == 12 || const  == 13 || const  == 14 
 TwoStage2d.path		= 'SecondStagePath';
-end
+% end
 TwoStage2d.bounds       = bounds;
 
 
@@ -437,7 +437,7 @@ constq = dlmread('primalconstq.txt');
 % expected.
 if const == 1
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
+
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13
@@ -451,8 +451,8 @@ end
 
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
-% guess.states(2,:) = [v0, 2950]/scale.v; 
-guess.states(2,:) = [v0, 2920]/scale.v; 
+guess.states(2,:) = [v0, 2950]/scale.v; 
+
 % Trajectoy angle guess. Sort of important, but easy to define. 
 if const ==3 || const == 31 
 guess.states(3,:) = [0,0]/scale.theta;
@@ -807,7 +807,7 @@ plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_5,t,mu_u);
 legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');
 title('Validation')
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% FORWARD INTEGRATION
+% FORWARD SIMULATION
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % This simply tests that the system dynamics hold, as the
 % Pseudospectral method may not converge to a realistic
@@ -864,18 +864,8 @@ if PayloadGrid(V(end)+10,theta(end),v(end)) - PayloadGrid(V(end),theta(end),v(en
     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 end
 
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% FORWARD SIMULATION
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-% This is a full forward simulation, using the angle of attack and flap
-% deflection at each node.
-
-% Note, because the nodes are spaced widely, small interpolation
-% differences result in the forward simulation being slightly different
-% than the actual. This is mostly a check to see if they are close. 
-
 forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.9725e+03];
+
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);

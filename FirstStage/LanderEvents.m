@@ -19,15 +19,16 @@ zeta0 = primal.states(6,1);		zetaf = primal.states(6,end);
 %===========================================================
 eventConditions(1) = h0;
 eventConditions(2) = v0;
-eventConditions(3) = m0;
-eventConditions(4) = gamma0;
-eventConditions(5) = alpha0;
+% eventConditions(3) = m0;
+eventConditions(3) = gamma0;
+eventConditions(4) = alpha0;
 %-----------------------------------------------------------
 
 % eventConditions(6) = mf;
-eventConditions(6) = zetaf;
+eventConditions(5) = zetaf;
 % eventConditions(7) = hf;
-eventConditions(7) = gammaf;
-% eventConditions(8) = hf;
+eventConditions(6) = gammaf;
+eventConditions(7) = vf;
+eventConditions(8) = mf;
 %===========================================================
 % all done!

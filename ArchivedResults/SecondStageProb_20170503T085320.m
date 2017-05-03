@@ -190,9 +190,9 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
 % 
 % PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
 % PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
+
 % global PayloadGrid
 % PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
-
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
@@ -437,7 +437,7 @@ constq = dlmread('primalconstq.txt');
 % expected.
 if const == 1
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
+
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13

@@ -190,9 +190,9 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
 % 
 % PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
 % PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
+
 % global PayloadGrid
 % PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
-
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
