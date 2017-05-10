@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 3
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -151,16 +151,16 @@ scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_tr
 scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
 clear liftarray
+
+% scattered.drag_forward = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,4),liftarray(:,6));
+% scattered.lift_forward = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,4),liftarray(:,3));
 %==========================================================================
 %   Import Payload Data 
 %==========================================================================
 
 
-% Import third stage data as arrays. the third stage data should be two
-% files, named thirdstage.dat and thirdstagefine.dat, arranged in four
+% Import third stage data as arrays. the third stage data should be in thirdstage.dat
 % columns: Altitude (m) , Trajectory angle (rad) , velocity (m/s) , payload-to-orbit (kg)
-
-% Two payload arrays are used: course and fine, purely to minimise computational time 
 
 % The PS routine must be able to search over a relatively large solution
 % space for all primal variables end states, so there must be a
@@ -179,20 +179,20 @@ ThirdStageData = sortrows(ThirdStageData);
 
 %%Permutes payload matrix into interpolatable form, no phi, zeta
 
-PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
-[VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% PayloadData = permute(reshape(ThirdStageData(:,6),[length(unique(ThirdStageData(:,5))),length(unique(ThirdStageData(:,4))),length(unique(ThirdStageData(:,3)))]),[3 2 1]);
+% [VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5)));
+% global PayloadGrid
+% PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
+
+
+%THIS INTERPOLATEs FOR ANY MISSING THIRD STAGE POINTS, BE CAREFUL WITH THIS
+[VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.0125 0.025 0.0375 0.05],[2800:25:2950]);
+
+PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
+PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
 global PayloadGrid
 PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 
-
-%THIS INTERPOLATED FOR ANY MISSING THIRD STAGE POINTS, BE CAREFUL WITH THIS
-% [VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.025 0.05],[2900 2925 2950]);
-% 
-% PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
-% PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
-
-% global PayloadGrid
-% PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','linear');
 
 % First Stage Array
 FirstStageData = dlmread('FirstStageDat.txt');
@@ -341,7 +341,8 @@ end
 % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
 
 
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
 % bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; 1.69];
 
 
@@ -410,7 +411,7 @@ algorithm.nodes		= [90];
 elseif const == 1
 % algorithm.nodes		= [90]; 
 % algorithm.nodes		= [100]; 
-algorithm.nodes		= [80]; 
+algorithm.nodes		= [90]; 
 elseif const == 12 
 % algorithm.nodes		= [80];
 algorithm.nodes		= [90];
@@ -436,8 +437,8 @@ constq = dlmread('primalconstq.txt');
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34000 ];
-
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000 ];
 elseif const == 12
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13
@@ -873,8 +874,9 @@ end
 
 % Note, because the nodes are spaced widely, small interpolation
 % differences result in the forward simulation being slightly different
-% than the actual. 
-forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.9725e+03];
+% than the actual. This is mostly a check to see if they are close. 
+
+forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);

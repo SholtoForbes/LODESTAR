@@ -49,10 +49,10 @@ options.TolX = 1e-3;
 mpayload = 0;
 x=0;
 
-for i3 = 0:4
-for i2 = 0:0.5:10
-    i3
-    i2
+    for i3 = 0:.5:6
+for i2 = 0:10
+%     i3
+%     i2
 %     for i4 = 0:2
 % x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(i/2) 250/1000];
 % x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];

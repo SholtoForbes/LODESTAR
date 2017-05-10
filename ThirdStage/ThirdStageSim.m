@@ -144,7 +144,7 @@ r_E = 6371000; % earth radius
 Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
 
 %Reference area
-A = 0.866;
+A = 0.866; % diameter of 1.05m
 
 g = 9.81; %standard gravity
 

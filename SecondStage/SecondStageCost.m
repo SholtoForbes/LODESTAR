@@ -67,10 +67,10 @@ IspNet = (Thrust-Fd)./Fueldt./9.81;
 
 global PayloadGrid
 % ThirdStagePayloadMass = PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end));
-if v(end) > 2850
+if v(end) > 2875
 ThirdStagePayloadMass = PayloadGrid(V(end),theta(end),v(end));
 else
-    ThirdStagePayloadMass = gaussmf(v(end), [300 2850] )*PayloadGrid(V(end),theta(end),2850);
+    ThirdStagePayloadMass = gaussmf(v(end), [300 2875] )*PayloadGrid(V(end),theta(end),2875);
 end
 
 % Define Cost =======================================================
@@ -143,7 +143,7 @@ elseif const == 1  || const == 12 || const == 13 || const == 14
 %   it more volatile..
 
 %     RunningCost = Penalty*2 ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
-RunningCost = Penalty*2.3 ;
+% RunningCost = Penalty*2.3 ;
     %Omegadot cost smooths the trajectory 
 RunningCost = 0;
 end

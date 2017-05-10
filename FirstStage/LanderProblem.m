@@ -6,7 +6,7 @@ clear all;
 clc
 %==============================================================
 % global zeta
-global phi
+% global phi
 global q
 
 global iterative_V
@@ -53,22 +53,27 @@ SPARTANscale = 1;
 
 % TARGET ==================================================================
 %target final altitude and trajectory angle
-global hf
-hf = 25000; % set final desired altitude
-gammaf = 0; % set final desired flight angle
+% global hf
+% hf = 24000; % set final desired altitude
+hf = 24419; % const 1
+
+% gammaf = 0; % set final desired flight angle
+
+gammaf =0.0408; % const 1
 % =========================================================================
 
 
-mRocket = 19000; % sets the total wet mass of the rocket (first stage only)
-
+% mRocket = 17000; % sets the total wet mass of the rocket (first stage only)
+mRocket =22710 % total mass of scaled Falcon, note, this will not be the final total mass
 mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*mRocket; % Mass fraction kept constant for simplicity
-
+% mFuel = 0.939*mRocket; % Mass fraction kept constant for simplicity
+mFuel = 0.939*(mRocket-mEngine) + mEngine; % structural mass fraction calculated without engine
 mSpartan = 9.7725e+03;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 
+% mEmpty = 1482.7; %(kg) Falcon sized to 8.5m, see ALV notes - 9/5/17 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -124,7 +129,8 @@ vLow = 0;
 vUpp = 3000;  
 
 mLow = mEmpty;
-mUpp = mTotal;
+% mUpp = mTotal;
+mUpp = 31000;
 
 gammaLow = deg2rad(-.1);
 gammaUpp = deg2rad(89.9);
@@ -149,13 +155,15 @@ bounds.upper.time	= [0 tfMax];
 
 
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(4)*AOAScale;0;-0.1];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(4)*AOAScale;0;-0.1; -0.25];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1; -0.15];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
 
-zetaF = deg2rad(97); %Targets a specific heading angle. This is about right to get into a SSO by the end of third stage flight
+% zetaF = deg2rad(97); %Targets a specific heading angle. This is about right to get into a SSO by the end of third stage flight
+zetaF = 1.6837;
+phif = -0.2138; % these match second stage
 
 alpha0 = 0; %Set initial angle of attack to 0
 
@@ -170,7 +178,14 @@ alpha0 = 0; %Set initial angle of attack to 0
 %   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
-bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; 1500; mEmpty+mSpartan];
+% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; 1500; mEmpty+mSpartan; hf; phif];
+
+vf = 1520;
+Atmosphere = dlmread('atmosphere.txt');
+bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; vf; mEmpty+mSpartan; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2); phif];
+
+% bounds.lower.events = [h0; v0; gamma0; alpha0;mTotal; zetaF; gammaf; mEmpty+mSpartan; hf; phif];
+
 bounds.upper.events = bounds.lower.events;
 
 
@@ -201,17 +216,19 @@ MoonLander.bounds = bounds;
 t0			= 0;
 tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
-
 guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
+% guess.states(1,:)	= [h0, interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2)+100]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1500];
 % guess.states(2,:)	= [v0, 1550];
-guess.states(3,:)	= [m0, mF];
-guess.states(3,:)	= [24500, mF];
-guess.states(4,:)	= [gamma0,0];
+guess.states(3,:)	= [mUpp, mF];
+% guess.states(3,:)	= [mTotal, mF];
+guess.states(4,:)	= [gamma0,gammaf];
 guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaF];
 
 guess.states(7,:)	= [0, 0];
+
+guess.states(8,:)	= [-0.22, phif];
 
 guess.controls		= [0.0, 0.0];
 guess.time			= [t0, tfGuess];
@@ -249,6 +266,7 @@ m = primal.states(3,:);
 gamma = primal.states(4,:);
 alpha = primal.states(5,:);
 zeta = primal.states(6,:);
+phi = primal.states(8,:);
 figure;
 hold on
 % plot([t_prepitch.' primal.nodes+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k','linestyle','-');

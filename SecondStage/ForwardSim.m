@@ -58,10 +58,16 @@ Flap_lift =q./50000*flaplift_spline(M,alpha,flapdeflection);
 % total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(alpha)) %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
 lift = Cl1*A*q + Flap_lift ;
-
-% Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);
 Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,flapdeflection);
-% flapdeflection = flapdeflection_spline(M,alpha,-body_pitchingmoment);
+
+% lift = scattered.lift_forward(v,V,alpha);
+% Drag = scattered.drag_forward(v,V,alpha);
+
+% lift = fminsearch(@(lift_search)Alphaerror(lift_search,v,V,scattered,alpha),90000);
+% % Alpha = scattered.AoA(v,V,lift);
+% flapdeflection = scattered.flapdeflection(v,V,lift);
+% Drag = scattered.drag(v,V,lift); 
+
 
 [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsForward(r,xi,phi,gamma,v,zeta,lift,Drag,Thrust,m,alpha);
 

@@ -16,6 +16,7 @@ xidot = v.*cos(gamma).*cos(zeta)./(r.*cos(phi));
 
 phidot = v.*cos(gamma).*sin(zeta)./r;
 total_lift = T.*sin(alpha) + L;
+% total_lift = L;
 
 gammadot = total_lift./(m.*v) + (v./r - mu_E./(r.^2.*v)).*cos(gamma) + cos(phi).*(2.*omega_E.*cos(zeta) + omega_E.^2.*r./v.*(cos(phi).*cos(gamma)+sin(phi).*sin(gamma).*sin(zeta)));
 

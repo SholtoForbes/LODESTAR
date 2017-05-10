@@ -1,5 +1,5 @@
-function [dz,q,phi] = rocketDynamics(z,u,t,phase,scattered)
-
+function [dz,q,xi] = rocketDynamics(z,u,t,phase,scattered)
+% function [dz,q,phi] = rocketDynamics(z,u,t,phase,scattered)
 %This function determines the dynamics of the system as time derivatives,
 %from input primals. Called by LanderDynamics
 
@@ -14,6 +14,7 @@ zeta = z(6,:);
 
 dalphadt = z(7,:);
 
+phi = z(8,:);
 
 dalphadt2 = u(1,:); % control is second derivative of AoA with time
 
@@ -74,7 +75,7 @@ switch phase
 end
 
 xi = 0; 
-phi = -0.2220; % initial latitude
+% phi = -0.2220; % initial latitude
 
 % This determines the dynamics of the system.
 % Set up like this because phi is a quasi-forward sim instead of a primal
@@ -82,8 +83,8 @@ i = 1;
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
 for i= 2:length(t)
 
-phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));
-
+% phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));
+xi(i) = xi(i-1) + dxi(i-1)*(t(i) - t(i-1));
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi,phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
 end
 
@@ -97,7 +98,7 @@ switch phase
 end
 
 
-dz = [dr;dv;dm;dgamma;dalphadt;dzeta;dalphadt2];
+dz = [dr;dv;dm;dgamma;dalphadt;dzeta;dalphadt2;dphi];
 
 if any(isnan(dz))
     disp('NaN Values Detected')

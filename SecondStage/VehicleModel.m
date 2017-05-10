@@ -81,8 +81,8 @@ M = v./c; % Calculating Mach No (Descaled)
 % Control =================================================================
 
 % % determine aerodynamics necessary for trim
-[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search);
-
+% [Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search);
+[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search,c,rho,Atmosphere);
 
 
 

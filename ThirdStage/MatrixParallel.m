@@ -6,9 +6,9 @@ mat = [];
 
 % u = [2850:25:2925];
 % u = 2900
-u = [2900:25:2950];
-u = [2800:25:2950]
-
+% u = [2900:25:2950];
+% u = [2875:25:2950]
+u = [2825 2850 2975 3000]
 % options.Display = 'iter';
 % options.Display = 'final';
 % options.Algorithm = 'sqp';
@@ -40,7 +40,7 @@ zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
 % for k = [30000:1000:35000 35000:250:38000 38500:500:40000]
 for k = [33000:1000:38000]
 %     for j = [0.00:0.025:0.05]
-for j = [ 0.0125 0.0375]
+for j = [0 0.0125 0.025 0.0375 0.05]
 %         for j = [0]
         temp_guess_no = 1;
         
@@ -170,4 +170,4 @@ temp_guess_no = temp_guess_no + 1;
 end
 % end
 % end
-dlmwrite('thirdstagenew2.dat', mat,'delimiter','\t')
+dlmwrite('thirdstagenew.dat', mat,'delimiter','\t')

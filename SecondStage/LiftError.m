@@ -17,7 +17,7 @@ function error = LiftError(M, Alpha, scattered, SPARTAN_SCALE,pitchingmoment_spl
 
             total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(Alpha)); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
-            error = abs(total_lift - Lift);
+            error = abs(total_lift - Lift)
 
             
 end
