@@ -1,4 +1,4 @@
-function [mpayload, x] = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x, zeta, phi] = ThirdStageOptm(k,j,u, phi0, zeta0)
 
 mScale = 1; % This needs to be manually changed in altitude and velocity files as well
 
@@ -49,28 +49,25 @@ options.TolX = 1e-3;
 mpayload = 0;
 x=0;
 
-    for i3 = 0:.5:6
+%     for i3 = 0:.1:8
+  for i3 = 0:.5:6
 for i2 = 0:10
-%     i3
-%     i2
-%     for i4 = 0:2
-% x0 = [2590/10000  AoA_max*ones(1,16)-deg2rad(i/2) 250/1000];
-% x0 = [2590/10000  AoA_max*ones(1,16) 250/1000];
-% x0 = [2590/10000  AoA_max*ones(1,20) 280/1000];
-% x0 = [2600/100000  AoA_max*ones(1,20) 250/10000+i*10/10000]; %[mfuel (constrained to 2600 currently) aoa t_aoa variation- this guess is very important!]
+
 i4=0;
 x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01 250/10000+i2*5/10000]; 
-% x0 = [2590/10000  AoA_max*ones(1,10) 300000/1e7 250/1000];
+% x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01 280/10000]; 
 
-% x0 = [2590/10000  0*ones(1,30) AoA_max-deg2rad(1)];
-% options.DiffMinChange = 0.0005 + 0.0001*i;
-% options.DiffMinChange =  0.0010;
 options.DiffMinChange = 0.0005*i3;
 [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(0)*ones(1,10) 160000/1e7 200/1000],[3000/10000 AoA_max*ones(1,10) 580000/1e7 300/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2300/10000 deg2rad(-1)*ones(1,30) 0],[3000/10000 deg2rad(1)*ones(1,30) AoA_max],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+opts = optimoptions(@fmincon,'Algorithm','sqp','Display','iter','TolFun',1e-3,'TolX',1e-3,'DiffMinChange',0.0005);
+problem = createOptimProblem('fmincon','objective',...
+ @(x)Payload(x,k,j,u, phi0, zeta0),'x0',[AoA_max*ones(1,10)-i4*AoA_max*0.01 280/10000],'lb',[deg2rad(0)*ones(1,10) 200/10000],'ub',[AoA_max*ones(1,10) 350/10000],'nonlcon',@(x)Constraint(x,k,j,u, phi0, zeta0),'options',opts);
+% ms = MultiStart;
+% ms.StartPointsToRun = 'bounds-ineqs'
+% [x,f,exitflag] = run(ms,problem,1000)
+% gs = GlobalSearch('NumTrialPoints',10000);
+% [x,fmin,flag,outpt,allmins] = run(gs,problem);
 exitflag
 [AltF, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);
 
@@ -83,7 +80,7 @@ end
 % end
 %     mpayload = mpayload_temp;
 %     x = x_temp;
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0);
+[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,phi] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 
 % x = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[2200/10000 deg2rad(0)*ones(1,16) 200/1000],[3000/10000 AoA_max*ones(1,16) 270/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 % [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x,k,j,u, phi0, zeta0);
@@ -107,7 +104,7 @@ hold on
 plot(t, Alt/100, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
 plot(t,v, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
 plot(t, m, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
-legend(  'Altitude (km x 100)',  'Mass (kg)', 'Velocity (m/s)');
+legend(  'Altitude (km x 100)', 'Velocity (m/s)',  'Mass (kg)');
 subplot(2,1,2);
 hold on
 plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
@@ -116,7 +113,7 @@ plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.
 % plot(t(1:end),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
 legend(  'Trajectory Angle (degrees)','Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
 
-% legend(  'Altitude (km x 100)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^3)', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
+% legend(  'Altitude (km x 100)', 'Trajectory Angle (degrees)', 'Velocity (m/s x 10^3)', 'Mass (kg x 10^3)', 'Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
 ylim([0 8])
 xlim([0 t(end)])
 

@@ -144,17 +144,17 @@ A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
 j = 1;
-for v = 1500:10:3000 % Velocity (m/s)
+% for v = 1470:10:3000 % Velocity (m/s)
 % for v = 1500:25:3000 % Velocity (m/s)
-% for v = 1950
-todisp = [num2str(j/length(1500:25:3000)*100),' % complete '];
+for v = 1490:25:3000
+todisp = [num2str(j/length(1490:25:3000)*100),' % complete '];
 disp(todisp)
 j = j+1;
-    for alt = 22000:100:40000 % Altitude (m)
-% for alt = 20000:250:50000 % Altitude (m)
+%     for alt = 22000:100:40000 % Altitude (m)
+for alt = 20000:250:40000 % Altitude (m)
 % for alt = 27000
- Lift = 0:1000:200000; % Lift force (N)   max mass of vehicle is 8755.1
-% Lift = 25000:2500:150000; % Lift force (N)   max mass of vehicle is 8755.1
+%  Lift = 0:1000:200000; % Lift force (N)   max mass of vehicle is 8755.1
+Lift = 25000:2500:160000; % Lift force (N)   max mass of vehicle is 8755.1
 % Lift = 70000
 Alphatemp = [];
 flapdeflection=[];
@@ -216,5 +216,5 @@ end
     end
 end
 
-dlmwrite('liftarray',liftarray)
+dlmwrite('liftarray2',liftarray)
 

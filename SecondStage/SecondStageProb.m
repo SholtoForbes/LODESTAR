@@ -44,7 +44,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 31: simple model for guess calc 
 
 global const
-const = 12
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -446,14 +446,14 @@ constq = dlmread('primalconstq.txt');
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,33000 ];
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,35000 ];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,33000 ];
 elseif const == 12
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,33000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,34000];
 elseif const == 13
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,35000];%45kPa limited
 elseif const == 14
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,33000]; %High Drag
 else
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,32000 ]/scale.V; 
@@ -461,7 +461,7 @@ end
 
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
-guess.states(2,:) = [v0, 2940]/scale.v; 
+guess.states(2,:) = [v0, 2950]/scale.v; 
 % guess.states(2,:) = [v0, 2920]/scale.v; 
 % Trajectoy angle guess. Sort of important, but easy to define. 
 if const ==3 || const == 31 
@@ -541,10 +541,11 @@ omegadot = primal.controls(1,:)*scale.theta;
 
 global phi
 
-% cd('../ThirdStage')
-% ThirdStagePayloadMass = ThirdStageOptm(V(end),theta(end),v(end), phi(end),zeta(end))
-% cd('../SecondStage')
-ThirdStagePayloadMass = 0;
+cd('../ThirdStage')
+[ThirdStagePayloadMass,ThirdStageControls,ThirdStageZeta,ThirdStagePhi] = ThirdStageOptm(V(end),theta(end),v(end), phi(end),zeta(end));
+ThirdStagePayloadMass
+cd('../SecondStage')
+% ThirdStagePayloadMass = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %
