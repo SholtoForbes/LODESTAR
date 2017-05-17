@@ -28,9 +28,15 @@ mEarth = 5.9721986e24;  %(kg) mass of earth
 G = 6.67e-11; %(Nm^2/kg^2) gravitational constant
 g = G*mEarth./((h+rEarth).^2);
 
+if h>=0
 density = interp1(Atmosphere(:,1),Atmosphere(:,4),h);
 P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),h);
 speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),h);
+else
+    density = interp1(Atmosphere(:,1),Atmosphere(:,4),0);
+P_atm = interp1(Atmosphere(:,1),Atmosphere(:,3),0);
+speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),0);
+end
 
 q = 0.5*density.*v.^2;
 

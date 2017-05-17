@@ -67,10 +67,10 @@ IspNet = (Thrust-Fd)./Fueldt./9.81;
 
 global PayloadGrid
 % ThirdStagePayloadMass = PayloadGrid(phi(end),zeta(end),V(end),theta(end),v(end));
-if v(end) > 2825
+if v(end) > 2875
 ThirdStagePayloadMass = PayloadGrid(V(end),theta(end),v(end));
 else
-    ThirdStagePayloadMass = gaussmf(v(end), [300 2825] )*PayloadGrid(V(end),theta(end),2825);
+    ThirdStagePayloadMass = gaussmf(v(end), [300 2875] )*PayloadGrid(V(end),theta(end),2875);
 end
 
 % Define Cost =======================================================
@@ -89,9 +89,20 @@ EndpointCost = Endcost;
 
 if const == 3 
 
+% RunningCost =((q-50000).^2+1000000)/1000000 + [0 0.005*abs(omegadot)]; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+2000000)/2000000 + [0 0.005*abs(omegadot)];
+% RunningCost =((q-50000).^2+2000000)/2000000 + abs(thetadot);
+% RunningCost =((q-50000).^2+2000000)/2000000; %looser
 
-% RunningCost =((q-50000).^2+100000)/100000 + [0.005*abs(omegadot)];
-RunningCost =((q-50000).^2+100000)/100000 + [0.0001*abs(omegadot)];
+% RunningCost =((q-50000).^2+10000)/10000 + [0.005*abs(omegadot)]; % tighter
+% RunningCost =((q-50000).^2+50000)/50000 + [0.005*abs(omegadot)]; % tighter, this works as of 1/2/17
+RunningCost =((q-50000).^2+100000)/100000 + [0.005*abs(omegadot)]; % tighter
+% RunningCost =((q-50000).^2+100000)/100000 ; 
+
+% RunningCost =((q-50000).^2+500000)/500000 + [0.005*abs(omegadot)]; % tighter
+% RunningCost =((q-50000).^2+5000000)/5000000 + [0.005*abs(omegadot)]; % tighter
+
+% RunningCost =((q-50000).^2+100000)/100000;
 
 elseif const == 1  || const == 12 || const == 13 || const == 14
     

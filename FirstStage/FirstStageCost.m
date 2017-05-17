@@ -27,7 +27,11 @@ global hf
 
 % eventCost = m(1);
 % eventCost   = (V(end)-hf)^2 + m(1);
-eventCost   = 0.000001*m(1);
+
+
+% eventCost   = 0.000001*m(1);
+% eventCost   = 0.01*m(1);
+eventCost   = .01*m(1);
 % eventCost   = 0;
 
 % eventCost   = -0.001*v(end);
