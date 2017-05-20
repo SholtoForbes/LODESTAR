@@ -91,8 +91,8 @@ if const == 3
 
 
 % RunningCost =((q-50000).^2+100000)/100000 + [0.005*abs(omegadot)];
-RunningCost =((q-50000).^2+100000)/100000 + [0.0001*abs(omegadot)];
-
+% RunningCost =((q-50000).^2+100000)/100000 + [0.0001*abs(omegadot)];
+RunningCost =((q-50000).^2+100000)/100000 + [0.01*abs(omegadot)];
 elseif const == 1  || const == 12 || const == 13 || const == 14
     
 %smoothing functions (can be adjusted depending on needs, remove if not working

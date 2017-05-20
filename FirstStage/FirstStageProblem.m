@@ -1,4 +1,4 @@
-function [states_end] = FirstStageProblem(hf,gammaf,phif,zetaf)
+function [states_end] = FirstStageProblem(hf,gammaf,phif,zetaf,const)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,14 +123,14 @@ gamma0 = deg2rad(89.9);    % set pitchover amount (start flight angle). This pit
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
 hLow = 0;   %Cannot go through the earth
-hUpp = 70000;  
+hUpp = 30000;  
 
 vLow = 0; 
 vUpp = 3000;  
 
 mLow = mEmpty;
 % mUpp = mTotal;
-mUpp = 31000;
+mUpp = 29000;
 
 gammaLow = deg2rad(-.1);
 gammaUpp = deg2rad(89.9);
@@ -182,8 +182,8 @@ alpha0 = 0; %Set initial angle of attack to 0
 
 vf = 1520;
 Atmosphere = dlmread('atmosphere.txt');
-bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2); phif];
-
+% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2); phif];
+bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
 % bounds.lower.events = [h0; v0; gamma0; alpha0;mTotal; zetaF; gammaf; mEmpty+mSpartan; hf; phif];
 
 bounds.upper.events = bounds.lower.events;
@@ -208,6 +208,7 @@ MoonLander.bounds = bounds;
                          % the solution (but, practically, this is not
                          % always true!)
   algorithm.nodes = [80]; 
+%  algorithm.nodes = [60]; 
   % Change this by a few nodes to potentially change the solution slightly
   
   
@@ -217,13 +218,27 @@ t0			= 0;
 tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
 % guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
-guess.states(1,:)	= [h0, hf+1000];
+if const == 1
+    guess.states(1,:)	= [h0, hf-100];
+elseif const == 12
+%     guess.states(1,:)	= [h0, hf]%didnt work
+    guess.states(1,:)	= [h0, hf-100];
+elseif const == 13
+    guess.states(1,:)	= [h0, hf-500];
+elseif const == 14
+%     guess.states(1,:)	= [h0, hf-100]; %didnt work
+guess.states(1,:)	= [h0, hf];
+elseif const == 3
+    guess.states(1,:)	= [h0, hf-100];
+end
+% guess.states(1,:)	= [hf,hf];
 % guess.states(1,:)	= [h0, interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2)+100]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1520];
 % guess.states(2,:)	= [v0, 1550];
 guess.states(3,:)	= [mUpp, mF];
 % guess.states(3,:)	= [mTotal, mF];
 guess.states(4,:)	= [gamma0,gammaf];
+% guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaf];
 
@@ -236,13 +251,13 @@ guess.time			= [t0, tfGuess];
 
 
 %% Start Iterative Plot
-figure(10)
+figure(1010)
 plot(linspace(guess.time(1),guess.time(2),algorithm.nodes),linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes),'k')
 iterative_V(end+1,:) = linspace(guess.states(1,1),guess.states(1,2),algorithm.nodes);
 iterative_t(end+1,:) = linspace(guess.time(1),guess.time(2),algorithm.nodes);
 
 filename = 'testnew51.gif';
-frame = getframe(10);
+frame = getframe(1010);
 im = frame2im(frame);
 [imind,cm] = rgb2ind(im,256);
 imwrite(imind,cm,filename,'gif', 'Loopcount',0);
@@ -332,7 +347,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0, 0];
 [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
 
 
-figure;
+figure(101);
 hold on
 plot([t_prepitch.' primal.nodes+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k','linestyle','-');
 plot([t_prepitch.' primal.nodes+t_prepitch(end)], [y(:,2).'/1000 v/1000],'color','k','linestyle','--');
@@ -360,7 +375,7 @@ mu_u = dual.controls; % NOTE: This deviates from 0, as the controls are set as a
 % Lagrangian of the Hamiltonian 
 dLHdu = dual.dynamics(3,:) + mu_u; % 
 
-figure(5)
+figure(102)
 
 plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_5,t,mu_u);
 legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');

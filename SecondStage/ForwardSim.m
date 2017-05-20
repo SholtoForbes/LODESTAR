@@ -54,12 +54,15 @@ Cl1 = Cl_spline(M,alpha);
 body_pitchingmoment = pitchingmoment_spline(M, alpha);% first approximation of pitchingmoment using only body lift
 
 % Flap_lift = q./50000*flaplift_spline(M,alpha,-body_pitchingmoment)*SPARTAN_SCALE^(2/3);% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
+% Flap_deflection = flapdeflection_spline(M,alpha,-body_pitchingmoment)
+% Flap_lift2 =q./50000*flaplift_spline(M,alpha,Flap_deflection)
+% M,alpha,flapdeflection,q
 Flap_lift =q./50000*flaplift_spline(M,alpha,flapdeflection);
 % total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(alpha)) %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
 lift = Cl1*A*q + Flap_lift ;
 Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,flapdeflection);
-
+% Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,-body_pitchingmoment)
 % lift = scattered.lift_forward(v,V,alpha);
 % Drag = scattered.drag_forward(v,V,alpha);
 

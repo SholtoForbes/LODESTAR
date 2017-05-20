@@ -34,10 +34,12 @@ communicator = importdata('communicator.txt');
 communicator_trim = importdata('communicator_trim.txt');
 
 
-scattered.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
-
+% scattered.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+% scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+% scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+% scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
+% scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6));
+scattered.flappm_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,4));
 
 [MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
 Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
@@ -122,10 +124,12 @@ scattered.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'
 
 disp('Calculating Flight Dynamics Regime');
 
-flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
-
+% flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+% flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+% flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,3));
+flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
+flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6));
 
 [MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
 Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
@@ -147,23 +151,26 @@ j = 1;
 % for v = 1470:10:3000 % Velocity (m/s)
 % for v = 1500:25:3000 % Velocity (m/s)
 for v = 1490:25:3000
+% for v = 1515
 todisp = [num2str(j/length(1490:25:3000)*100),' % complete '];
 disp(todisp)
 j = j+1;
 %     for alt = 22000:100:40000 % Altitude (m)
 for alt = 20000:250:40000 % Altitude (m)
-% for alt = 27000
+% for alt = 24300
 %  Lift = 0:1000:200000; % Lift force (N)   max mass of vehicle is 8755.1
 Lift = 25000:2500:160000; % Lift force (N)   max mass of vehicle is 8755.1
-% Lift = 70000
+% Lift = 87200
 Alphatemp = [];
 flapdeflection=[];
 Drag=[];
 body_pitchingmoment=[];
 error=[];
-  
-parfor i=1:length(Lift)
+%   options.Display = 'off';
 
+  options =   optimset('Algorithm','interior-point','Display','off','LargeScale','off');
+parfor i=1:length(Lift)
+% for i=1:length(Lift)
             
             c = spline( Atmosphere(:,1),  Atmosphere(:,5), alt); % Calculate speed of sound using atmospheric data
 
@@ -182,8 +189,11 @@ parfor i=1:length(Lift)
 %             alphaguess = 5;
 %             error(i) = 2;
 %            while error(i) > 1 && alphaguess < 7
-            Alphatemp(i) = fminsearch(@(Alpha)LiftError(M, Alpha, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift(i),T0,P0),5);
+%             Alphatemp(i) = fminunc(@(Alpha)LiftError(M, Alpha, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift(i),T0,P0),5);
 
+[x,fval] = fminunc(@(x)LiftError(M, x, scattered, SPARTAN_SCALE,pitchingmoment_spline,flaplift_spline,Cl_spline,q,A,Lift(i),T0,P0),[5,0],options);
+Alphatemp(i) = x(1);
+flapdeflection(i) = x(2);
             %Fuel Cost ===========================================================================
             
             [Isp,Fueldt] = RESTM12int(M, Alphatemp(i), scattered, SPARTAN_SCALE,T0,P0);
@@ -196,7 +206,9 @@ parfor i=1:length(Lift)
 
             body_pitchingmoment(i) = pitchingmoment_spline(M, Alphatemp(i));% first approximation of pitchingmoment using only body lift
 
-            Flap_lift = q./50000*flaplift_spline(M,Alphatemp(i),-body_pitchingmoment(i))*SPARTAN_SCALE^(2/3);% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
+%             Flap_lift = q./50000*flaplift_spline(M,Alphatemp(i),-body_pitchingmoment(i))*SPARTAN_SCALE^(2/3)% first approximation of flap lift, scale is only applied here as it will cancel for pitchingmoments
+% M,Alphatemp(i),flapdeflection(i),q
+Flap_lift = q./50000*flaplift_spline(M,Alphatemp(i),flapdeflection(i));
 
             total_lift = Cl1*A*q + Flap_lift + Thrust*sin(deg2rad(Alphatemp(i))); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
 
@@ -205,16 +217,16 @@ parfor i=1:length(Lift)
 %            end
             
 
-            flapdeflection(i) = flapdeflection_spline(M,Alphatemp(i),-body_pitchingmoment(i));
+%             flapdeflection(i) = flapdeflection_spline(M,Alphatemp(i),-body_pitchingmoment(i));
 
-            Drag(i) = Cd_spline(M,Alphatemp(i))*A*q +  q/50000*flapdrag_spline(M,Alphatemp(i),-body_pitchingmoment(i))*SPARTAN_SCALE^(2/3);
+%             Drag(i) = Cd_spline(M,Alphatemp(i))*A*q +  q/50000*flapdrag_spline(M,Alphatemp(i),-body_pitchingmoment(i))*SPARTAN_SCALE^(2/3);
 
-
+Drag(i) = Cd_spline(M,Alphatemp(i))*A*q +  q/50000*flapdrag_spline(M,Alphatemp(i),flapdeflection(i));
 end 
 
             liftarray = [liftarray;[v*ones(length(Lift),1),alt*ones(length(Lift),1),Lift.',Alphatemp.',flapdeflection.',Drag.',-body_pitchingmoment.',error.']];
     end
 end
 
-dlmwrite('liftarray2',liftarray)
+dlmwrite('liftarraynew',liftarray)
 

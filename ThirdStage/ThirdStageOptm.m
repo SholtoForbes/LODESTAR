@@ -1,4 +1,4 @@
-function [mpayload, x, zeta, phi] = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x, zeta, phi,Alt,v,t,Alpha,m,gamma,q] = ThirdStageOptm(k,j,u, phi0, zeta0)
 
 mScale = 1; % This needs to be manually changed in altitude and velocity files as well
 
@@ -33,9 +33,9 @@ AoA_max
 
 % x0 = [2590/10000  AoA_max*ones(1,5)  0*ones(1,1) AoA_max*ones(1,10)  250/1000];
 
-options.Display = 'iter-detailed';
+% options.Display = 'iter-detailed';
 options.Algorithm = 'sqp';
-options.FunValCheck = 'on'
+options.FunValCheck = 'on';
 % options.ScaleProblem = 'obj-and-constr'
 % options.DiffMinChange = 0.0005;
 % options.TypicalX = x0;
@@ -94,7 +94,7 @@ x(end)
 
 mpayload
 zeta(end)
-figure(9)
+figure(301)
 xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])
 

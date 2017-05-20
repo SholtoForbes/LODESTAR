@@ -51,7 +51,7 @@ if rem(iteration,5000) == 0
     hold on
     todisp = ['Total Iterations Done:',num2str(iteration)];
     disp(todisp);
-    figure(10)
+    figure(1010)
     iterative_V(end+1,:) = h;
     iterative_t(end+1,:) = t;
     if length(iterative_V(:,1)) > 4
@@ -70,7 +70,7 @@ if rem(iteration,5000) == 0
 %     plot(iterative_t(end,:),iterative_V_f(end,:),'Color','r')
 
     filename = 'testnew51.gif';
-    frame = getframe(10);
+    frame = getframe(1010);
     im = frame2im(frame);
     [imind,cm] = rgb2ind(im,256);
     imwrite(imind,cm,filename,'gif','WriteMode','append');

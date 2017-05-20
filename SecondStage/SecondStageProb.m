@@ -426,7 +426,7 @@ elseif const == 12
 algorithm.nodes		= [90];
 elseif const == 13
 % algorithm.nodes		= [78];
-algorithm.nodes		= [90];
+algorithm.nodes		= [89];
 % algorithm.nodes		= [110];
 elseif const == 14
 algorithm.nodes		= [90];
@@ -446,23 +446,23 @@ constq = dlmread('primalconstq.txt');
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500 ];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,33000 ];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34800 ];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,35000 ]; % third stage didnt work well
 elseif const == 12
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,34000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,35000];
 elseif const == 13
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,35000];%45kPa limited
 elseif const == 14
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,33000]; %High Drag
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
 else
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,32000 ]/scale.V; 
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),32000 ]/scale.V; 
 end
 
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
-guess.states(2,:) = [v0, 2950]/scale.v; 
-% guess.states(2,:) = [v0, 2920]/scale.v; 
+% guess.states(2,:) = [v0, 2950]/scale.v; 
+guess.states(2,:) = [v0, 2920]/scale.v; 
 % Trajectoy angle guess. Sort of important, but easy to define. 
 if const ==3 || const == 31 
 guess.states(3,:) = [0,0]/scale.theta;
@@ -542,7 +542,7 @@ omegadot = primal.controls(1,:)*scale.theta;
 global phi
 
 cd('../ThirdStage')
-[ThirdStagePayloadMass,ThirdStageControls,ThirdStageZeta,ThirdStagePhi] = ThirdStageOptm(V(end),theta(end),v(end), phi(end),zeta(end));
+[ThirdStagePayloadMass,ThirdStageControls,ThirdStageZeta,ThirdStagePhi,ThirdStageAlt,ThirdStagev,ThirdStaget,ThirdStageAlpha,ThirdStagem,ThirdStagegamma,ThirdStageq] = ThirdStageOptm(V(end),theta(end),v(end), phi(end),zeta(end));
 ThirdStagePayloadMass
 cd('../SecondStage')
 % ThirdStagePayloadMass = 0;
@@ -585,7 +585,7 @@ end
 
 Separation_LD = lift(end)/Fd(end)
 
-figure(1)
+figure(201)
 
 subplot(5,5,[1,10])
 hold on
@@ -680,7 +680,7 @@ title('Omegadot Control (Deg/s2)')
 dim = [.8 .0 .2 .2];
 annotation('textbox',dim,'string',{['Third Stage Thrust: ', num2str(50), ' kN'],['Third Stage Starting Mass: ' num2str(2850) ' kg'],['Third Stage Isp: ' num2str(350) ' s']},'FitBoxToText','on');  
 
-figure(2)
+figure(202)
 subplot(2,6,[1,6])
 hold on
 plot(H/1000, V/1000,'Color','k')
@@ -754,7 +754,7 @@ g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
 
-figure(3)
+figure(203)
 
 subplot(2,5,[1,5]);
 
@@ -780,11 +780,12 @@ title('Hamiltonian')
 dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha]);
 dlmwrite('payload.txt', ThirdStagePayloadMass);
 dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
+dlmwrite('ThirdStage.txt',[ThirdStageZeta,ThirdStagePhi,ThirdStageAlt,ThirdStagev,ThirdStaget,ThirdStageAlpha,ThirdStagem,ThirdStagegamma,ThirdStageq]);
 
 copyfile('primal.txt',sprintf('../ArchivedResults/primal_%s.txt',Timestamp))
 copyfile('dual.txt',sprintf('../ArchivedResults/dual_%s.txt',Timestamp))
 copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
-
+copyfile('ThirdStage.txt',sprintf('../ArchivedResults/ThirdStage_%s.txt',Timestamp))
 primal_old = primal;
 
 ts = timeseries(Isp,t);
@@ -812,7 +813,7 @@ mu_u = dual.controls; % NOTE: This deviates from 0, as the controls are set as a
 % Lagrangian of the Hamiltonian 
 dLHdu = dual.dynamics(3,:) + mu_u; % 
 
-figure(5)
+figure(205)
 
 plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_5,t,mu_u);
 legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');
@@ -840,7 +841,7 @@ V_F = V_F + V(1);
 mfuel_F = cumtrapz(t,-Fueldt);
 mfuel_F = mfuel_F + mfuel(1);
 
-figure(6)
+figure(206)
 
 subplot(5,1,1)
 plot(t,theta_F,t,theta);
@@ -889,7 +890,7 @@ forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03];
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);
 
-figure(12)
+figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(t,V);
@@ -906,7 +907,7 @@ plotT = [min(T_englist):1:600];
 interpeq = scattered.eqGridded(gridM,gridT);
 interpIsp = scattered.IspGridded(gridM,gridT);
 
-figure(100)
+figure(210)
 hold on
 contourf(gridM,gridT,interpeq);
 scatter(data(:,1),data(:,2),30,data(:,4),'filled');
@@ -914,7 +915,7 @@ plot(M1,T1,'r');
 
 error_Isp = scattered.IspGridded(data(:,1),data(:,2))-data(:,3);
 
-figure(101)
+figure(211)
 hold on
 contourf(gridM,gridT,interpIsp);
 scatter(data(:,1),data(:,2),30,data(:,3),'filled')
@@ -925,6 +926,12 @@ plot(M1,T1,'r');
 
 
 
+% Run First Stage =========================================================
+cd('../FirstStage')
+[FirstStageStates] = FirstStageProblem(V(1),theta(1),phi(1),zeta(1),const);
+cd('../SecondStage')
+dlmwrite('FirstStage.txt', FirstStageStates);
+copyfile('FirstStage.txt',sprintf('../ArchivedResults/FirstStage_%s.txt',Timestamp))
 %%
 
 % =========================================================================
