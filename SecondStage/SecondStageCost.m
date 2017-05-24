@@ -58,7 +58,7 @@ omegadot  = primal.controls(1,:)*scale.thetadot;
 
 
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,gridded,const,thetadot, Atmosphere, SPARTAN_SCALE,zeta);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,gridded,const,thetadot, Atmosphere, SPARTAN_SCALE,zeta);
 
 IspNet = (Thrust-Fd)./Fueldt./9.81;
 % THIRD STAGE ======================================================
@@ -76,8 +76,9 @@ end
 % Define Cost =======================================================
 % The pseudospectral solver is able to run with no cost at all, this is useful for checking dynamics
 
-if const == 3 
+if const == 3  || const == 32
 Endcost = 0;
+% Endcost = 0.001*theta(end);
 % Endcost =1*sum(abs(omegadot));
 elseif const == 1  || const == 12 || const == 13 || const == 14
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
@@ -87,12 +88,14 @@ EndpointCost = Endcost;
 
 
 
-if const == 3 
+if const == 3 || const == 32
 
 
 % RunningCost =((q-50000).^2+100000)/100000 + [0.005*abs(omegadot)];
-% RunningCost =((q-50000).^2+100000)/100000 + [0.0001*abs(omegadot)];
-RunningCost =((q-50000).^2+100000)/100000 + [0.01*abs(omegadot)];
+
+RunningCost =((q-50000).^2+100000)/100000 + [0.0001*abs(omegadot)];
+
+% RunningCost =((q-50000).^2+100000)/100000 + [0.01*abs(omegadot)];
 elseif const == 1  || const == 12 || const == 13 || const == 14
     
 %smoothing functions (can be adjusted depending on needs, remove if not working

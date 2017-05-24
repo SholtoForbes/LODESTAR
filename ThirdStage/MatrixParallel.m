@@ -18,7 +18,7 @@ u = [2825 2850 2975 3000]
 % for phi0 = [-0.1271-0.005 -0.1271 -0.1271+0.005]
     phi0 = -0.13 % this has very minimal effect
 % for zeta0 = [1.70 1.7040 1.7080]
-zeta0 = 1.69 % this is the phi to reach close to 1.704 rad heading angle (SSO)
+zeta0 = 1.69 % this is the zeta to reach close to 1.704 rad heading angle (SSO)
 
 
 %     guess = [2500/10000  deg2rad(20) deg2rad(20) deg2rad(20) deg2rad(20) 200/1000;

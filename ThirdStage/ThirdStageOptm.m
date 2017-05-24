@@ -104,7 +104,7 @@ hold on
 plot(t, Alt/100, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
 plot(t,v, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
 plot(t, m, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
-legend(  'Altitude (km x 100)', 'Velocity (m/s)',  'Mass (kg)');
+legend(  'Altitude (km x 10)', 'Velocity (m/s)',  'Mass (kg)');
 subplot(2,1,2);
 hold on
 plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)

@@ -7,7 +7,7 @@ function [states_end] = FirstStageProblem(hf,gammaf,phif,zetaf,const)
 %==============================================================
 % global zeta
 % global phi
-global q
+global q_forward
 
 global iterative_V
 iterative_V = [];
@@ -33,6 +33,7 @@ addpath TrajOpt-master
 Aero = dlmread('FirstStageAeroCoeffs.txt');
 scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
+scattered.Moment = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 
 M_list = unique(sort(Aero(:,1))); % create unique list of Mach numbers from engine data
 M_interp = unique(sort(Aero(:,1)));
@@ -43,8 +44,10 @@ AoA_interp = unique(sort(Aero(:,2)));
 [grid.M,grid.AoA] =  ndgrid(M_interp,AoA_interp);
 grid.Lift = scattered.Lift(grid.M,grid.AoA);
 grid.Drag = scattered.Drag(grid.M,grid.AoA);
+grid.Moment = scattered.Moment(grid.M,grid.AoA);
 scattered.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','linear');
 scattered.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
+scattered.MomentGridded = griddedInterpolant(grid.M,grid.AoA,grid.Moment,'spline','linear');
 
 global SPARTANscale
 
@@ -136,8 +139,10 @@ gammaLow = deg2rad(-.1);
 gammaUpp = deg2rad(89.9);
 
 % This sets the control limits, this is second derivative of AoA
-uLow = [-.001]*AOAScale; % Can do either AoA or thrust
-uUpp = [.001]*AOAScale; 
+% uLow = [-.001]*AOAScale; % Can do either AoA or thrust
+% uUpp = [.001]*AOAScale; 
+uLow = [-.0005]*AOAScale; % Can do either AoA or thrust
+uUpp = [.0005]*AOAScale; 
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
 %-------------------------------------------
@@ -207,7 +212,11 @@ MoonLander.bounds = bounds;
                        % larger the number of nodes, the more accurate 
                          % the solution (but, practically, this is not
                          % always true!)
+if const == 3
+    algorithm.nodes = [82]; 
+else
   algorithm.nodes = [80]; 
+end
 %  algorithm.nodes = [60]; 
   % Change this by a few nodes to potentially change the solution slightly
   
@@ -218,24 +227,26 @@ t0			= 0;
 tfGuess 	= 90;			
 % slightly educated guess of final time (for the scaled problem!)
 % guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
-if const == 1
+
+% if const == 3 || const == 12
     guess.states(1,:)	= [h0, hf-100];
-elseif const == 12
-%     guess.states(1,:)	= [h0, hf]%didnt work
-    guess.states(1,:)	= [h0, hf-100];
-elseif const == 13
-    guess.states(1,:)	= [h0, hf-500];
-elseif const == 14
-%     guess.states(1,:)	= [h0, hf-100]; %didnt work
-guess.states(1,:)	= [h0, hf];
-elseif const == 3
-    guess.states(1,:)	= [h0, hf-100];
-end
+% else
+%     guess.states(1,:)	= [h0, hf-500];
+% end
 % guess.states(1,:)	= [hf,hf];
 % guess.states(1,:)	= [h0, interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2)+100]; %24.5 for 45kpa, 23 for 55kpa
 guess.states(2,:)	= [v0, 1520];
+% guess.states(2,:)	= [v0, 1620];
 % guess.states(2,:)	= [v0, 1550];
-guess.states(3,:)	= [mUpp, mF];
+% guess.states(3,:)	= [28000, mF];
+
+
+% if const == 3
+    guess.states(3,:)	= [28300, mF];
+%     else
+%     guess.states(3,:)	= [mTotal, mF];
+% end
+
 % guess.states(3,:)	= [mTotal, mF];
 guess.states(4,:)	= [gamma0,gammaf];
 % guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
@@ -358,9 +369,10 @@ plot([t_prepitch.' primal.nodes+t_prepitch(end)], [zeros(1,length(t_prepitch)) r
 % plot([primal.nodes], [v/1000],'color','k','linestyle','--');
 % plot([primal.nodes], [V/10000],'color','k','linestyle',':');
 % plot([primal.nodes], [rad2deg(alpha)/10],'color','k','linestyle','-.')
-% legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /10)','AoA (degrees/10)')
-% xlabel('Time (s)')
-% xlim([0,primal.nodes(end)]);
+
+legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /10)','AoA (degrees/10)')
+xlabel('Time (s)')
+xlim([0,primal.nodes(end)]);
 
 mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);

@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta)
 
 % =======================================================
 % Vehicle Model
@@ -35,7 +35,9 @@ xi = zeros(1,length(time));
 phi = zeros(1,length(time));
 % zeta = zeros(1,length(time));
 
-phi(1) = -0.2138;
+% phi(1) = -0.2138;
+phi(1) = -0.264;
+
 % zeta(1) = deg2rad(97);
 % zeta(1) = 1.696;
 % zeta(1) = 1.699;
@@ -102,52 +104,52 @@ end
 % kpa50_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), kpa50_alt); % Calculate density using atmospheric data
 
 % Calculate temperature and pressure ratios
-if const == 1 || const == 14
-%     temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-    
-    Penalty = zeros(1,length(time));
-
-    for i = 1:length(time)
-        if q(i) < 50000
-
-        else
-
-            Penalty(i) = q(i)/50000-1; 
-
-        end
-    end
-elseif const == 12
-
-
-    Penalty = zeros(1,length(time));
-
-    for i = 1:length(time)
-        if q(i) < 55000
-
-        else
-
-            Penalty(i) = q(i)/55000-1; 
-
-        end
-    end
-elseif const == 13
-
-    Penalty = zeros(1,length(time));
-
-    for i = 1:length(time)
-        if q(i) < 45000
-
-        else
-            Penalty(i) = q(i)/45000-1; 
-
-        end
-    end
-elseif const == 3 || const == 31
-
-    Penalty = 0;
-%     t_ratio = temp_actual./kpa50_temp;
-
-end
+% if const == 1 || const == 14
+% %     temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
+%     
+%     Penalty = zeros(1,length(time));
+% 
+%     for i = 1:length(time)
+%         if q(i) < 50000
+% 
+%         else
+% 
+%             Penalty(i) = q(i)/50000-1; 
+% 
+%         end
+%     end
+% elseif const == 12
+% 
+% 
+%     Penalty = zeros(1,length(time));
+% 
+%     for i = 1:length(time)
+%         if q(i) < 55000
+% 
+%         else
+% 
+%             Penalty(i) = q(i)/55000-1; 
+% 
+%         end
+%     end
+% elseif const == 13
+% 
+%     Penalty = zeros(1,length(time));
+% 
+%     for i = 1:length(time)
+%         if q(i) < 45000
+% 
+%         else
+%             Penalty(i) = q(i)/45000-1; 
+% 
+%         end
+%     end
+% elseif const == 3 || const == 31
+% 
+%     Penalty = 0;
+% %     t_ratio = temp_actual./kpa50_temp;
+% 
+% end
 
 
 lift = lift_search;

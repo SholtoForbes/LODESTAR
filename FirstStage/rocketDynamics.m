@@ -63,6 +63,14 @@ global L
 L = 0.5*Cl.*Area.*density.*v.^2;
 
 
+% ref_length = 30.96;
+% Cm = scattered.MomentGridded(mach,rad2deg(alpha));
+% moment = 0.5*Cm.*ref_length.*Area.*density.*v.^2;
+% thrust_vector = asin(-moment./(8.*T));
+% T = T - T.*abs(sin(thrust_vector));
+% L = L - T.*sin(thrust_vector); % negative so that nose down pith results in positive lift
+
+
 
 %%%% Complete the calculation:
 
@@ -87,6 +95,7 @@ xi = 0;
 % Set up like this because phi is a quasi-forward sim instead of a primal
 i = 1;
 [dr(i),dxi(i),dphi(i),dgamma(i),dv(i),dzeta(i)] = RotCoords(h(i)+rEarth,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i),phase);
+
 for i= 2:length(t)
 
 % phi(i) = phi(i-1) + dphi(i-1)*(t(i) - t(i-1));

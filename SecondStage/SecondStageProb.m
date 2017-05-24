@@ -42,9 +42,10 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % const = 3: Fuel mass is constrained at end point, used for constant
 % dynamic pressure calculation (50kPa constrained)
 % const = 31: simple model for guess calc 
+% 32: Higher velocity
 
 global const
-const = 1
+const = 32
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -268,7 +269,7 @@ bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/s
 
 end
 
-if const == 3 || const == 31
+if const == 3 || const == 31 || const == 32
 bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; (mfuelL-3000)/scale.m; -0.001/scale.thetadot; 1];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; mfuelU/scale.m; 0.002/scale.thetadot; 2];
 end
@@ -341,29 +342,17 @@ vf = 2839.51;
 % This defines set values along the trajectory.
 % These correspond to the values in SecondStageEvents.m
 
-% if const == 1 || const == 12 || const == 14 || const == 13
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
-
-
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-if const == 1 || const == 14 || const == 3
-bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-elseif const == 12
-    bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-elseif const == 13
-    bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-end
-% bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; 1.69];
-
-
-%  bounds.lower.events = [mfuelU/scale.m; mfuelL/scale.m; V0; 1.69];
+% if const == 1 || const == 14 || const == 3
+% bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+% elseif const == 12
+%     bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+% elseif const == 13
+%     bounds.lower.events = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2);v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
 % end
 
-% if const == 3 || const == 31
-% % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
-% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69;interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)];
-% 
-% end
+
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; 1.69];
+
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -386,7 +375,7 @@ elseif const == 13
 % bounds.upper.path = [45000;0];
     bounds.lower.path = 0;
 bounds.upper.path = 45000;
-elseif const ==3
+elseif const ==3 
 %         bounds.lower.path = 0;
 % bounds.upper.path = 0;
 %         bounds.lower.path = [];
@@ -414,22 +403,22 @@ TwoStage2d.bounds       = bounds;
 % Usually between 70-90 works. The best node no. must be found using trial and error approach, but usually
 % working down from 90 works well. 
 
-if const == 3 || const == 31
+if const == 3 || const == 31 || const == 32
 % algorithm.nodes		= [60]; 
 algorithm.nodes		= [90]; 
 elseif const == 1
-% algorithm.nodes		= [90]; 
-% algorithm.nodes		= [100]; 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [92]; 
+
+% algorithm.nodes		= [89]; %works
 elseif const == 12 
-% algorithm.nodes		= [80];
-algorithm.nodes		= [90];
+algorithm.nodes		= [92];
+% algorithm.nodes		= [90]; % nearly works
 elseif const == 13
 % algorithm.nodes		= [78];
-algorithm.nodes		= [89];
+algorithm.nodes		= [90];
 % algorithm.nodes		= [110];
 elseif const == 14
-algorithm.nodes		= [90];
+algorithm.nodes		= [92];
 end
 
 global nodes
@@ -446,14 +435,19 @@ constq = dlmread('primalconstq.txt');
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34800 ];
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,35000 ]; % third stage didnt work well
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34500 ];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000 ]; % this works ok
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-1000 ,35500 ];% works well
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-1000 ,36100 ];
 elseif const == 12
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,35000];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,35000];
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35000];
 elseif const == 13
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,35000];%45kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
+ guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-1000 ,36100];
 elseif const == 14
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000]; 
 else
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),32000 ]/scale.V; 
@@ -462,12 +456,21 @@ end
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
 % guess.states(2,:) = [v0, 2950]/scale.v; 
+if const == 1
+%     guess.states(2,:) = [v0, 2920] % works
+    guess.states(2,:) = [v0, 2940]
+elseif const == 13
+    guess.states(2,:) = [v0, 2900]
+else
 guess.states(2,:) = [v0, 2920]/scale.v; 
+end
 % Trajectoy angle guess. Sort of important, but easy to define. 
-if const ==3 || const == 31 
+if const ==3 || const == 31  || const == 32
 guess.states(3,:) = [0,0]/scale.theta;
-else 
+elseif const == 1 || const == 14
 guess.states(3,:) = [0,0.05]/scale.theta;  
+else
+guess.states(3,:) = [0.05,0.05]
 end 
 
 % Mass guess. Simply the exact values at beginning and end (also constraints).
@@ -477,14 +480,17 @@ guess.states(4,:) = [mfuelU, 0]/scale.m;
 guess.states(5,:) = [0,0];
 
 % Heading angle guess. End defined. Start should be close to expected.
-guess.states(6,:) = [1.694,1.699];
+guess.states(6,:) = [1.682,1.699];
 
 % Control guess. Keep at 0. Not important. 
 guess.controls(1,:)    = [0,0]; 
 
 % Time guess. This should be sort of close to expected (ie. not ridiculous)
-guess.time        = [t0 ,350];
-% guess.time        = [t0 ,400];
+if const == 1 || const == 14 || const == 3 || const == 32
+guess.time        = [t0 ,350]; % works ok for 50kpa
+else
+guess.time        = [t0 ,400];
+end
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -777,10 +783,10 @@ title('Hamiltonian')
 
 
 % save results
-dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha]);
+dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha;M;eq;flapdeflection;phi]);
 dlmwrite('payload.txt', ThirdStagePayloadMass);
 dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
-dlmwrite('ThirdStage.txt',[ThirdStageZeta,ThirdStagePhi,ThirdStageAlt,ThirdStagev,ThirdStaget,ThirdStageAlpha,ThirdStagem,ThirdStagegamma,ThirdStageq]);
+dlmwrite('ThirdStage.txt',[ThirdStageZeta;ThirdStagePhi;ThirdStageAlt;ThirdStagev;ThirdStaget;[ThirdStageAlpha 0];ThirdStagem;ThirdStagegamma;[ThirdStageq 0]]);
 
 copyfile('primal.txt',sprintf('../ArchivedResults/primal_%s.txt',Timestamp))
 copyfile('dual.txt',sprintf('../ArchivedResults/dual_%s.txt',Timestamp))

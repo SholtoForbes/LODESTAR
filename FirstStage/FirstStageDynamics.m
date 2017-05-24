@@ -31,12 +31,12 @@ u = primal.controls/AOAScale;
 phase = 'postpitch';
 global scattered
 
-global q
+global q_forward
 global xi
 % global phi
 % [dz,q,phi] = rocketDynamics(x,u,t,phase,scattered);
 [dz,q,xi] = rocketDynamics(x,u,t,phase,scattered);
-
+q_forward = q;
 dz(5) = dz(5)*AOAScale;
 
 
