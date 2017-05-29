@@ -2,6 +2,8 @@ function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0)
 % Engine Interpolator for RESTM12 Data
 % Reading from RESTM12DATA 
 
+% THIS IS ACTUALLY FOR THE CREST M10
+
 % NEW SPARTAN MODEL
 
 T1 = scattered.tempgridded(M,Alpha).*T0;

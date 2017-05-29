@@ -107,9 +107,22 @@ T_eng_interp = unique(sort(data(:,2)));
 [grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
 % grid.Isp_eng = IspScattered(grid.Mgrid_eng,grid.T_eng); % An 'interpolator' which only interpolates at the data points. This is just an easy way to make a grid.
 
+% for i = 1:30
+%     for j= 1:30
+% grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+%     end
+% end
+
+load gridIsp_eng
+grid.Isp_eng = gridIsp_eng
+scat = scatteredInterpolant(data(:,1),data(:,2),data(:,3))
 for i = 1:30
     for j= 1:30
-grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+% grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+if any(grid.Isp_eng(i,j)) == false
+    grid.Isp_eng(i,j) = scat(grid.Mgrid_eng(i,j), grid.T_eng(i,j));
+end
+
     end
 end
 

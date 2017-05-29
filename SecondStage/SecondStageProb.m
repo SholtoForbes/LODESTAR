@@ -26,8 +26,9 @@ iterative_V_f = [];
 % This saves the entire problem file every time the program is run. 
 
 Timestamp = datestr(now,30)
-copyfile('SecondStageProb.m',sprintf('../ArchivedResults/SecondStageProb_%s.m',Timestamp))
-copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',Timestamp))
+mkdir('../ArchivedResults', sprintf(Timestamp))
+copyfile('SecondStageProb.m',sprintf('../ArchivedResults/%s/SecondStageProb.m',Timestamp))
+copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',Timestamp))
 
 %%
 % =========================================================================
@@ -45,7 +46,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',T
 % 32: Higher velocity
 
 global const
-const = 32
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -114,11 +115,19 @@ T_eng_interp = unique(sort(data(:,2)));
 
 [grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
 
+load gridIsp_eng
+grid.Isp_eng = gridIsp_eng
+scat = scatteredInterpolant(data(:,1),data(:,2),data(:,3))
 for i = 1:30
     for j= 1:30
-grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+% grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+if any(grid.Isp_eng(i,j)) == false
+    grid.Isp_eng(i,j) = scat(grid.Mgrid_eng(i,j), grid.T_eng(i,j));
+end
+
     end
 end
+
 
 scattered.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','spline');
 
@@ -320,8 +329,11 @@ bounds.upper.time	= [t0; tfMax];
 %     v0 = 1521;
 % end
 
-
+if const == 32
+    v0 = 1596
+else
 v0 = 1520; 
+end
 % v0 = 1490; % gives Mach 5.0018 for all cases
 % v0 = 1600
 vf = 2839.51;
@@ -407,18 +419,18 @@ if const == 3 || const == 31 || const == 32
 % algorithm.nodes		= [60]; 
 algorithm.nodes		= [90]; 
 elseif const == 1
-algorithm.nodes		= [92]; 
+% algorithm.nodes		= [92];  %cubic
 
-% algorithm.nodes		= [89]; %works
+algorithm.nodes		= [91]; % works
 elseif const == 12 
-algorithm.nodes		= [92];
-% algorithm.nodes		= [90]; % nearly works
+% algorithm.nodes		= [92]; % works for cubic
+algorithm.nodes		= [90]; % works
 elseif const == 13
-% algorithm.nodes		= [78];
-algorithm.nodes		= [90];
-% algorithm.nodes		= [110];
+
+% algorithm.nodes		= [92]; % nearly works
+algorithm.nodes		= [85]; % works
 elseif const == 14
-algorithm.nodes		= [92];
+algorithm.nodes		= [89];
 end
 
 global nodes
@@ -437,42 +449,56 @@ constq = dlmread('primalconstq.txt');
 if const == 1
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34500 ];
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000 ]; % this works ok
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-1000 ,35500 ];% works well
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-1000 ,35500 ];% works well for cubic
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-1000 ,36100 ];
+
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000 ]; % test for new interpolation
 elseif const == 12
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+100 ,35000];
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35000];
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,35000]; %works for cubic
+
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
- guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-1000 ,36100];
+ guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)-100 ,34000];
 elseif const == 14
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000]; 
-else
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; 
+elseif const ==3
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),32000 ]/scale.V; 
+elseif const == 32
+   guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33000 ] ;
 end
 
 % Velocity Guess. This should be relatively close to the end solution,
 % second most important guess. 
 % guess.states(2,:) = [v0, 2950]/scale.v; 
-if const == 1
-%     guess.states(2,:) = [v0, 2920] % works
-    guess.states(2,:) = [v0, 2940]
-elseif const == 13
-    guess.states(2,:) = [v0, 2900]
-else
-guess.states(2,:) = [v0, 2920]/scale.v; 
-end
-% Trajectoy angle guess. Sort of important, but easy to define. 
-if const ==3 || const == 31  || const == 32
-guess.states(3,:) = [0,0]/scale.theta;
-elseif const == 1 || const == 14
-guess.states(3,:) = [0,0.05]/scale.theta;  
-else
-guess.states(3,:) = [0.05,0.05]
-end 
+% if const == 1
+% 
+%     guess.states(2,:) = [v0, 2940];
+% elseif const == 13
+%     guess.states(2,:) = [v0, 2900];
+% elseif const == 32
+%     guess.states(2,:) = [v0, 2970];
+% else
+% guess.states(2,:) = [v0, 2920]/scale.v; 
+% end
+% if const == 12
+%     guess.states(2,:) = [v0, 2920];
+% else
+guess.states(2,:) = [v0, 2900];
+% end
 
+% Trajectoy angle guess. Sort of important, but easy to define. 
+% if const ==3 || const == 31  || const == 32
+% guess.states(3,:) = [0,0]/scale.theta;
+% elseif const == 1 || const == 14
+% guess.states(3,:) = [0,0.05]/scale.theta;  
+% else
+% guess.states(3,:) = [0.05,0.05]
+% end 
+guess.states(3,:) = [0.05,0.05]
 % Mass guess. Simply the exact values at beginning and end (also constraints).
 guess.states(4,:) = [mfuelU, 0]/scale.m;
 
@@ -486,11 +512,12 @@ guess.states(6,:) = [1.682,1.699];
 guess.controls(1,:)    = [0,0]; 
 
 % Time guess. This should be sort of close to expected (ie. not ridiculous)
-if const == 1 || const == 14 || const == 3 || const == 32
-guess.time        = [t0 ,350]; % works ok for 50kpa
-else
-guess.time        = [t0 ,400];
-end
+% if const == 1 || const == 14 || const == 3 || const == 32
+% guess.time        = [t0 ,350]; % works ok for 50kpa
+% else
+% guess.time        = [t0 ,400];
+% end
+guess.time        = [t0 ,360];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -687,7 +714,8 @@ dim = [.8 .0 .2 .2];
 annotation('textbox',dim,'string',{['Third Stage Thrust: ', num2str(50), ' kN'],['Third Stage Starting Mass: ' num2str(2850) ' kg'],['Third Stage Isp: ' num2str(350) ' s']},'FitBoxToText','on');  
 
 figure(202)
-subplot(2,6,[1,6])
+sp1 = subplot(2,6,[1,6]);
+ax1 = gca; % current axes
 hold on
 plot(H/1000, V/1000,'Color','k')
 
@@ -715,50 +743,81 @@ thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on
-subplot(2,6,[7,9])
+sp2 = subplot(2,6,[7,9]);
 xlabel('time (s)')
 
 hold on
-ax1 = gca; % current axes
+ax2 = gca; % current axes
 xlim([min(t) max(t)]);
 
-line(t, rad2deg(theta),'Parent',ax1,'Color','k', 'LineStyle','-')
+line(t, rad2deg(theta),'Parent',ax2,'Color','k', 'LineStyle','-')
 
-line(t, M,'Parent',ax1,'Color','k', 'LineStyle','--')
+line(t, M,'Parent',ax2,'Color','k', 'LineStyle','--')
 
-line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
+line(t, v./(10^3),'Parent',ax2,'Color','k', 'LineStyle','-.')
 
-line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(t, q./(10^4),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 % line(t, heating_rate./(10^5),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
 % line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 % legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)',  'Q (Mj x 10)')
-h = legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
+h = legend(ax2,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
 rect1 = [0.12, 0.35, .25, .25];
 set(h, 'Position', rect1)
 
 
-subplot(2,6,[10,12])
+sp3 = subplot(2,6,[10,12]);
 xlabel('time (s)')
-ax2 = gca;
+ax3 = gca;
 xlim([min(t) max(t)]);
-line(t, Alpha,'Parent',ax2,'Color','k', 'LineStyle','-')
+line(t, Alpha,'Parent',ax3,'Color','k', 'LineStyle','-')
 
-line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')
+line(t, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 
 
 % line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
-line(t, eq.*10,'Parent',ax2,'Color','k', 'LineStyle','-.')
+line(t, eq.*10,'Parent',ax3,'Color','k', 'LineStyle','-.')
 
-line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(t, IspNet./(10^2),'Parent',ax3,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 % g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
-g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio x 10', 'Net Isp (s x 10^2)');
+g = legend(ax3, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio x 10', 'Net Isp (s x 10^2)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
+
+saveas(figure(202),[pwd sprintf('../ArchivedResults/%s/2ndStage',Timestamp)]);
+
+% 
+% dat_temp1 = get(ax1,'children');
+% fig_temp1 = figure;
+% ax_temp1 = axes;
+% temp_fig1 = copyobj(dat_temp1,ax_temp1);
+% title('Trajectory')
+% xlabel('Earth Normal Distance Flown (km)')
+% ylabel('Vertical Position (km)')
+% dim = [.55 .15 .2 .2];
+% annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mfuel(1) - mfuel(end)) ' kg']},'FitBoxToText','on');  
+%  set(fig_temp1, 'Position', [100, 100, 900, 400]);
+%  saveas(fig_temp1,[pwd sprintf('../ArchivedResults/%s/FlightPath',Timestamp)]);
+%  close fig_temp1;
+%  
+% dat_temp2 = get(ax2,'children');
+% fig_temp2 = figure;
+% ax_temp2 = axes;
+% temp_fig2 = copyobj(dat_temp2,ax_temp2);
+%  set(fig_temp2, 'Position', [100, 100, 900, 400]);
+%  h = legend(ax_temp2,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
+% rect1 = [0.22, 0.85, .25, .25];
+% % set(h, 'Position', rect1)
+% set(h,'location','bestoutside')
+% xlabel('time (s)')
+ 
+ 
+temp_fig3 = copyobj(sp3,ax3);
+ set(FigHandle, 'Position', [100, 100, 900, 400]);
 
 figure(203)
 
@@ -788,10 +847,12 @@ dlmwrite('payload.txt', ThirdStagePayloadMass);
 dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
 dlmwrite('ThirdStage.txt',[ThirdStageZeta;ThirdStagePhi;ThirdStageAlt;ThirdStagev;ThirdStaget;[ThirdStageAlpha 0];ThirdStagem;ThirdStagegamma;[ThirdStageq 0]]);
 
-copyfile('primal.txt',sprintf('../ArchivedResults/primal_%s.txt',Timestamp))
-copyfile('dual.txt',sprintf('../ArchivedResults/dual_%s.txt',Timestamp))
-copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
-copyfile('ThirdStage.txt',sprintf('../ArchivedResults/ThirdStage_%s.txt',Timestamp))
+
+
+copyfile('primal.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
+copyfile('dual.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
+copyfile('payload.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
+copyfile('ThirdStage.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
 primal_old = primal;
 
 ts = timeseries(Isp,t);
@@ -907,8 +968,8 @@ T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
 T1 = scattered.tempgridded(M,Alpha).*T0;
 M1 = scattered.M1gridded(M, Alpha);
 
-plotM = [min(M_englist):0.01:10];
-plotT = [min(T_englist):1:600];
+plotM = [min(M_englist):0.01:9.5];
+plotT = [min(T_englist):1:550];
 [gridM,gridT] =  ndgrid(plotM,plotT);
 interpeq = scattered.eqGridded(gridM,gridT);
 interpIsp = scattered.IspGridded(gridM,gridT);
@@ -937,7 +998,7 @@ cd('../FirstStage')
 [FirstStageStates] = FirstStageProblem(V(1),theta(1),phi(1),zeta(1),const);
 cd('../SecondStage')
 dlmwrite('FirstStage.txt', FirstStageStates);
-copyfile('FirstStage.txt',sprintf('../ArchivedResults/FirstStage_%s.txt',Timestamp))
+copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
 %%
 
 % =========================================================================

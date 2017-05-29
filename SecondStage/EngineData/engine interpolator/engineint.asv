@@ -1,7 +1,6 @@
-%2ndStageEngineInterpolator
+%Engine interpolator
 clear all
-% this runs the file EngineData.exe which takes input of Mach, T and p (behind initial shock, given in communicator matrix) and
-% produces output of thrust force (N) and fuel usage (kg/s).
+
 
 delete input
 delete output
@@ -11,7 +10,7 @@ com = dlmread('communicator_extrapolate_MpT.txt'); % import data from atmosphere
 
 wcap = 0.65;
 
-for i = 6:.2:11
+for i = 6:.2:10
     M = i ;
 
     for j = 0.:.2:6

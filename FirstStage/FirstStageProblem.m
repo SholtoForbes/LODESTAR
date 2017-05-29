@@ -133,8 +133,11 @@ vUpp = 3000;
 
 mLow = mEmpty;
 % mUpp = mTotal;
+if const == 32
+    mUpp = 30000;
+else
 mUpp = 29000;
-
+end
 gammaLow = deg2rad(-.1);
 gammaUpp = deg2rad(89.9);
 
@@ -184,8 +187,11 @@ alpha0 = 0; %Set initial angle of attack to 0
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
 % bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; 1500; mEmpty+mSpartan; hf; phif];
-
+if const == 32
+    vf = 1596;
+else
 vf = 1520;
+end
 Atmosphere = dlmread('atmosphere.txt');
 % bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2); phif];
 bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
@@ -215,7 +221,7 @@ MoonLander.bounds = bounds;
 if const == 3
     algorithm.nodes = [82]; 
 else
-  algorithm.nodes = [80]; 
+  algorithm.nodes = [81]; 
 end
 %  algorithm.nodes = [60]; 
   % Change this by a few nodes to potentially change the solution slightly
