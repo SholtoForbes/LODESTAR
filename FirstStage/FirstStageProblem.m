@@ -378,7 +378,7 @@ plot([t_prepitch.' primal.nodes+t_prepitch(end)], [zeros(1,length(t_prepitch)) r
 
 legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /10)','AoA (degrees/10)')
 xlabel('Time (s)')
-xlim([0,primal.nodes(end)]);
+xlim([0,primal.nodes(end)+t_prepitch(end)]);
 
 mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);

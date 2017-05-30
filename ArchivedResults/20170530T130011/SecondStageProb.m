@@ -4,7 +4,8 @@
 % Utilises the DIDO proprietary optimisation software
 % startup.m must be run before this file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all;		
+clear all;
+clc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global SPARTAN_SCALE
@@ -46,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 1
+const = 12
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -424,7 +425,7 @@ elseif const == 1
 algorithm.nodes		= [91]; % works
 elseif const == 12 
 % algorithm.nodes		= [92]; % works for cubic
-algorithm.nodes		= [90]; % works
+algorithm.nodes		= [86]; % works
 elseif const == 13
 
 % algorithm.nodes		= [92]; % nearly works
@@ -487,8 +488,13 @@ end
 % if const == 12
 %     guess.states(2,:) = [v0, 2920];
 % else
-guess.states(2,:) = [v0, 2900];
+
 % end
+if const == 32
+    guess.states(2,:) = [v0, 2970];
+else
+guess.states(2,:) = [v0, 2900];
+end
 
 % Trajectoy angle guess. Sort of important, but easy to define. 
 % if const ==3 || const == 31  || const == 32
@@ -788,30 +794,36 @@ g = legend(ax3, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
 
+saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
 
-dat_temp1 = get(ax1,'children');
-fig_temp1 = figure;
-ax_temp1 = axes;
-temp_fig1 = copyobj(dat_temp1,ax_temp1);
-title('Trajectory')
-xlabel('Earth Normal Distance Flown (km)')
-ylabel('Vertical Position (km)')
-dim = [.55 .15 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mfuel(1) - mfuel(end)) ' kg']},'FitBoxToText','on');  
- set(fig_temp1, 'Position', [100, 100, 900, 400]);
- saveas(fig_temp1,[pwd sprintf('../ArchivedResults/%s/FlightPath',Timestamp)]);
- close fig_temp1;
+% 
+% dat_temp1 = get(ax1,'children');
+% fig_temp1 = figure;
+% ax_temp1 = axes;
+% temp_fig1 = copyobj(dat_temp1,ax_temp1);
+% title('Trajectory')
+% xlabel('Earth Normal Distance Flown (km)')
+% ylabel('Vertical Position (km)')
+% dim = [.55 .15 .2 .2];
+% annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mfuel(1) - mfuel(end)) ' kg']},'FitBoxToText','on');  
+%  set(fig_temp1, 'Position', [100, 100, 900, 400]);
+%  saveas(fig_temp1,[pwd sprintf('../ArchivedResults/%s/FlightPath',Timestamp)]);
+%  close fig_temp1;
+%  
+% dat_temp2 = get(ax2,'children');
+% fig_temp2 = figure;
+% ax_temp2 = axes;
+% temp_fig2 = copyobj(dat_temp2,ax_temp2);
+%  set(fig_temp2, 'Position', [100, 100, 900, 400]);
+%  h = legend(ax_temp2,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
+% rect1 = [0.22, 0.85, .25, .25];
+% % set(h, 'Position', rect1)
+% set(h,'location','bestoutside')
+% xlabel('time (s)')
  
-dat_temp2 = get(ax2,'children');
-fig_temp2 = figure;
-ax_temp2 = axes;
-temp_fig2 = copyobj(dat_temp2,ax_temp2);
- set(FigHandle, 'Position', [100, 100, 900, 400]);
  
- 
- 
-temp_fig3 = copyobj(sp3,ax3);
- set(FigHandle, 'Position', [100, 100, 900, 400]);
+% temp_fig3 = copyobj(sp3,ax3);
+%  set(FigHandle, 'Position', [100, 100, 900, 400]);
 
 figure(203)
 
@@ -844,9 +856,9 @@ dlmwrite('ThirdStage.txt',[ThirdStageZeta;ThirdStagePhi;ThirdStageAlt;ThirdStage
 
 
 copyfile('primal.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
-copyfile('dual.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
-copyfile('payload.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
-copyfile('ThirdStage.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
+copyfile('dual.txt',sprintf('../ArchivedResults/%s/dual_%s.txt',Timestamp,Timestamp))
+copyfile('payload.txt',sprintf('../ArchivedResults/%s/payload_%s.txt',Timestamp,Timestamp))
+copyfile('ThirdStage.txt',sprintf('../ArchivedResults/%s/ThirdStage_%s.txt',Timestamp,Timestamp))
 primal_old = primal;
 
 ts = timeseries(Isp,t);
@@ -992,7 +1004,7 @@ cd('../FirstStage')
 [FirstStageStates] = FirstStageProblem(V(1),theta(1),phi(1),zeta(1),const);
 cd('../SecondStage')
 dlmwrite('FirstStage.txt', FirstStageStates);
-copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
+copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))
 %%
 
 % =========================================================================

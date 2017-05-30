@@ -114,7 +114,7 @@ plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.
 legend(  'Trajectory Angle (degrees)','Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
 
 % legend(  'Altitude (km x 100)', 'Trajectory Angle (degrees)', 'Velocity (m/s x 10^3)', 'Mass (kg x 10^3)', 'Dynamic Pressure (kPa) x 10','Angle of Attack (deg) x 10');
-ylim([0 8])
+ylim([-1 8])
 xlim([0 t(end)])
 
 dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')

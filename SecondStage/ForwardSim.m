@@ -72,7 +72,7 @@ Drag = Cd_spline(M,alpha)*A*q +  q/50000*flapdrag_spline(M,alpha,flapdeflection)
 % Drag = scattered.drag(v,V,lift); 
 
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsForward(r,xi,phi,gamma,v,zeta,lift,Drag,Thrust,m,alpha);
+[rdot,xidot,phidot,gammadot,vdot,zetadot,total_lift] = RotCoordsForward(r,xi,phi,gamma,v,zeta,lift,Drag,Thrust,m,alpha);
 
 dz = [rdot;phidot;gammadot;vdot;zetadot;-Fueldt];
 end

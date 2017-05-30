@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsForward(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha)
+function [rdot,xidot,phidot,gammadot,vdot,zetadot,total_lift] = RotCoordsForward(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha)
 % Determination of motion in rotating coordinates
 %xi  Longitude (rad)
 %phi  Latitude (rad)
