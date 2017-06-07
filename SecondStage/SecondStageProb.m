@@ -605,7 +605,7 @@ global Alpha
 global a
 global eq
 
-Thrust = Thrust./cos(deg2rad(Alpha));
+Thrust = Thrust./cos(deg2rad(Alpha)); % change thrust to account for total thrust, including portion that contributes to lift
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
