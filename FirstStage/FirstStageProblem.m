@@ -121,7 +121,7 @@ h0 = y(end,1);
 v0 = y(end,2);  
 m0 = y(end,3);  
 gamma0 = deg2rad(89.9);    % set pitchover amount (start flight angle). This pitchover is 'free' movement, and should be kept small. 
-
+% gamma0 = deg2rad(89); 
 
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
@@ -132,15 +132,16 @@ vLow = 0;
 vUpp = 3000;  
 
 mLow = mEmpty;
-% mUpp = mTotal;
-if const == 32
-    mUpp = 30000;
-else
-mUpp = 29000;
-end
+mUpp = mTotal;
+% if const == 32
+%     mUpp = 30000;
+% else
+% mUpp = 29000;
+% end
+% mUpp = 29000;
 gammaLow = deg2rad(-.1);
-gammaUpp = deg2rad(89.9);
-
+% gammaUpp = deg2rad(89.9);
+gammaUpp = gamma0;
 % This sets the control limits, this is second derivative of AoA
 % uLow = [-.001]*AOAScale; % Can do either AoA or thrust
 % uUpp = [.001]*AOAScale; 
@@ -163,7 +164,7 @@ bounds.upper.time	= [0 tfMax];
 
 
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(4)*AOAScale;0;-0.1; -0.25];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1; -0.25];
 bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1; -0.15];
 
 bounds.lower.controls = uLow;
@@ -193,9 +194,9 @@ else
 vf = 1520;
 end
 Atmosphere = dlmread('atmosphere.txt');
-% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2); phif];
-bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
-% bounds.lower.events = [h0; v0; gamma0; alpha0;mTotal; zetaF; gammaf; mEmpty+mSpartan; hf; phif];
+
+% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
+bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; hf; phif];
 
 bounds.upper.events = bounds.lower.events;
 
@@ -230,7 +231,8 @@ end
   
 % Initial Guess ===========================================================   
 t0			= 0;
-tfGuess 	= 90;			
+% tfGuess 	= 90;			
+tfGuess 	= 80;
 % slightly educated guess of final time (for the scaled problem!)
 % guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
 
@@ -248,14 +250,14 @@ guess.states(2,:)	= [v0, 1520];
 
 
 % if const == 3
-    guess.states(3,:)	= [28300, mF];
+    guess.states(3,:)	= [28000, mF];
 %     else
 %     guess.states(3,:)	= [mTotal, mF];
 % end
 
 % guess.states(3,:)	= [mTotal, mF];
 guess.states(4,:)	= [gamma0,gammaf];
-% guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
+% guess.states(5,:)	= [deg2rad(-1), deg2rad(-2)];
 guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaf];
 

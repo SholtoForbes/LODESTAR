@@ -35,10 +35,14 @@ phi = primal.states(6,:);
 
 xi = primal.states(7,:);
 
+eta = primal.states(8,:);
+
+
 % alphadot  = primal.states(8,:);
 
 % alphadot2  = primal.controls(1,:)*scale.gammadot; %
 alphadot  = primal.controls(1,:)*scale.gammadot; %
+etadot  = primal.controls(2,:);
 time = primal.nodes;
 % %=========================================================================================
 
@@ -46,12 +50,12 @@ global q
 global M
 global Fd
 global L
-[Vdot,xidot,phidot,gammadot,a,zetadot, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha);
+[Vdot,xidot,phidot,gammadot,a,zetadot, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha,eta);
 
 %======================================================
 
 % XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; alphadot2];
-XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot];
+XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; etadot];
 end
 
 %======================================================

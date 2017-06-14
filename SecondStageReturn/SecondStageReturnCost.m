@@ -49,14 +49,21 @@ time = primal.nodes;
 global Atmosphere
 density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
 q = 0.5*density.*v.^2;
-% RunningCost = 0;
 
+% figure out horizontal motion
+H(1) = 0;
+for i = 1:nodes-1
+H(i+1) = v(i)*(time(i+1) - time(i))*cos(gamma(i)) + H(i);
+end
 
-RunningCost = q;
+RunningCost = 0;
+
+% RunningCost = q.^2;
 
 % EndpointCost = time(end);
 EndpointCost = 0;
-
+EndpointCost = H(end);
+% EndpointCost = V(end);
 global iterative_V
 global iterative_t
 global iterative_V_f

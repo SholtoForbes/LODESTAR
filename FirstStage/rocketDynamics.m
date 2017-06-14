@@ -43,8 +43,9 @@ q = 0.5*density.*v.^2;
 SCALE = 1.;
 % SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
-T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
-Isp = 275 + (101325 - P_atm)*2.9410e-04;
+% T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; 
+T = 555900*SCALE + (101325 - P_atm)*0.5667*SCALE; 
+Isp = 275 + (101325 - P_atm)*2.9410e-04; % from encyclopaedia astronautica, back up by falcon 1 users guide
 
 dm = -T./Isp./g*SCALE;
 

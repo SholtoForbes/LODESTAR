@@ -107,14 +107,21 @@ phiU = 1;
 xiL = -1;
 xiU = 1;
 
+etaL = -.5;
+etaU = .5;
+
 alphadotL = -0.01;
 alphadotU = 0.01;
+
+etadotL = -0.01;
+etadotU = 0.01;
+
 
 % bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; alphadotL];
 % bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; alphadotU];
 
-bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL];
-bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU];
+bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
+bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 
 % control bounds
 
@@ -124,8 +131,8 @@ bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU];
 % bounds.lower.controls = [alphadot2L];
 % bounds.upper.controls = [alphadot2U]; 
 
- bounds.lower.controls = [alphadotL];
-bounds.upper.controls = [alphadotU]; 
+ bounds.lower.controls = [alphadotL;etadotL];
+bounds.upper.controls = [alphadotU;etadotU]; 
 %------------------
 % bound the horizon
 %------------------
@@ -152,7 +159,9 @@ gamma0 = 0.048;
 zeta0 = 1.69;
 phi0 = -0.12913;
 xi0 = 0;
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf];
+zetaf = 1.6915;
+% zetaf = 1.7;
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
 
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -200,11 +209,13 @@ guess.states(6,:) = [-0.1293,0];
 
 guess.states(7,:) = [0,0];
 
+guess.states(8,:) = [0,0];
+
 % guess.states(8,:) = [0,0];
 
 % Control guess.
 guess.controls(1,:)    = [0,0]; 
-
+guess.controls(2,:)    = [0,0]; 
 
 guess.time        = [t0 ,1000];
 % Tell DIDO the guess
@@ -253,7 +264,13 @@ gamma = primal.states(3,:);
 
 Alpha = rad2deg(primal.states(4,:));
 
-zeta = primal.states(5,:);
+zeta = rad2deg(primal.states(5,:));
+
+phi = primal.states(6,:);
+
+xi = primal.states(7,:);
+
+eta = rad2deg(primal.states(8,:));
 
 alphadot = primal.controls(1,:)*scale.gamma;
 
@@ -262,7 +279,7 @@ alphadot = primal.controls(1,:)*scale.gamma;
 % Third Stage
 % Optimise third stage trajectory from end point for accuracy 
 
-global phi
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -416,11 +433,12 @@ xlabel('time (s)')
 ax3 = gca;
 xlim([min(t) max(t)]);
 line(t, Alpha,'Parent',ax3,'Color','k', 'LineStyle','-')
-
+line(t, eta,'Parent',ax3,'Color','k', 'LineStyle','--')
+line(t, zeta,'Parent',ax3,'Color','k', 'LineStyle',':')
 % line(t, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 
 % g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
-g = legend(ax3, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio x 10', 'Net Isp (s x 10^2)');
+g = legend(ax3, 'AoA (degrees)','Roll Angle (degrees)','heading Angle (degrees)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)

@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha)
+function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha,eta)
 
 % =======================================================
 % Vehicle Model
@@ -48,7 +48,7 @@ i= 1;
 
 T =0;
 
-[rdot,xidot,phidot,gammadot,a,zetadot] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha);
+[rdot,xidot,phidot,gammadot,a,zetadot] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta);
 
 
 % Aero Data =============================================================
