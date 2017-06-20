@@ -99,59 +99,6 @@ end
 %Fuel Cost ===========================================================================
 
 
-
-% kpa50_alt = interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000./v.^2);% altitude at each velocity, if it were a constant 50kPa q trajectory (used to compare with communicator matrix results) 
-% kpa50_temp =  spline( Atmosphere(:,1),  Atmosphere(:,2), kpa50_alt); % Calculate density using atmospheric data
-
-% Calculate temperature and pressure ratios
-% if const == 1 || const == 14
-% %     temp_actual = spline( Atmosphere(:,1),  Atmosphere(:,2), V);
-%     
-%     Penalty = zeros(1,length(time));
-% 
-%     for i = 1:length(time)
-%         if q(i) < 50000
-% 
-%         else
-% 
-%             Penalty(i) = q(i)/50000-1; 
-% 
-%         end
-%     end
-% elseif const == 12
-% 
-% 
-%     Penalty = zeros(1,length(time));
-% 
-%     for i = 1:length(time)
-%         if q(i) < 55000
-% 
-%         else
-% 
-%             Penalty(i) = q(i)/55000-1; 
-% 
-%         end
-%     end
-% elseif const == 13
-% 
-%     Penalty = zeros(1,length(time));
-% 
-%     for i = 1:length(time)
-%         if q(i) < 45000
-% 
-%         else
-%             Penalty(i) = q(i)/45000-1; 
-% 
-%         end
-%     end
-% elseif const == 3 || const == 31
-% 
-%     Penalty = 0;
-% %     t_ratio = temp_actual./kpa50_temp;
-% 
-% end
-
-
 lift = lift_search;
 
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 

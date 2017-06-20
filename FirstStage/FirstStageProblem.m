@@ -195,8 +195,8 @@ vf = 1520;
 end
 Atmosphere = dlmread('atmosphere.txt');
 
-% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
-bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; hf; phif];
+bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
+% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; hf; phif];
 
 bounds.upper.events = bounds.lower.events;
 
@@ -222,7 +222,7 @@ MoonLander.bounds = bounds;
 if const == 3
     algorithm.nodes = [82]; 
 else
-  algorithm.nodes = [81]; 
+  algorithm.nodes = [82]; 
 end
 %  algorithm.nodes = [60]; 
   % Change this by a few nodes to potentially change the solution slightly

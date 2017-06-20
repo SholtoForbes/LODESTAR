@@ -63,6 +63,8 @@ options.DiffMinChange = 0.0005*i3;
 opts = optimoptions(@fmincon,'Algorithm','sqp','Display','iter','TolFun',1e-3,'TolX',1e-3,'DiffMinChange',0.0005);
 problem = createOptimProblem('fmincon','objective',...
  @(x)Payload(x,k,j,u, phi0, zeta0),'x0',[AoA_max*ones(1,10)-i4*AoA_max*0.01 280/10000],'lb',[deg2rad(0)*ones(1,10) 200/10000],'ub',[AoA_max*ones(1,10) 350/10000],'nonlcon',@(x)Constraint(x,k,j,u, phi0, zeta0),'options',opts);
+
+
 % ms = MultiStart;
 % ms.StartPointsToRun = 'bounds-ineqs'
 % [x,f,exitflag] = run(ms,problem,1000)

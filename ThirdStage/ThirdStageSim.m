@@ -134,7 +134,7 @@ AoA_init = x(1);
         
 
 
-mfuel_burn = 2600;
+mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value. 
 mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids

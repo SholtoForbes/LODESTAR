@@ -44,7 +44,7 @@ SCALE = 1.;
 % SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
 % T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; 
-T = 555900*SCALE + (101325 - P_atm)*0.5667*SCALE; 
+T = 555900*SCALE + (101325 - P_atm)*0.58*SCALE; % constant is just a scale which makes it get to the appropriate thrust at vacuum
 Isp = 275 + (101325 - P_atm)*2.9410e-04; % from encyclopaedia astronautica, back up by falcon 1 users guide
 
 dm = -T./Isp./g*SCALE;
@@ -63,6 +63,8 @@ D = 0.5*Cd.*Area.*density.*v.^2;
 global L
 L = 0.5*Cl.*Area.*density.*v.^2;
 
+% D=2*D;
+% L=2*L;
 
 % ref_length = 30.96;
 % Cm = scattered.MomentGridded(mach,rad2deg(alpha));
