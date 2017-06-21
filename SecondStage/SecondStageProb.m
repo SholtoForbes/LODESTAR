@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 3
+const = 13
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -420,15 +420,13 @@ if const == 3 || const == 31 || const == 32
 % algorithm.nodes		= [60]; 
 algorithm.nodes		= [90]; 
 elseif const == 1
-% algorithm.nodes		= [92];  %cubic
-
-algorithm.nodes		= [91]; % works
+algorithm.nodes		= [96];
 elseif const == 12 
-% algorithm.nodes		= [92]; % works for cubic
-algorithm.nodes		= [84]; 
+
+algorithm.nodes		= [85]; 
 elseif const == 13
-% algorithm.nodes		= [92]; % nearly works
-algorithm.nodes		= [85]; % works
+
+algorithm.nodes		= [88]; 
 elseif const == 14
 algorithm.nodes		= [89];
 end
@@ -465,8 +463,8 @@ elseif const == 14
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,34000]; %High Drag
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; 
 elseif const ==3
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),33000 ]/scale.V; %50kpa limited
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),32000 ]/scale.V; 
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33000 ]/scale.V; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2),32000 ]/scale.V; 
 elseif const == 32
    guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33000 ] ;
 end
@@ -957,7 +955,7 @@ end
 % differences result in the forward simulation being slightly different
 % than the actual. This is mostly a check to see if they are close. 
 
-forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03];
+forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),9.7725e+03- 994.7 + 994.7*1.57];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);
