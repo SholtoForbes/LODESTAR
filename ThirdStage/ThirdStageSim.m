@@ -1,19 +1,16 @@
 function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi] = ThirdStageSim(x,k,j,u, phi0, zeta0)
+% Function for simulating the Third Stage Rocket Trajectory
+% Created by Sholto Forbes-Spyratos
 
+x(end) = x(end)*10000; % de-scale
 
-% x(end) = deg2rad(10);
-x(end) = x(end)*10000;
-
-
-% x(end) = 300;
-% x(18) = 300;
 SCALE_Engine = 1; % changes characteristic length
 
 time1 = cputime;
 
 Atmosphere = dlmread('atmosphere.txt');
 Aero = dlmread('AeroCoeffs.txt');
-%Simulating the Third Stage Rocket Trajectory
+
 Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 
 Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
@@ -31,109 +28,40 @@ c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), k);
 q_init = 0.5*rho_init*u^2;
 M_init = u/c_init;
 
-% CN_50 = 0.5265; %maximum allowable normal force coefficient, (ten degrees AoA at q=50kPa conditions) This is an assumption, to form a baseline for allowable force
-% CN_50 = 0.3; %maximum allowable normal force coefficient
-
-%% this determines the maximum allowable normal coefficient with a 10 degree limit at 50kPa dynamic pressure
+%% Set Max AoA
+% determine the maximum allowable normal coefficient with a 10 degree limit
+% at 50kPa dynamic pressure, and set the max AoA to match this normal
+% coefficient
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
 M_50 = u(1)/c_50;
 CN_50 = CN_interp(M_50,10);
-CN_50*50000/q_init;
-M_init;
-M_50;
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
-
-% AoA_max = deg2rad(10);
-% if rad2deg(AoA_max) < 5
-%     AoA_max = deg2rad(5);
-% end
-
+%%
 AoA_init = x(1); 
-
-% AoA_init = AoA_max; 
-% if AoA_init > deg2rad(20)
-%     AoA_init = deg2rad(20); % keep the angle of attack within the set bounds
-% elseif AoA_init < deg2rad(0)
-% % if AoA_init < deg2rad(0)
-%     AoA_init = deg2rad(0);
-% end
-
-% if AoA_init > AoA_max
-%     AoA_init = AoA_max;
-% end
-% 
-% 
-% AoA_mid1 = x(3);
-% if AoA_mid1 > AoA_max
-%     AoA_mid1 = AoA_max;
-% end
-% 
-% AoA_mid2 = x(4);
-% if AoA_mid2 > AoA_max
-%     AoA_mid2 = AoA_max;
-% end
-
-% AoA_mid3 = x(5);
-% if AoA_mid3 > AoA_max
-%     AoA_mid3 = AoA_max;
-% end
-
-% AoA_mid3 = x(5);
-% AoA_mid4 = x(6);
-% AoA_mid5 = x(7);
-% AoA_mid6 = x(8);
-% AoA_mid7 = x(9);
-% AoA_mid8 = x(10);
-% AoA_mid9 = x(11);
-% AoA_mid10 = x(12);
-% AoA_mid11 = x(13);
-% AoA_mid12 = x(14);
-% AoA_mid13 = x(15);
-% AoA_mid14 = x(16);
-% AoA_end = x(17); 
-
-% AoA_end = x(5); 
-
-% AoA_end = x(2); 
-% AoA_end = deg2rad(10);
-% if AoA_end > deg2rad(20)
-%     AoA_end = deg2rad(20); % keep the angle of attack within the set bounds
-% elseif AoA_end < deg2rad(0)
-%     AoA_end = deg2rad(0);
-% end
-
-% if AoA_end > AoA_max
-%     AoA_end = AoA_max;
-% end
-
-
-% AoA_list = [AoA_init AoA_mid1 AoA_end];
 
 [k j u];
         
-        Starting_Altitude = k;
-        Starting_Theta = j;
+Starting_Altitude = k;
+Starting_Theta = j;
 
-        c = [];
-        CD = [];
-        CL = [];
-        M = [];
-        CN = [];
-        CA = [];
-        vx = [];
-        vy = [];
-        rho = [];
-        t= [];
-        Theta = [];
-        Alt = [];
-        mfuel = [];
-        Hor = [];
-        D = [];
-        L = [];
+c = [];
+CD = [];
+CL = [];
+M = [];
+CN = [];
+CA = [];
+vx = [];
+vy = [];
+rho = [];
+t= [];
+Theta = [];
+Alt = [];
+mfuel = [];
+Hor = [];
+D = [];
+L = [];
         
-
-
 mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value. 
 mfuel(1) = mfuel_burn;
 
@@ -153,7 +81,7 @@ g = 9.81; %standard gravity
 Isp = 317; %Kestrel
 
 % Isp = 446; %HM7B
-%define starting condtions
+%% Define starting condtions
 t(1) = 0.;
 
 dt_main = 1; %time step
@@ -161,15 +89,12 @@ dt = dt_main;
 
 i=1;
 
-%
-
 r(1) = r_E + k;
 
 Alt(1) = k;
 
 xi(1) = 0;
     
-
 phi(1) = phi0;
 
 gamma(1) = j;
@@ -178,106 +103,63 @@ v(1) = u;
 
 zeta(1) = zeta0;
 
+%% Define Vehicle Properties
 mHS = 125; % Heat Shield Mass
-% mHS = 302;
 
 % mEng = 100; %RL10
 mEng = 52; %Kestrel
 % mEng = 165; %HM7B
 
-% m(1) = 2400 + 100 + mHS; %vehicle mass, (to match Dawids glasgow paper)
-% m(1) = 2400 + mEng + mHS;
-% m(1) = 2900;
-
-
-% m(1) = 3500; 
 m(1) = 3300;
-% m(1) = 3350;
+
 % mdot = 14.71; %RL10
 mdot = 9.8; %Kestrel
 % mdot = 14.8105; %HM7B
 
 burntime = mfuel_burn/mdot;
 
-
+%% Initiate Simulation
 exocond = false;
 Fuel = true;
 
 j = 1;
 
-% Alpha(1) = x(end);
-% while gamma(i) >= 0 && Alt(end) < 567*1000 || t(i) < 200;
 
-p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3));
 
-        c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
+p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3)); % calculate pressure using atmospheric data
 
-        rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
+c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
 
-while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
-    %     if i == 1
+rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
+
+while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000 
+% iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
+
     mfuel_temp = mfuel(i) - mdot*dt;
-%     else
-%         mfuel_temp = mfuel(i-1) - mdot*2*dt;
-%     end
     
     if mfuel_temp < mdot*dt && Fuel == true
-        
-%         dt = mfuel_temp/mdot;
-    mdot = mfuel_temp/dt;
+        mdot = mfuel_temp/dt;
         Fuel = false;
-        
     end
     
     dt = dt_main;
         t(i+1) = t(i) + dt;
         
-if t(i) <= x(end)
-Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip');
-% Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(2:end-1),t(i));
-elseif t(i) > x(end)
-    Alpha(i) = 0;
-end
-% Fuel
-
-% if t(i) < 200
-% Alpha(i) = interp1(0:200/(length(x)-4):200,x(2:end-2),t(i));
-% elseif t(i) >= 200 && Alt(i) < 85000
-%     Alpha(i) = x(end-1);
-% else
-%     Alpha(i) = 0;
-% end
-
-
-% if t(i) <= burntime
-% Alpha(i) = interp1(0:burntime/(length(x)-3):burntime,x(2:end-1),t(i));
-% elseif t(i) > burntime
-%     Alpha(i) = 0;
-% end
-
-% if t(i) <= 200
-% Alpha(i+1) = Alpha(i) + dt*interp1(0:200/(length(x)-3):200,x(2:end-1),t(i));
-% elseif t(i) >= 200 && Alt(i) < 85000
-%     Alpha(i+1) = Alpha(i);
-% else Alpha(i+1) = 0;
-% end
-%  Alpha
-
-%     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
+    if t(i) <= x(end)
+        Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+    elseif t(i) > x(end)
+        Alpha(i) = 0;
+    end
 
     p(i) = ppval(p_spline, Alt(i));
+    
     if Alt(i) < 85000
-%         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(i)); % Calculate speed of sound using atmospheric data
-% 
-%         rho(i) = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(i)); % Calculate density using atmospheric data
-
-c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
-
+        c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
         rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
     else
-%         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000); % if altitude is over 85km, set values of atmospheric data not change. i will need to look at this
-c(i) = ppval(c_spline, 85000);
+        c(i) = ppval(c_spline, 85000);
         rho(i) = 0;
+    
     end
     
     q(i) = 1/2*rho(i)*v(i)^2;
@@ -348,29 +230,9 @@ c(i) = ppval(c_spline, 85000);
     v(i+1) = v(i) + vdot*dt;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
-%     else
-%     r(i+1) = r(i-1) + rdot*2*dt;
-%     
-%     Alt(i+1) = r(i+1) - r_E;
-%     
-%     xi(i+1) = xi(i-1) + xidot*2*dt;
-%     
-%     phi(i+1) = phi(i-1) + phidot*2*dt;
-%     
-%     gamma(i+1) = gamma(i-1) + gammadot*2*dt;
-%     
-%     v(i+1) = v(i-1) + vdot*2*dt;
-%     
-%     zeta(i+1) = zeta(i-1) + zetadot*2*dt;
-%     
-%     end
+
     i = i+1;
 end
-
-% Alt(end) = x(end-1);
-
-
-
 
 gamma(end) = 0;
 
@@ -378,42 +240,13 @@ AltF = Alt(end);
 AltF_actual = Alt(end);
 vF = v(end);
 
-
-
-
-mult1 = 1;
 if AltF > 566.89*1000
-%     mult1 = gaussmf(AltF,[50000 566.89*1000]);
     AltF = 566.89*1000;
 end
-% if AltF < 0.1
-%     AltF = 0.1;
-% end
-mult2=1;
-% if gamma(end) > 0
-%     mult2 = 0;
-% end
 
-mult3=1;
-
-% if max(q) > 60000
-%     mult3 = gaussmf(max(q),[1000 60000]);
-% end
-
-% if max(q) > 50000
-%     mult3 = gaussmf(max(q),[1000 50000])
-% end
-
-%  if min(gamma) < 0
-%     mult3 = gaussmf(min(gamma),[.001 0]);
-% end
-
-%  if min(Alt) < Alt(1)
-%     mult3 = gaussmf(min(Alt),[100 Alt(1)]);
-% end
 
 if exocond == false
-%     fprintf('Did not reach exoatmospheric conditions')
+%     fprintf('Did not reach exoatmospheric conditions') % enable this if you are doing testing on the third stage
     m(end) = m(end) - mHS;
 end
 
@@ -436,9 +269,8 @@ v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3
 
 dvtot = v12 + v23 + v34;
 
-%as this is happening in a vacuum we can compute while delta v at once for
+%as this is happening in a vacuum we can compute whole delta v at once for
 %fuel usage, tsiolkovsky rocket equation. 
-
 
 g = 9.81;
 
@@ -447,36 +279,6 @@ m2 = m(end)/(exp(v12/(Isp*g)));
 m3 = m2/(exp(v23/(Isp*g)));
 
 m4 = m3/(exp(v34/(Isp*g)));
-% x(1)
-% m4
-% m(1)
-% mHS
-% mEng
-% mpayload = m4 - 247.4 -mEng; % subtract structural mass
-% mpayload = m4 - 189 -mEng; % subtract structural mass
-% vexo
-% v12
-% m(end)
+
 mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
-% if isinf(mpayload) || isnan(mpayload)
-%     mpayload = 0;
-% end
-
-% if exocond == false
-%     mpayload = 0;
-% end
-% Alt(end)
-% AltF
-mult4=1;
-% if AltF < 160000
-%     mult4 = gaussmf(AltF,[100000 160000]);
-% end
-% x(1)
-% AltF
-% q
-% mult
-
-% Alt(end)
-% gamma(end)
-mpayload = mult1*mult2*mult3*mult4*mpayload;
 

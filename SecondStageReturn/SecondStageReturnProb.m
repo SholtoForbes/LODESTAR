@@ -161,8 +161,8 @@ phi0 = -0.12913;
 xi0 = 0;
 zetaf = 1.6915;
 % zetaf = 1.7;
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-
+% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 

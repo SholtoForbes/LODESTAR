@@ -1,8 +1,5 @@
 function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0)
-% Engine Interpolator for RESTM12 Data
-% Reading from RESTM12DATA 
-
-% THIS IS ACTUALLY FOR THE CREST M10
+% Engine Interpolator for engine data
 
 % NEW SPARTAN MODEL
 
@@ -20,28 +17,7 @@ for i = 1: length(eq)
     end
 end
 
-
 wcap = 0.65;
-
-% 
-wcapstandard = 0.2156; %meters
-
-R0 = wcap^2/wcapstandard^2; % meters
-
-Acap = 0.0470*R0*SPARTAN_SCALE^(2/3); %                   m^2          
-
-gam0 = 1.4000000;
-r = 287.035;
-
-a1 = 0.5730261;
-a2 = 1.65047e-2;
-a3 = 8.889289e-3;
-a4 = -6.0995262e-4;
-
-mc     = a1 + a2*M1 + a3*M1.^2 + a4*M1.^3;
-
-w = mc.*Acap.*P1.*M1.*sqrt(gam0./r./T1).*4.0; % 4 engine modules in Full capture engine 
-
 
 % From C-REST thrust calculator
 

@@ -1,50 +1,32 @@
 function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta)
 
 % =======================================================
-% Vehicle Model
+% Vehicle Model for SPARTAN Scramjet Accelerator
 % =======================================================
 A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 
 eta = .0*ones(1,length(time)); % Roll angle
 
-% eta = 0.3 - 0.0001*time;
-
-%Gravity
-g = 9.81;
+g = 9.81; %Gravity
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-
-mstruct = 4910.5 + 3300 - 994.7 + 994.7*1.351; % mass of everything but fuel from dawids work, with fuel tank scaled to surface area
+mstruct = 4910.5 + 3300 - 994.7 + 994.7*1.351; % mass of everything but fuel from dawids work, with fuel tank mass scaled by surface area to hold 1562kg fuel
 
 m = mfuel + mstruct;
 
 %===================================================
-%
-% SECOND STAGE
-%
+%Rotational Coordinates 
 %===================================================
-
-%======================================================
-
-%Rotational Coordinates =================================================
-%=================================================
 
 global xi
 xi = zeros(1,length(time));
 phi = zeros(1,length(time));
-% zeta = zeros(1,length(time));
 
-% phi(1) = -0.2138;
 phi(1) = -0.264;
-
-% zeta(1) = deg2rad(97);
-% zeta(1) = 1.696;
-% zeta(1) = 1.699;
 
 r = V + 6371000;
 i= 1;
-
 
 [xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta(i), thetadot(i),const);
 

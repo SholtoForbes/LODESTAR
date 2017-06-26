@@ -10,7 +10,7 @@ delete grid.Isp_eng
 
 wcap = 0.65;
 
-data = dlmread('RESTM12DATA.txt');
+data = dlmread('ENGINEDATA.txt');
 
 M_englist = unique(sort(data(:,1))); % create unique list of Mach numbers from engine data
 M_eng_interp = unique(sort(data(:,1)));
