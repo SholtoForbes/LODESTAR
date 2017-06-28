@@ -98,8 +98,8 @@ scale.gammadot = 1;
 alphaL = 0;
 alphaU = deg2rad(8);
 
-zetaL = 1.5;
-zetaU = 2;
+zetaL = 1.0;
+zetaU = 1.7;
 
 phiL = -1;
 phiU = 1;
@@ -162,7 +162,7 @@ xi0 = 0;
 zetaf = 1.6915;
 % zetaf = 1.7;
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -187,7 +187,7 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [110]; 
+algorithm.nodes		= [100]; 
 global nodes
 nodes = algorithm.nodes;
 

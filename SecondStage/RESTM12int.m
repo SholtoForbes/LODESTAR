@@ -1,8 +1,6 @@
 function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0)
 % Engine Interpolator for engine data
 
-% NEW SPARTAN MODEL
-
 T1 = scattered.tempgridded(M,Alpha).*T0;
 P1 = scattered.presgridded(M,Alpha).*P0; % note this is at 50kPa, modified by efficiency
 M1 = scattered.M1gridded(M, Alpha);

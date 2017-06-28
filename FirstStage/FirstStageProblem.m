@@ -66,17 +66,16 @@ SPARTANscale = 1;
 % =========================================================================
 
 
-% mRocket = 17000; % sets the total wet mass of the rocket (first stage only)
-mRocket =22710 % total mass of scaled Falcon, note, this will not be the final total mass
+
+mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
 mEngine = 470; % Mass of Merlin 1C
-% mFuel = 0.939*mRocket; % Mass fraction kept constant for simplicity
 mFuel = 0.939*(mRocket-mEngine) + mEngine; % structural mass fraction calculated without engine
-mSpartan = 9.7725e+03;
+mSpartan = 9819.11;
+
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 
-% mEmpty = 1482.7; %(kg) Falcon sized to 8.5m, see ALV notes - 9/5/17 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -315,7 +314,7 @@ phi = primal.states(8,:);
 % [t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamics(postpitch_f,ControlFunction(t,primal.nodes,dalphadt),phase,scattered), tspan, postpitch0_f);
 
 
-% Forward Integrator
+%% Forward Integrator
  phase = 'postpitch';
 tspan = primal.nodes; 
 % postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)]; % set mass
@@ -323,7 +322,7 @@ postpitch0_f = [y(end,1) y(end,2) m(1) deg2rad(89.9) phi(1) zeta(1)];
 
 [t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered), tspan, postpitch0_f);
 
-figure(303)
+figure(103)
 hold on
 plot(postpitch_f(:,1));
 plot(V);

@@ -78,7 +78,7 @@ g = 9.81; %standard gravity
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
-Isp = 317; %Kestrel
+Isp = 317; %Kestrel, from Falcon 1 users guide
 
 % Isp = 446; %HM7B
 %% Define starting condtions
@@ -113,7 +113,8 @@ mEng = 52; %Kestrel
 m(1) = 3300;
 
 % mdot = 14.71; %RL10
-mdot = 9.8; %Kestrel
+% mdot = 9.8; %Kestrel
+mdot = 9.86; %Kestrel
 % mdot = 14.8105; %HM7B
 
 burntime = mfuel_burn/mdot;
@@ -165,8 +166,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     q(i) = 1/2*rho(i)*v(i)^2;
     
     if Fuel == true
-        T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from program
-        
+%         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
+        T = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false

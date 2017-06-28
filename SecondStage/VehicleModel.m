@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta,mstruct,mThirdStage)
 
 % =======================================================
 % Vehicle Model for SPARTAN Scramjet Accelerator
@@ -11,9 +11,9 @@ g = 9.81; %Gravity
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-mstruct = 4910.5 + 3300 - 994.7 + 994.7*1.351; % mass of everything but fuel from dawids work, with fuel tank mass scaled by surface area to hold 1562kg fuel
 
-m = mfuel + mstruct;
+
+m = mfuel + mstruct + mThirdStage ;
 
 %===================================================
 %Rotational Coordinates 
