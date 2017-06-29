@@ -30,11 +30,11 @@ interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
 interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 interp.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
-Alpha = 5; % aoa (deg)
+Alpha = 7; % aoa (deg)
 FlapDeflection = 0;
 eta = 1; % roll (rad)
 
-[t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 300],Initial_States);
+[t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
 
 
 figure(401)

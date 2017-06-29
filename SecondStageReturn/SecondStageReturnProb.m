@@ -79,7 +79,8 @@ Atmosphere = dlmread('atmosphere.txt');
 VL = 10000;
 VU = 50000; 
 
-vL = 1500;
+% vL = 1500;
+vL = 500;
 vU = 3000; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
 
@@ -107,8 +108,10 @@ phiU = 1;
 xiL = -1;
 xiU = 1;
 
-etaL = -.5;
-etaU = .5;
+% etaL = -.5;
+% etaU = .5;
+etaL = -1;
+etaU = 1;
 
 alphadotL = -0.01;
 alphadotU = 0.01;
@@ -159,10 +162,10 @@ gamma0 = 0.048;
 zeta0 = 1.69;
 phi0 = -0.12913;
 xi0 = 0;
-zetaf = 1.6915;
-% zetaf = 1.7;
+% zetaf = 1.6915;
+zetaf = 4.7124;
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;zetaf];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 

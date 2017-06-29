@@ -100,17 +100,23 @@ end
 %   end  
 % end
 
-Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha));
+Thrust = Isp.*Fueldt*9.81.*cos(deg2rad(Alpha)); % Thrust in direction of motion
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
-v_H = v.*cos(theta);
+% v_H = v.*cos(theta);
 
-gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
+% gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
+% 
+% a = ((Thrust - (Fd + gravity.*sin(theta))) ./ m );
 
-a = ((Thrust - (Fd + gravity.*sin(theta))) ./ m );
+mu_E = 3.986e14; % m^3/s^2 Earth Gravitational Parameter
+omega_E = 7.292115e-5; % s^-1 Earth Rotation Rate
+
+a = Thrust./(m) - mu_E.*sin(theta)./r.^2 -Fd./m + omega_E.^2.*r.*cos(phi).*(cos(phi).*cos(theta)+sin(phi).*sin(theta).*sin(zeta));
+
 
 % =========================================================================
 

@@ -5,7 +5,7 @@ function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelRe
 % =======================================================
 A = 62.77; % reference area (m^2)
 
-eta = .0*ones(1,length(time)); % Roll angle
+% eta = .0*ones(1,length(time)); % Roll angle
 
 % eta = 0.3 - 0.0001*time;
 
