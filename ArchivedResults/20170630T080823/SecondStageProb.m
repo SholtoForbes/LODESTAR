@@ -885,32 +885,32 @@ forward0 = [V(1),phi(1),theta(1),v(1),zeta(1),mstruct+mThirdStage+mfuelU];
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);
 
 figure(212)
-subplot(7,1,[1 2])
+subplot(6,1,1)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(t,V);
 
-subplot(7,1,3)
+subplot(6,1,2)
 hold on
 plot(f_t(1:end),f_y(:,2));
 plot(t,phi);
 
-subplot(7,1,4)
+subplot(6,1,3)
 hold on
 plot(f_t(1:end),f_y(:,3));
 plot(t,theta);
 
-subplot(7,1,5)
+subplot(6,1,4)
 hold on
 plot(f_t(1:end),f_y(:,4));
 plot(t,v);
 
-subplot(7,1,6)
+subplot(6,1,5)
 hold on
 plot(f_t(1:end),f_y(:,5));
 plot(t,zeta);
 
-subplot(7,1,7)
+subplot(6,1,6)
 hold on
 plot(f_t(1:end),f_y(:,6));
 plot(t,mstruct+mThirdStage+mfuel);

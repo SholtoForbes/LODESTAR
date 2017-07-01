@@ -100,7 +100,7 @@ alphaL = 0;
 alphaU = deg2rad(8);
 
 zetaL = 1.0;
-zetaU = 1.7;
+zetaU = 5;
 
 phiL = -1;
 phiU = 1;
@@ -120,11 +120,11 @@ etadotL = -0.01;
 etadotU = 0.01;
 
 
-% bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; alphadotL];
-% bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; alphadotU];
+% bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
+% bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 
-bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
-bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
+bounds.lower.states = [VL ; vL; gammaL; zetaL; phiL; xiL; etaL];
+bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
 
 % control bounds
 
@@ -134,8 +134,11 @@ bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 % bounds.lower.controls = [alphadot2L];
 % bounds.upper.controls = [alphadot2U]; 
 
- bounds.lower.controls = [alphadotL;etadotL];
-bounds.upper.controls = [alphadotU;etadotU]; 
+%  bounds.lower.controls = [alphadotL;etadotL];
+% bounds.upper.controls = [alphadotU;etadotU]; 
+
+bounds.lower.controls = [etadotL];
+bounds.upper.controls = [etadotU]; 
 %------------------
 % bound the horizon
 %------------------
@@ -204,21 +207,21 @@ guess.states(2,:) = [v0, 1500];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(5),deg2rad(5)];
+% guess.states(4,:) = [deg2rad(5),deg2rad(5)];
 
-guess.states(5,:) = [1.69,1.71];
+guess.states(4,:) = [1.69,1.71];
 
-guess.states(6,:) = [-0.1293,0];
+guess.states(5,:) = [-0.1293,0];
+
+guess.states(6,:) = [0,0];
 
 guess.states(7,:) = [0,0];
-
-guess.states(8,:) = [0,0];
 
 % guess.states(8,:) = [0,0];
 
 % Control guess.
 guess.controls(1,:)    = [0,0]; 
-guess.controls(2,:)    = [0,0]; 
+% guess.controls(2,:)    = [0,0]; 
 
 guess.time        = [t0 ,1000];
 % Tell DIDO the guess

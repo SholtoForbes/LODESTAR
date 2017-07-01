@@ -12,14 +12,14 @@ Vf = primal.states(1,end);
 v0 = primal.states(2,1);  
 vf = primal.states(2,end);  
 gamma0 = primal.states(3,1);  
-omega0 = primal.states(4,1);
-omegaf = primal.states(4,end);
-zeta0 = primal.states(5,1);
-zetaf = primal.states(5,end);
-phi0 = primal.states(6,1);
-phif = primal.states(6,end);
-xi0 = primal.states(7,1);
-xif = primal.states(7,end);
+% omega0 = primal.states(4,1);
+% omegaf = primal.states(4,end);
+zeta0 = primal.states(4,1);
+zetaf = primal.states(4,end);
+phi0 = primal.states(5,1);
+phif = primal.states(5,end);
+xi0 = primal.states(6,1);
+xif = primal.states(6,end);
 
 
 
