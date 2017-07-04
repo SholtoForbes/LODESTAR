@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi] = ThirdStageSim(x,k,j,u, phi0, zeta0)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -34,7 +34,10 @@ M_init = u/c_init;
 % coefficient
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
+
 M_50 = u(1)/c_50;
+% M_50 = 2922.8/c_50;% using a constant velocity
+
 CN_50 = CN_interp(M_50,10);
 AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 %%
@@ -79,8 +82,8 @@ g = 9.81; %standard gravity
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
 Isp = 317; %Kestrel, from Falcon 1 users guide
-
 % Isp = 446; %HM7B
+% Isp = 340; %Aestus 2
 %% Define starting condtions
 t(1) = 0.;
 
@@ -109,14 +112,15 @@ mHS = 125; % Heat Shield Mass
 % mEng = 100; %RL10
 mEng = 52; %Kestrel
 % mEng = 165; %HM7B
+% mEng = 138; %Aestus 2 / RS72 from https://web.archive.org/web/20141122143945/http://cs.astrium.eads.net/sp/launcher-propulsion/rocket-engines/aestus-rs72-rocket-engine.html
 
 m(1) = 3300;
-
+% m(1) = 3600;
 
 % mdot = 14.71; %RL10
-% mdot = 9.8; %Kestrel
 mdot = 9.86; %Kestrel
 % mdot = 14.8105; %HM7B
+% mdot = 16.5; %Aestus 2
 
 burntime = mfuel_burn/mdot;
 
@@ -261,11 +265,13 @@ Omega_E = 7.2921e-5 ; % rotation rate of the Earth rad/s
 
 vexo = sqrt((v(end)*sin(zeta(end)))^2 + (v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))^2); %Change coordinate system when exoatmospheric, add velocity component from rotation of the Earth
 
-inc = asin(v(end)*sin(pi-zeta(end))/vexo);  % orbit inclination angle
+inc = acos((v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))/vexo);  % initial orbit inclination angle
 
 v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo;
 
-v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-zeta(end))); % Final term of this is inclination change cost
+% v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-zeta(end))); % Final term of this is inclination change cost to get into heliosynch orbit
+
+v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-inc)); % Final term of this is inclination change cost to get into heliosync orbit
 
 v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
 

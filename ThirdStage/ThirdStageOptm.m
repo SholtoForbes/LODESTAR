@@ -39,7 +39,7 @@ options.DiffMinChange = 0.0005*i3;
 [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 exitflag
-[AltF, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);
+[AltF, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,inc] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);
 
 if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3)
     mpayload = mpayload_temp;
@@ -48,7 +48,7 @@ end
 end
 end
 
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,phi] = ThirdStageSim(x,k,j,u, phi0, zeta0);
+[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,phi,inc] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 
 
 mfuel_burn = x(1)

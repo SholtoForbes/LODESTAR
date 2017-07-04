@@ -5,7 +5,7 @@ mSPARTAN_empty = 4910.5 - 132.8 + 179.41; % Mass of the empty SPARTAN, with scal
 
 V0 = 36800;
 gamma0 = 0.048;
-zeta0 = 1.69;
+zeta0 = 1.76;
 phi0 = -0.12913;
 xi0 = 0;
 v0 = 2920;
@@ -30,11 +30,19 @@ interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
 interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 interp.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
-Alpha = 7; % aoa (deg)
-FlapDeflection = 0;
-eta = 1; % roll (rad)
+% Alpha = 7; % aoa (deg)
+% FlapDeflection = 0;
+% eta = 1; % roll (rad)
 
-[t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
+% [t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
+
+
+num_div = 5;% no of timestep divisions
+controls0 = [7*ones(1,num_div) 1*ones(1,num_div)]; % first half is angle of attack (deg), second half is roll (rad)
+
+[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[0*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)])
+
+[phi,t,y] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
 
 
 figure(401)

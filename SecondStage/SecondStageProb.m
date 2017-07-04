@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 3
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -339,7 +339,8 @@ vf = 2839.51;
 % This defines set values along the trajectory.
 % These correspond to the values in SecondStageEvents.m
 
-Zetaf = 1.69;
+% Zetaf = 1.69;
+Zetaf = 1.76;
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -385,7 +386,7 @@ TwoStage2d.bounds       = bounds;
 if const == 3 || const == 31 || const == 32
     algorithm.nodes		= [90]; 
 elseif const == 1
-    algorithm.nodes		= [100];
+    algorithm.nodes		= [105];
 elseif const == 12 
     algorithm.nodes		= [93]; 
 elseif const == 13

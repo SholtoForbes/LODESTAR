@@ -1,0 +1,12 @@
+function [phi] = BankOpt(Alpha_series,Initial_States)
+%BANKOPT A function for banking optimisation
+%   Runs ForwardSimReturn and outputs latitude
+
+
+
+
+[t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
+
+phi = y(2,end);
+end
+
