@@ -1,4 +1,4 @@
-function [phi,t,y] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty)
+function [phi,t,y,q] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty)
 %BANKOPT A function for banking optimisation
 %   Runs ForwardSimReturn and outputs latitude
 
@@ -23,6 +23,11 @@ for i = 1:length(eta_hist)
     t = [t;t_iterative];
 end
 
+V = y(:,1);
+v = y(:,4);
+rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using atmospheric data
+
+q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
 phi = y(end,2);
 end

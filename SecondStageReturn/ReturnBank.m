@@ -1,4 +1,4 @@
-%% Program to simulate a banking turn
+1%% Program to simulate a banking turn
 % Sholto Forbes-Spyratos
 clear all
 mSPARTAN_empty = 4910.5 - 132.8 + 179.41; % Mass of the empty SPARTAN, with scaled fuel tank mass
@@ -36,13 +36,15 @@ interp.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_G
 
 % [t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
 
+options.Algorithm = 'sqp';
+options.Display = 'iter';
 
-num_div = 5;% no of timestep divisions
-controls0 = [7*ones(1,num_div) 1*ones(1,num_div)]; % first half is angle of attack (deg), second half is roll (rad)
+num_div = 10;% no of timestep divisions
+controls0 = [7*ones(1,num_div) 0.5*ones(1,num_div)]; % first half is angle of attack (deg), second half is roll (rad)
 
-[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[0*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)])
+[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[1*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)],[],options)
 
-[phi,t,y] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
+[phi,t,y,q] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
 
 
 figure(401)

@@ -33,7 +33,7 @@ addpath TrajOpt-master
 Aero = dlmread('FirstStageAeroCoeffs.txt');
 scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
 scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
-scattered.Moment = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
+% scattered.Moment = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 
 M_list = unique(sort(Aero(:,1))); % create unique list of Mach numbers from engine data
 M_interp = unique(sort(Aero(:,1)));
@@ -44,10 +44,10 @@ AoA_interp = unique(sort(Aero(:,2)));
 [grid.M,grid.AoA] =  ndgrid(M_interp,AoA_interp);
 grid.Lift = scattered.Lift(grid.M,grid.AoA);
 grid.Drag = scattered.Drag(grid.M,grid.AoA);
-grid.Moment = scattered.Moment(grid.M,grid.AoA);
+% grid.Moment = scattered.Moment(grid.M,grid.AoA);
 scattered.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','linear');
 scattered.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
-scattered.MomentGridded = griddedInterpolant(grid.M,grid.AoA,grid.Moment,'spline','linear');
+% scattered.MomentGridded = griddedInterpolant(grid.M,grid.AoA,grid.Moment,'spline','linear');
 
 global SPARTANscale
 
@@ -163,7 +163,7 @@ bounds.upper.time	= [0 tfMax];
 
 
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1; -0.25];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(6)*AOAScale;0;-0.1; -0.25];
 bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1; -0.15];
 
 bounds.lower.controls = uLow;

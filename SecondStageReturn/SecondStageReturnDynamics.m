@@ -27,27 +27,27 @@ vdot = a;
  
 gamma = primal.states(3,:)*scale.gamma ; 
 
-% alpha = primal.states(4,:);
-alpha = deg2rad(7)*ones(1,length(V));
+alpha = primal.states(4,:);
+% alpha = deg2rad(7)*ones(1,length(V));
 
-zeta = primal.states(4,:);
+zeta = primal.states(5,:);
 
-phi = primal.states(5,:);
+phi = primal.states(6,:);
 
-xi = primal.states(6,:);
+xi = primal.states(7,:);
 
-eta = primal.states(7,:);
+eta = primal.states(8,:);
 
 
 % alphadot  = primal.states(8,:);
 
 % alphadot2  = primal.controls(1,:)*scale.gammadot; %
 
-% alphadot  = primal.controls(1,:)*scale.gammadot; %
-% etadot  = primal.controls(2,:);
+alphadot  = primal.controls(1,:)*scale.gammadot; %
+etadot  = primal.controls(2,:);
 
-alphadot = 0*ones(1,length(alpha));
-etadot  = primal.controls(1,:);
+% alphadot = 0*ones(1,length(alpha));
+% etadot  = primal.controls(1,:);
 
 time = primal.nodes;
 % %=========================================================================================
@@ -63,8 +63,8 @@ global L
 %======================================================
 
 % XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; alphadot2];
-% XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; etadot];
-XDOT = [Vdot;a; gammadot; zetadot; phidot; xidot; etadot];
+XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; etadot];
+% XDOT = [Vdot;a; gammadot; zetadot; phidot; xidot; etadot];
 end
 
 %======================================================

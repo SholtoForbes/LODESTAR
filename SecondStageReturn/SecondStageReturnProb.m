@@ -120,11 +120,11 @@ etadotL = -0.01;
 etadotU = 0.01;
 
 
-% bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
-% bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
+bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
+bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 
-bounds.lower.states = [VL ; vL; gammaL; zetaL; phiL; xiL; etaL];
-bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
+% bounds.lower.states = [VL ; vL; gammaL; zetaL; phiL; xiL; etaL];
+% bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
 
 % control bounds
 
@@ -134,11 +134,11 @@ bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
 % bounds.lower.controls = [alphadot2L];
 % bounds.upper.controls = [alphadot2U]; 
 
-%  bounds.lower.controls = [alphadotL;etadotL];
-% bounds.upper.controls = [alphadotU;etadotU]; 
+ bounds.lower.controls = [alphadotL;etadotL];
+bounds.upper.controls = [alphadotU;etadotU]; 
 
-bounds.lower.controls = [etadotL];
-bounds.upper.controls = [etadotU]; 
+% bounds.lower.controls = [etadotL];
+% bounds.upper.controls = [etadotU]; 
 %------------------
 % bound the horizon
 %------------------
@@ -168,12 +168,15 @@ xi0 = 0;
 % zetaf = 1.6915;
 zetaf = 4.7124;
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;zetaf];
+% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;zetaf];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
     bounds.lower.path = 0;
 bounds.upper.path = 50000;
+
+
 
 %% 
 %============================================
@@ -202,28 +205,29 @@ nodes = algorithm.nodes;
 
 
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
-guess.states(1,:) = [V0 ,V0 ];
+% guess.states(1,:) = [V0 ,V0 ];
+guess.states(1,:) = [V0 ,20000 ];
 guess.states(2,:) = [v0, 1500];
 
 guess.states(3,:) = [0.05,0.00];
 
-% guess.states(4,:) = [deg2rad(5),deg2rad(5)];
+guess.states(4,:) = [deg2rad(6),deg2rad(6)];
 
-guess.states(4,:) = [1.69,1.71];
+guess.states(5,:) = [1.69,4.7];
 
-guess.states(5,:) = [-0.1293,0];
-
-guess.states(6,:) = [0,0];
+guess.states(6,:) = [-0.1293,0];
 
 guess.states(7,:) = [0,0];
+
+guess.states(8,:) = [1,1];
 
 % guess.states(8,:) = [0,0];
 
 % Control guess.
 guess.controls(1,:)    = [0,0]; 
-% guess.controls(2,:)    = [0,0]; 
+guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,1000];
+guess.time        = [t0 ,350];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -269,6 +273,7 @@ t = primal.nodes;
 gamma = primal.states(3,:);
 
 Alpha = rad2deg(primal.states(4,:));
+% Alpha = deg2rad(7)*ones(1,length(V));
 
 zeta = rad2deg(primal.states(5,:));
 

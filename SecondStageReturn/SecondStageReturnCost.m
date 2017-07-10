@@ -34,13 +34,13 @@ v = primal.states(2,:) ;
  
 gamma = primal.states(3,:) ; 
 
-% alpha = primal.states(4,:);
+alpha = primal.states(4,:);
 
-zeta = primal.states(4,:);
+zeta = primal.states(5,:);
 
-phi = primal.states(5,:);
+phi = primal.states(6,:);
 
-xi = primal.states(6,:);
+xi = primal.states(7,:);
 
 alphadot  = primal.controls(1,:); %
 

@@ -49,6 +49,8 @@ options{i}.TolX = 1e-3;
 % This mostly ensures that the optimal solution will be found.
 for i3 = 0:.5:6
 for i2 = 0:10
+% for i3 = 0:2:6
+% for i2 = 0:2.5:10
     
 
 i4 = 0;
