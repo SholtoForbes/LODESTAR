@@ -1,4 +1,4 @@
-function [dz,q,xi] = rocketDynamics(z,u,t,phase,scattered)
+function [dz,q,xi] = rocketDynamics(z,u,t,phase,scattered,Throttle)
 % function [dz,q,phi] = rocketDynamics(z,u,t,phase,scattered)
 %This function determines the dynamics of the system as time derivatives,
 %from input primals. Called by LanderDynamics
@@ -44,6 +44,9 @@ SCALE = 1.;
 % SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
 T = 555900*SCALE + (101325 - P_atm)*0.5518*SCALE; % Thrust from Flacon 1 users guide. exit area calculated in SCALING.docx
+
+T = T.*Throttle; % Throttle down
+
 Isp = 275 + (101325 - P_atm)*2.9410e-04; % linear regression of SL and vacuum Isp. From encyclopaedia astronautica, backed up by falcon 1 users guide
 
 dm = -T./Isp./g*SCALE;
@@ -57,7 +60,8 @@ Cl = scattered.LiftGridded(mach,rad2deg(alpha));
 
 %%%% Compute the drag and lift:
 global SPARTANscale
-Area = 62.77*SPARTANscale^(2/3);  
+Area = 62.77*SPARTANscale^(2/3); 
+
 D = 0.5*Cd.*Area.*density.*v.^2;
 global L
 L = 0.5*Cl.*Area.*density.*v.^2;

@@ -1,5 +1,7 @@
 function [states_end] = FirstStageProblem(hf,gammaf,phif,zetaf,const)
 
+global Throttle
+Throttle = 0.85; % throttle the Merlin engine down by a constant value, to enable easier pitchover
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % clear all;		
@@ -163,8 +165,8 @@ bounds.upper.time	= [0 tfMax];
 
 
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(6)*AOAScale;0;-0.1; -0.25];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi; 0.1; -0.15];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1; -0.25];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(2)*AOAScale;2*pi; 0.1; -0.15];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
@@ -219,7 +221,8 @@ MoonLander.bounds = bounds;
                          % the solution (but, practically, this is not
                          % always true!)
 if const == 3
-    algorithm.nodes = [82]; 
+%     algorithm.nodes = [82]; 
+algorithm.nodes = [90]; 
 else
   algorithm.nodes = [82]; 
 end
@@ -320,7 +323,7 @@ tspan = primal.nodes;
 % postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)]; % set mass
 postpitch0_f = [y(end,1) y(end,2) m(1) deg2rad(89.9) phi(1) zeta(1)];
 
-[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered), tspan, postpitch0_f);
+[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered,Throttle), tspan, postpitch0_f);
 
 figure(103)
 hold on
@@ -339,7 +342,7 @@ plot(V);
 %100m, 30m/s at the PS method determined fuel mass
 
 % ntoe that launch altitude does vary, but it should only be slightly
-controls = fminunc(@(controls) prepitch(controls,m(1),scattered),[10,6]);
+controls = fminunc(@(controls) prepitch(controls,m(1),scattered,Throttle),[10,6]);
 
 h_launch = controls(1)
 t_prepitch = controls(2)
@@ -362,7 +365,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0, 0];
 
 % this performs a forward simulation before pitchover. The end results of
 % this are used as initial conditions for the optimiser. 
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered,Throttle), tspan, y0);  
 
 
 figure(101);

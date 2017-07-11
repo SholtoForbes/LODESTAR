@@ -2,7 +2,7 @@ function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
-x(end) = x(end)*10000; % de-scale
+% x(end) = x(end)*10000; % de-scale
 
 SCALE_Engine = 1; % changes characteristic length
 
@@ -151,9 +151,15 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     dt = dt_main;
         t(i+1) = t(i) + dt;
         
-    if t(i) <= x(end)
-        Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-    elseif t(i) > x(end)
+%     if t(i) <= x(end)
+%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+%     elseif t(i) > x(end)
+%         Alpha(i) = 0;
+%     end
+
+    if t(i) <= burntime
+        Alpha(i) = interp1(0:burntime/(length(x)-1):burntime,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+    elseif t(i) > burntime
         Alpha(i) = 0;
     end
 

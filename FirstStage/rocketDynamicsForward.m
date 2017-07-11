@@ -1,4 +1,4 @@
-function [dz] = rocketDynamicsForward(z,zeta,alpha,phase,scattered)
+function [dz] = rocketDynamicsForward(z,zeta,alpha,phase,scattered,Throttle)
 global mach
 Atmosphere = dlmread('atmosphere.txt');
 h = z(1,:);   %Height
@@ -32,6 +32,7 @@ SCALE = 1.;
 % Merlin 1C engine 
 % T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
 T = 555900*SCALE + (101325 - P_atm)*0.5518; 
+T = T*Throttle;
 Isp = 275 + (101325 - P_atm)*2.9410e-04;
 
 dm = -T./Isp./g*SCALE;

@@ -8,6 +8,7 @@ function xdot = LanderDynamics(primal)
 global CONSTANTS
 global AOAScale
 global iteration
+global Throttle
 iteration = iteration + 1;
 
 
@@ -35,7 +36,7 @@ global q_forward
 global xi
 % global phi
 % [dz,q,phi] = rocketDynamics(x,u,t,phase,scattered);
-[dz,q,xi] = rocketDynamics(x,u,t,phase,scattered);
+[dz,q,xi] = rocketDynamics(x,u,t,phase,scattered,Throttle);
 q_forward = q;
 dz(5) = dz(5)*AOAScale;
 

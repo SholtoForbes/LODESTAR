@@ -15,7 +15,7 @@ g = 9.81;
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 
-mstruct = 4910.5 + 3300; % mass of everything but fuel from dawids work
+mstruct = 4910.5 - 132.8 + 179.41; % mass of everything but fuel from dawids work
 
 m = mstruct;
 
