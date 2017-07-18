@@ -7,8 +7,6 @@ A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
 
 eta = .0*ones(1,length(time)); % Roll angle
 
-g = 9.81; %Gravity
-
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 

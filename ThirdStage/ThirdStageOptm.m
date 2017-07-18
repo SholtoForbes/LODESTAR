@@ -8,11 +8,11 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 
 % This is used to calculate the max AoA, not the best coding here
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max] = ThirdStageSim([0 0 0 0 20],k,j,u, phi0, zeta0);
-AoA_max
+AoA_max(1)
 
 
 % options.Display = 'iter-detailed';
-options.Algorithm = 'sqp';
+% options.Algorithm = 'sqp';
 options.FunValCheck = 'on';
 % options.ScaleProblem = 'obj-and-constr'
 % options.DiffMinChange = 0.0005;
@@ -31,21 +31,21 @@ x=0;
 % for i3 = 0:.5:6
 % for i2 = 0:10
 
-% for i3 = 0:2:6
-% for i2 = 0:2.5:10
-
-for i3 = 0:.1:8
-for i2 = 1
-
+for i3 = 0:.5:12
+for i2 = 0:2.5:10
+% 
+% for i3 = 0:.25:6
+% for i4 = 0:2;
+% i2 = 1;
 i4=0;
-% x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01 250/10000+i2*5/10000]; 
+x0 = [AoA_max(1)*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000]; 
 
-x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
+% x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
 
 % Initiate optimiser
 options.DiffMinChange = 0.0005*i3;
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
- [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max(1)*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+%  [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
  
 exitflag
 [AltF, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,inc] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);

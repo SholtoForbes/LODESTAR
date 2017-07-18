@@ -38,6 +38,8 @@ Cl = scattered.Cl_spline(mach,rad2deg(alpha));
 D = 0.5*Cd.*A.*density.*v.^2;
 L = 0.5*Cl.*A.*density.*v.^2;
 
+% D=D*2;
+% L=L*3;
 
 %Rotational Coordinates =================================================
 %=================================================

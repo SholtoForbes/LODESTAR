@@ -2,7 +2,7 @@ function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
-% x(end) = x(end)*10000; % de-scale
+x(end) = x(end)*10000; % de-scale
 
 SCALE_Engine = 1; % changes characteristic length
 
@@ -39,7 +39,7 @@ M_50 = u(1)/c_50;
 % M_50 = 2922.8/c_50;% using a constant velocity
 
 CN_50 = CN_interp(M_50,10);
-AoA_max = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
+AoA_max(1) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 %%
 AoA_init = x(1); 
 
@@ -107,7 +107,7 @@ v(1) = u;
 zeta(1) = zeta0;
 
 %% Define Vehicle Properties
-mHS = 125; % Heat Shield Mass
+mHS = 125.65; % Heat Shield Mass
 
 % mEng = 100; %RL10
 mEng = 52; %Kestrel
@@ -130,8 +130,6 @@ Fuel = true;
 
 j = 1;
 
-
-
 p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3)); % calculate pressure using atmospheric data
 
 c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
@@ -141,6 +139,10 @@ rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density usi
 while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000 
 % iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
 
+    if t(i) > x(end)
+        dt = 2; % Increase timestep after end of angle of attack variation. Accuracy doesnt matter as much at that point. 
+    end
+
     mfuel_temp = mfuel(i) - mdot*dt;
     
     if mfuel_temp < mdot*dt && Fuel == true
@@ -148,20 +150,19 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Fuel = false;
     end
     
-    dt = dt_main;
         t(i+1) = t(i) + dt;
         
-%     if t(i) <= x(end)
-%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > x(end)
-%         Alpha(i) = 0;
-%     end
-
-    if t(i) <= burntime
-        Alpha(i) = interp1(0:burntime/(length(x)-1):burntime,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-    elseif t(i) > burntime
+    if t(i) <= x(end)
+        Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+    elseif t(i) > x(end)
         Alpha(i) = 0;
     end
+
+%     if t(i) <= burntime
+%         Alpha(i) = interp1(0:burntime/(length(x)-1):burntime,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+%     elseif t(i) > burntime
+%         Alpha(i) = 0;
+%     end
 
     p(i) = ppval(p_spline, Alt(i));
     
@@ -175,6 +176,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     end
     
     q(i) = 1/2*rho(i)*v(i)^2;
+    
+    AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
     
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
@@ -222,26 +225,44 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i);
    
-    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
+    [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
     
 %     if i == 1 && gammadot < 0 && x(1) ~= 0
 %         fprintf('BAD CONDITIONS!');
 %     end
    
-%     if i == 1
-    r(i+1) = r(i) + rdot*dt;
+    if i == 1
+        
+    r(i+1) = r(i) + rdot(i)*dt;
     
     Alt(i+1) = r(i+1) - r_E;
     
-    xi(i+1) = xi(i) + xidot*dt;
+    xi(i+1) = xi(i) + xidot(i)*dt;
     
-    phi(i+1) = phi(i) + phidot*dt;
+    phi(i+1) = phi(i) + phidot(i)*dt;
     
-    gamma(i+1) = gamma(i) + gammadot*dt;
+    gamma(i+1) = gamma(i) + gammadot(i)*dt;
     
-    v(i+1) = v(i) + vdot*dt;
+    v(i+1) = v(i) + vdot(i)*dt;
     
-    zeta(i+1) = zeta(i) + zetadot*dt;
+    zeta(i+1) = zeta(i) + zetadot(i)*dt;
+    
+    else
+        % Second order taylor's series with forward difference
+    r(i+1) = r(i) + rdot(i)*dt + (rdot(i) - rdot(i-1))/2*dt;
+    
+    Alt(i+1) = r(i+1) - r_E;
+    
+    xi(i+1) = xi(i) + xidot(i)*dt + (xidot(i) - xidot(i-1))/2*dt;
+    
+    phi(i+1) = phi(i) + phidot(i)*dt + (phidot(i) - phidot(i-1))/2*dt;
+    
+    gamma(i+1) = gamma(i) + gammadot(i)*dt + (gammadot(i) - gammadot(i-1))/2*dt;
+    
+    v(i+1) = v(i) + vdot(i)*dt + (vdot(i) - vdot(i-1))/2*dt;
+    
+    zeta(i+1) = zeta(i) + zetadot(i)*dt + (zetadot(i) - zetadot(i-1))/2*dt;
+    end
 
     i = i+1;
 end
@@ -273,7 +294,7 @@ vexo = sqrt((v(end)*sin(zeta(end)))^2 + (v(end)*cos(zeta(end)) + r(end)*Omega_E*
 
 inc = acos((v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))/vexo);  % initial orbit inclination angle
 
-v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo + 2*(v(end))*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-inc)); % Final term of this is inclination change cost to get into heliosync orbit
+v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo + 2*(v(end))*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-inc)/2); % Final term of this is inclination change cost to get into heliosync orbit
 
 % v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-zeta(end))); % Final term of this is inclination change cost to get into heliosynch orbit
 
@@ -286,13 +307,13 @@ dvtot = v12 + v23 + v34;
 %as this is happening in a vacuum we can compute whole delta v at once for
 %fuel usage, tsiolkovsky rocket equation. 
 
-g = 9.81;
+g_standard = 9.806;
 
-m2 = m(end)/(exp(v12/(Isp*g)));
+m2 = m(end)/(exp(v12/(Isp*g_standard)));
 
-m3 = m2/(exp(v23/(Isp*g)));
+m3 = m2/(exp(v23/(Isp*g_standard)));
 
-m4 = m3/(exp(v34/(Isp*g)));
+m4 = m3/(exp(v34/(Isp*g_standard)));
 
 mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
 

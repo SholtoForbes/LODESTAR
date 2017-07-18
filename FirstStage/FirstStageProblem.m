@@ -134,6 +134,14 @@ vUpp = 3000;
 
 mLow = mEmpty;
 mUpp = mTotal;
+
+phiL = -0.5;
+phiU = -0.2;
+
+if phif > phiU || phif < phiL
+    disp('Given latitude outside of bounds')
+end
+
 % if const == 32
 %     mUpp = 30000;
 % else
@@ -165,8 +173,8 @@ bounds.upper.time	= [0 tfMax];
 
 
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1; -0.25];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(2)*AOAScale;2*pi; 0.1; -0.15];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1;phiL ];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(2)*AOAScale;2*pi; 0.1; phiU];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;

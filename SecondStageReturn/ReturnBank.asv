@@ -14,11 +14,12 @@ Initial_States = [V0,phi0,gamma0,v0,zeta0,xi0];
 
 %% Define Latitude and Longitude Constraints
 % Define the latitude and longitude of home base
-returncond.phi = -0.3;
-returncond.xi = 0;
+phi_base = -0.2;
+xi_base = 0;
 
 % Define acceptable landing radius
-returncond.rad = 0.01; %in radians
+r_landing = 
+
 
 %%
 
@@ -63,25 +64,25 @@ ub = [8*ones(1,(length(controls0)-1)/2) deg2rad(80)*ones(1,(length(controls0)-1)
 
 
 % [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[1*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)],[],options)
-[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],lb,ub,@(controls)Constraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond),options)
+[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],lb,ub,@(controls)Constraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),options)
 
-[cost,phi,t,y,q,xi] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
+[phi,t,y,q] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
 
 
 figure(401)
-subplot(5,5,[1,5]);
+subplot(5,7,[1,5]);
 plot(t,y(:,1));
 title('Altitude');
 
-subplot(5,5,[6,10]);
+subplot(5,7,[6,10]);
 plot(t,y(:,5));
 title('Heading Angle');
 
-subplot(5,5,[11,15]);
+subplot(5,7,[11,15]);
 plot(t,y(:,4));
 title('Velocity');
 
-subplot(5,5,[16,20]);
+subplot(5,7,[16,20]);
 plot(t,y(:,2));
 title('Latitude');
 

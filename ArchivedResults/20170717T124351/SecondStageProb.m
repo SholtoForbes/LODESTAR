@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 1
+const = 3
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
