@@ -956,10 +956,7 @@ copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Time
 
 %% Latitude Plot
 figure(250)
-plot(FirstStageStates(:,9))
-plot(phi)
-plot(ThirdStagePhi)
-title('Latitude')
+plot(
 
 %%
 
