@@ -19,13 +19,19 @@ ceq = 0;
 % Target = [160000-Alt(end) gamma(end)-deg2rad(1)];
 % Target = [160000-Alt(end) Alt(end)-567000 gamma(end)-deg2rad(1)];
 
+% Alpha
+% AoA_max
+% Alpha - AoA_max
+% AoA_constraint = max(Alpha - AoA_max);
 
-AoA_constraint = max(Alpha - AoA_max);
+% Target = [100000-Alt(end) max(q)-80000 Alt(end)-567000 gamma(end)-deg2rad(1) AoA_constraint];
 
-Target = [160000-Alt(end) Alt(1)-(min(Alt)) Alt(end)-567000 gamma(end)-deg2rad(1) AoA_constraint]; 
-%  max(q)-70000
+Target = [160000-Alt(end) max(q)-51000 Alt(end)-567000 gamma(end)-deg2rad(1)]; 
 
+% Target = [gamma(end)-deg2rad(1) AoA_constraint]; 
+%  max(q)-70000    Alt(1)-(min(Alt)) Alt(end)-567000
 
+% ceq = 160000-Alt(end);
 
 
 % Target = [100000-Alt(end-1) Alt(1)-(min(Alt)) Alt(end-1)-567000 gamma(end-1)-deg2rad(1)];

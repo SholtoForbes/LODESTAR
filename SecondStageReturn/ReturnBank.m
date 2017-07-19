@@ -55,7 +55,7 @@ interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 options.Algorithm = 'sqp';
 options.Display = 'iter';
 
-num_div = 10;% no of timestep divisions
+num_div = 20;% no of timestep divisions
 controls0 = [7*ones(1,num_div) 0.5*ones(1,num_div) 450]; % first half is angle of attack (deg), second half is roll (rad)
 
 lb = [1*ones(1,(length(controls0)-1)/2) -1*ones(1,(length(controls0)-1)/2) 400];

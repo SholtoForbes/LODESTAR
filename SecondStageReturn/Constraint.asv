@@ -1,9 +1,0 @@
-function [constraint,ceq] = Constraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty)
-
-[phi,t,y,q] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty);
-% 
-length(y()
-length(q)
-constraint = [q - 50000];
-% constraint = [];
-ceq = [];

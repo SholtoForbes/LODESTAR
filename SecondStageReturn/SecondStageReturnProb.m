@@ -286,12 +286,6 @@ eta = rad2deg(primal.states(8,:));
 alphadot = primal.controls(1,:)*scale.gamma;
 
 % ===================================================================
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Third Stage
-% Optimise third stage trajectory from end point for accuracy 
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %

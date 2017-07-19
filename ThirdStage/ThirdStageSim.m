@@ -2,7 +2,7 @@ function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
-x(end) = x(end)*10000; % de-scale
+% x(end) = x(end)*10000; % de-scale
 
 SCALE_Engine = 1; % changes characteristic length
 
@@ -39,6 +39,7 @@ M_50 = u(1)/c_50;
 % M_50 = 2922.8/c_50;% using a constant velocity
 
 CN_50 = CN_interp(M_50,10);
+% CN_50 = CN_interp(M_50,5);
 AoA_max(1) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 %%
 AoA_init = x(1); 
@@ -65,7 +66,8 @@ Hor = [];
 D = [];
 L = [];
         
-mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value. 
+mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value.
+% mfuel_burn = 2500;
 mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
@@ -115,7 +117,7 @@ mEng = 52; %Kestrel
 % mEng = 138; %Aestus 2 / RS72 from https://web.archive.org/web/20141122143945/http://cs.astrium.eads.net/sp/launcher-propulsion/rocket-engines/aestus-rs72-rocket-engine.html
 
 m(1) = 3300;
-% m(1) = 3600;
+% m(1) = 3000;
 
 % mdot = 14.71; %RL10
 mdot = 9.86; %Kestrel
@@ -152,23 +154,25 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
         t(i+1) = t(i) + dt;
         
-    if t(i) <= x(end) && Fuel == true
-        Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-    else
-        Alpha(i) = 0;
-    end
+%     if t(i) <= x(end) && Fuel == true
+%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+%     else
+%         Alpha(i) = 0;
+%     end
     
 %     elseif t(i) > x(end)
 %         Alpha(i) = 0;
 %     end
    
 
-%     if t(i) <= burntime
-%         Alpha(i) = interp1(0:burntime/(length(x)-1):burntime,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > burntime
-%         Alpha(i) = 0;
-%     end
-
+    if t(i) <= 200
+        Alpha(i) = interp1(0:200/(length(x)-1):200,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+    elseif t(i) > 200 && t(i) <= burntime
+        Alpha(i) = -x(end)*(t(i) - 200)/(burntime - 200) + x(end);
+    elseif t(i) > burntime
+        Alpha(i) = 0;
+    end
+ 
     p(i) = ppval(p_spline, Alt(i));
     
     if Alt(i) < 85000
@@ -182,7 +186,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     q(i) = 1/2*rho(i)*v(i)^2;
     
-    AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
+%     AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
     
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.

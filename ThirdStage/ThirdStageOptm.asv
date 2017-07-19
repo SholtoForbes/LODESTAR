@@ -31,52 +31,41 @@ x=0;
 % for i3 = 0:.5:6
 % for i2 = 0:10
 count = 1
-for i3 = 0:.5:5
-%   for i3 = 0 
-% for i2 = 0:2.5:5
-    
+for i3 = 0:.5:12
+for i2 = 0:2.5:10
+    count = count+1
 % 
 % for i3 = 0:.25:6
-
-for i4 = 0:.5:3;
-% for i4 = 1;
+% for i4 = 0:2;
 % i2 = 1;
-% i4=0;
-count = count+1
-AoA_max_abs = deg2rad(10);
+i4=0;
 
-% x0 = [AoA_max(1)*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000]; % initial guess uses first max aoa
-% 
-% if AoA_max(1) > AoA_max_abs
-%     x0 = [AoA_max_abs*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000];
-% end
+AoA_max_abs = deg2rad(15);
 
-% x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000+i2*5/10000]; % initial guess uses first max aoa
+x0 = [AoA_max(1)*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000]; % initial guess uses first max aoa
 
-x0 = [deg2rad(5)*ones(1,10)+i4*deg2rad(1)];
+if AoA_max(1) > AoA_max_abs
+    x0 = [AoA_max_abs*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000];
+end
+
+% x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
 
 % Initiate optimiser
 options.DiffMinChange = 0.0005*i3;
 % maximum angle of attack is 20 deg. This is limited further in constraints.
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max_abs*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max(1) AoA_max_abs*ones(1,9)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max_abs*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max_abs*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 %  [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
  
 exitflag
 [AltF, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,inc] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);
-mpayload_temp
 
 if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3)
     mpayload = mpayload_temp;
     x = x_temp;
 end
+end
+end
 
-mpayload
-end
-% end
-end
 [AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,phi,inc] = ThirdStageSim(x,k,j,u, phi0, zeta0);
 
 
