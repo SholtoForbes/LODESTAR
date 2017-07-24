@@ -1,8 +1,9 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc] = ThirdStageSim(x,k,j,u, phi0, zeta0)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
-x(end) = x(end)*10000; % de-scale
+x(end) = x(end)*1000; % de-scale
+x(end-1) = x(end-1)*10000; % de-scale
 
 SCALE_Engine = 1; % changes characteristic length
 
@@ -39,6 +40,7 @@ M_50 = u(1)/c_50;
 % M_50 = 2922.8/c_50;% using a constant velocity
 
 CN_50 = CN_interp(M_50,10);
+% CN_50 = CN_interp(M_50,5);
 AoA_max(1) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 %%
 AoA_init = x(1); 
@@ -65,7 +67,10 @@ Hor = [];
 D = [];
 L = [];
         
-mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value. 
+% mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value.
+% mfuel_burn = 2000;
+mfuel_burn = x(end-1);
+
 mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
@@ -115,7 +120,7 @@ mEng = 52; %Kestrel
 % mEng = 138; %Aestus 2 / RS72 from https://web.archive.org/web/20141122143945/http://cs.astrium.eads.net/sp/launcher-propulsion/rocket-engines/aestus-rs72-rocket-engine.html
 
 m(1) = 3300;
-% m(1) = 3600;
+% m(1) = 3000;
 
 % mdot = 14.71; %RL10
 mdot = 9.86; %Kestrel
@@ -136,10 +141,16 @@ c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of soun
 
 rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
+for k = 1:length(x)
+   if isnan(x(k))
+       x(k) = 0;
+   end
+end
+
 while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000 
 % iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
 
-    if t(i) > x(end)
+    if t(i) > x(end-1)
         dt = 2; % Increase timestep after end of angle of attack variation. Accuracy doesnt matter as much at that point. 
     end
 
@@ -163,12 +174,30 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
 %     end
    
 
-    if t(i) <= 200
-        Alpha(i) = interp1(0:200/(length(x)-1):200,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-    elseif t(i) > 200
+%     if t(i) <= 220
+%         Alpha(i) = interp1(0:220/(length(x)-1):220,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+%     elseif t(i) > 220 && t(i) <= burntime
+%         Alpha(i) = -x(end)*(t(i) - 220)/(burntime - 220) + x(end);
+%     elseif t(i) > burntime
+%         Alpha(i) = 0;
+%     end
+
+%     if t(i) <= x(end)
+%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+%     elseif t(i) > x(end) && t(i) <= burntime
+%         Alpha(i) = -x(end-1)*(t(i) - x(end))/(burntime - x(end)) + x(end-1);
+%     elseif t(i) > burntime
+%         Alpha(i) = 0;
+%     end
+
+    if t(i) <= x(end)
+        Alpha(i) = interp1(0:x(end)/(length(x)-3):x(end),x(1:end-2),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+    elseif t(i) > x(end) && t(i) <= burntime
+        Alpha(i) = -x(end-2)*(t(i) - x(end))/(burntime - x(end)) + x(end-2);
+    elseif t(i) > burntime
         Alpha(i) = 0;
     end
-
+ 
     p(i) = ppval(p_spline, Alt(i));
     
     if Alt(i) < 85000
@@ -182,11 +211,11 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     q(i) = 1/2*rho(i)*v(i)^2;
     
-    AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
+%     AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
     
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
-        T = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
+        T(i) = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false
@@ -197,7 +226,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         end
         
     else
-        T = 0;
+        T(i) = 0;
 
         mfuel(i+1) = mfuel(i);
         
@@ -227,10 +256,26 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
 
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
+    L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i); % Ae
     
-    L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i);
+    
+    %% Thrust vectoring
+    if T(i) > 0
+        Vec_angle(i) = asin(2.5287/2.9713*L(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment.
+    else
+        Vec_angle(i) = 0;
+    end
+    
+    if L(i) > T(i)*sin(deg2rad(80)); % this is not a limit, it just stops it going imaginary
+        Vec_angle(i) = deg2rad(80);
+    end
+    
+    T(i) = T(i)*cos(Vec_angle(i));
+    L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
+    
+    %%
    
-    [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
+    [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i));
     
 %     if i == 1 && gammadot < 0 && x(1) ~= 0
 %         fprintf('BAD CONDITIONS!');

@@ -1,4 +1,4 @@
-function dz = ForwardSimReturn(y,alpha,eta,Atmosphere,interp,flapdeflection,mSPARTAN_empty)
+function dz = ForwardSimReturn(y,alphadot,etadot,Atmosphere,interp,flapdeflection,mSPARTAN_empty)
 
 V = y(1);
 phi = y(2);
@@ -9,6 +9,8 @@ m = mSPARTAN_empty;
 xi = y(6); % longitude doesnt matter
 r = V + 6371000;
 
+eta =  y(7);
+alpha =  y(8);
 
 
 A = 62.77; % reference area (m^2)
@@ -42,5 +44,5 @@ Drag = interp.Cd_spline(M,alpha)*A*q;
 
 [rdot,xidot,phidot,gammadot,vdot,zetadot,total_lift] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,lift,Drag,Thrust,m,alpha,eta);
 
-dz = [rdot;phidot;gammadot;vdot;zetadot;xidot];
+dz = [rdot;phidot;gammadot;vdot;zetadot;xidot;etadot;alphadot];
 end

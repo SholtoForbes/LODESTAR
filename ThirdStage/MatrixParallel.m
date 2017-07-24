@@ -42,8 +42,8 @@ options{i}.Algorithm = 'sqp';
 % options{i}.Algorithm = 'active-set';
 % options(i).ScaleProblem = 'iter-and-constr'
 
-options{i}.TolFun = 1e-3;
-options{i}.TolX = 1e-3;
+% options{i}.TolFun = 1e-3;
+% options{i}.TolX = 1e-3;
     
 % Run each case for a range of initial guesses and DiffMinChange values.
 % This mostly ensures that the optimal solution will be found.
@@ -59,13 +59,13 @@ options{i}.TolX = 1e-3;
 % for i2 = 0:2.5:5
 % for i4 = 0:2;
 
-for i3 = 0:.5:5
-for i4 = 0:.5:3;
+for i3 = 0:2
+for i4 = 0:.25:2;
     
 % i2 = 1;
 % i4 = 0;
 
-AoA_max_abs = deg2rad(10);
+AoA_max_abs = deg2rad(15);
 % 
 % x0 = [AoA_max(1)*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000]; % initial guess uses first max aoa
 % 
@@ -73,16 +73,22 @@ AoA_max_abs = deg2rad(10);
 %     x0 = [AoA_max_abs*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000];
 % end
 
-% x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000+i2*5/10000]; % initial guess uses first max aoa
-x0 = [deg2rad(5)*ones(1,10)+i4*deg2rad(1)];
+% x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000]; % initial guess uses first max aoa
+% x0 = [deg2rad(5)*ones(1,10) 230/10000];
 
 % x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
+
+num_div = 10;
+x0 = [deg2rad(5)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+
 
 options{i}.DiffMinChange = 0.0005*i3;
 
 % Initiate optimiser
 % [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max_abs*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
- [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max_abs*ones(1,10)],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
+%  [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max_abs*ones(1,10)],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
+% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,8)  200/10000],[AoA_max_abs*ones(1,8)  240/10000],@(x)Constraint(x,k,j,u(i), phi0, zeta0),options{i});
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,num_div) 2500/10000  200/1000],[AoA_max_abs*ones(1,num_div) 2900/10000  240/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 
 [AltF(i), vF(i), Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta] = ThirdStageSim(x_temp,k,j,u(i), phi0, zeta0);
 

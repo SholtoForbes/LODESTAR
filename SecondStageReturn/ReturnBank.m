@@ -3,7 +3,7 @@
 clear all
 mSPARTAN_empty = 4910.5 - 132.8 + 179.41; % Mass of the empty SPARTAN, with scaled fuel tank mass
 
-V0 = 36800;
+V0 = 35000;
 gamma0 = 0.048;
 zeta0 = 1.76;
 phi0 = -0.12913;
@@ -14,11 +14,11 @@ Initial_States = [V0,phi0,gamma0,v0,zeta0,xi0];
 
 %% Define Latitude and Longitude Constraints
 % Define the latitude and longitude of home base
-returncond.phi = -0.3;
-returncond.xi = 0;
+returncond.phi = -0.15;
+% returncond.xi = 0;
 
 % Define acceptable landing radius
-returncond.rad = 0.01; %in radians
+returncond.rad = 0.05; %in radians
 
 %%
 
@@ -56,16 +56,26 @@ options.Algorithm = 'sqp';
 options.Display = 'iter';
 
 num_div = 20;% no of timestep divisions
-controls0 = [7*ones(1,num_div) 0.5*ones(1,num_div) 450]; % first half is angle of attack (deg), second half is roll (rad)
 
-lb = [1*ones(1,(length(controls0)-1)/2) -1*ones(1,(length(controls0)-1)/2) 400];
-ub = [8*ones(1,(length(controls0)-1)/2) deg2rad(80)*ones(1,(length(controls0)-1)/2) 600];
+Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 
+% controls0 = [7*ones(1,num_div) 0.5*ones(1,num_div) 450];
+% lb = [1*ones(1,num_div) -1*ones(1,num_div) 400];
+% ub = [8*ones(1,num_div) deg2rad(80)*ones(1,num_div) 600];
+
+
+eta_00 = 1; % initial roll guess
+AoA_00 = 7;
+
+controls0 = [0*ones(1,num_div) 0*ones(1,num_div) 450 eta_00 AoA_00];
+
+lb = [-1*ones(1,num_div) -.1*ones(1,num_div) 400 -1 0];
+ub = [1*ones(1,num_div) .1*ones(1,num_div) 600 1.5 8];
 
 % [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[1*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)],[],options)
-[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],lb,ub,@(controls)Constraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond),options)
+[controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div),controls0,[],[],[],[],lb,ub,@(controls)ReturnConstraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond,num_div),options)
 
-[cost,phi,t,y,q,xi] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty);
+[cost,phi,t,y,q,xi] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
 
 
 figure(401)
