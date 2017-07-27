@@ -1,21 +1,13 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb, num_div)
+function [AltF_actual, vF, Alt, v, mpayload, Alpha, m,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L, rdot, vdot, gammadot, Alt_check, v_check, gamma_check,mdot] = ThirdStageSim(Alt, v, gamma, Alpha, phi0, zeta0,nodes,t)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
-
-
-for temp_it = 1:length(x)
-   if isnan(x(temp_it))
-       x(temp_it) = lb(temp_it);
-   end
-end
-
-x(end) = x(end)*1000; % de-scale
-x(end-1) = x(end-1)*10000; % de-scale
-
 
 SCALE_Engine = 1; % changes characteristic length
 
 time1 = cputime;
+
+
+
 
 Atmosphere = dlmread('atmosphere.txt');
 Aero = dlmread('AeroCoeffs.txt');
@@ -31,32 +23,26 @@ Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
 iteration = 1;
 
 
-rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), k);
-c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), k);
+rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(1));
+c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(1));
 
-q_init = 0.5*rho_init*u^2;
-M_init = u/c_init;
+q_init = 0.5*rho_init*v(1)^2;
+M_init = v(1)/c_init;
 
 %% Set Max AoA
 % determine the maximum allowable normal coefficient with a 10 degree limit
 % at 50kPa dynamic pressure, and set the max AoA to match this normal
 % coefficient
-Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/u(1)^2);
+Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000*2/v(1)^2);
 c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
 
-M_50 = u(1)/c_50;
+M_50 = v(1)/c_50;
 % M_50 = 2922.8/c_50;% using a constant velocity
 
 CN_50 = CN_interp(M_50,10);
 % CN_50 = CN_interp(M_50,5);
 AoA_max(1) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q_init)); %maximum allowable AoA
 %%
-AoA_init = x(1); 
-
-[k j u];
-        
-Starting_Altitude = k;
-Starting_Theta = j;
 
 c = [];
 CD = [];
@@ -67,23 +53,21 @@ CA = [];
 vx = [];
 vy = [];
 rho = [];
-t= [];
-Theta = [];
-Alt = [];
-mfuel = [];
+
 Hor = [];
 D = [];
 L = [];
-        
-% mfuel_burn = 2600; % this was chosen to last until after atmospheric exit. This does not make a large amount of difference, and is close to the optimal value.
-% mfuel_burn = 2000;
-mfuel_burn = x(end-1);
+  p=[];      
+
+mfuel_burn = 2600;
 
 mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
 
 r_E = 6371000; % earth radius
+
+ r = Alt + r_E;
 
 Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
 
@@ -98,24 +82,13 @@ Isp = 317; %Kestrel, from Falcon 1 users guide
 % Isp = 446; %HM7B
 % Isp = 340; %Aestus 2
 %% Define starting condtions
-t(1) = 0.;
-
-dt_main = 1; %time step
-dt = dt_main;
+dt = t(2:end)-t(1:end-1);
 
 i=1;
-
-r(1) = r_E + k;
-
-Alt(1) = k;
 
 xi(1) = 0;
     
 phi(1) = phi0;
-
-gamma(1) = j;
-
-v(1) = u;
 
 zeta(1) = zeta0;
 
@@ -142,114 +115,40 @@ exocond = false;
 Fuel = true;
 
 
-
 p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3)); % calculate pressure using atmospheric data
 
 c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
 
 rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
+Alt_check = Alt(1);
+
+v_check = v(1);
+
+gamma_check = gamma(1);
 
 
-while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000 
+for i = 1:nodes-1
 % iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
 
-    if t(i) > x(end-1)
-        dt = 2; % Increase timestep after end of angle of attack variation. Accuracy doesnt matter as much at that point. 
-    end
-
-    mfuel_temp = mfuel(i) - mdot*dt;
-    
-    if mfuel_temp < mdot*dt && Fuel == true
-        mdot = mfuel_temp/dt;
-        Fuel = false;
-    end
-    
-        t(i+1) = t(i) + dt;
-        
-%     if t(i) <= x(end) && Fuel == true
-%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     else
-%         Alpha(i) = 0;
-%     end
-    
-%     elseif t(i) > x(end)
-%         Alpha(i) = 0;
-%     end
-   
-
-%     if t(i) <= 220
-%         Alpha(i) = interp1(0:220/(length(x)-1):220,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > 220 && t(i) <= burntime
-%         Alpha(i) = -x(end)*(t(i) - 220)/(burntime - 220) + x(end);
-%     elseif t(i) > burntime
-%         Alpha(i) = 0;
-%     end
-
-%     if t(i) <= x(end)
-%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > x(end) && t(i) <= burntime
-%         Alpha(i) = -x(end-1)*(t(i) - x(end))/(burntime - x(end)) + x(end-1);
-%     elseif t(i) > burntime
-%         Alpha(i) = 0;
-%     end
-
-    if t(i) <= x(end)
-        Alpha(i) = interp1(0:x(end)/(num_div-1):x(end),x(1:num_div),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-
-    elseif t(i) > x(end) && t(i) <= burntime
-        Alpha(i) = -x(num_div)*(t(i) - x(end))/(burntime - x(end)) + x(num_div);
-    elseif t(i) > burntime
-        Alpha(i) = 0;
-    end
- 
-    p(i) = ppval(p_spline, Alt(i));
-    
-    if Alt(i) < 85000
-        c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
+    c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
         rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
-    else
-        c(i) = ppval(c_spline, 85000);
-        rho(i) = 0;
-    
-    end
+        p(i) = ppval(p_spline, Alt(i));
+
     
     q(i) = 1/2*rho(i)*v(i)^2;
+   
     
-%     AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
-    
-    if Fuel == true
-%         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
         T(i) = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
-        mfuel(i+1) = mfuel(i) - mdot*dt;
-        
-        if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - mHS - mdot*dt; %release of heat shield, from dawids glasgow paper
-            exocond = true;
-        else 
-            m(i+1) = m(i) - mdot*dt;
-        end
-        
-    else
-        T(i) = 0;
 
-        mfuel(i+1) = mfuel(i);
-        
-        if q(i) < 10 && exocond == false
-            m(i+1) = m(i) - mHS; %release of heat shield, from dawids glasgow paper
-            exocond = true;
-        else 
-            m(i+1) = m(i);
-        end
-    end
- 
+ m(i+1) = m(i) - mdot*dt(i);
 
     M(i) = v(i)/c(i);
     
     %calculate axial and normal coefficient, and then lift and drag
     %coefficients. from Dawid (3i)
 
-    
+
     CD(i) = Drag_interp(M(i),rad2deg(Alpha(i)));
     
     CL(i) = Lift_interp(M(i),rad2deg(Alpha(i)));
@@ -257,8 +156,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
 %     CA(i) = 0.346 + 0.183 - 0.058*M(i)^2 + 0.00382*M(i)^3;
 %     
 %     CN(i) = (5.006 - 0.519*M(i) + 0.031*M(i)^2)*rad2deg(Alpha(i));
-   
-
+    
+    
 
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i); % Aerodynamic lift
@@ -288,41 +187,38 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
    
     if i == 1
         
-    r(i+1) = r(i) + rdot(i)*dt;
     
-    Alt(i+1) = r(i+1) - r_E;
+    Alt_check(i+1) = Alt_check(i) + Alt_check(i)*dt(i);
     
-    xi(i+1) = xi(i) + xidot(i)*dt;
+    v_check(i+1) = v_check(i) + v_check(i)*dt(i);
     
-    phi(i+1) = phi(i) + phidot(i)*dt;
+    gamma_check(i+1) = gamma_check(i) + gamma_check(i)*dt(i);
     
-    gamma(i+1) = gamma(i) + gammadot(i)*dt;
+    xi(i+1) = xi(i) + xidot(i)*dt(i);
     
-    v(i+1) = v(i) + vdot(i)*dt;
+    phi(i+1) = phi(i) + phidot(i)*dt(i);
     
-    zeta(i+1) = zeta(i) + zetadot(i)*dt;
+    
+    zeta(i+1) = zeta(i) + zetadot(i)*dt(i);
     
     else
         % Second order taylor's series with forward difference
-    r(i+1) = r(i) + rdot(i)*dt + (rdot(i) - rdot(i-1))/2*dt;
+
+    Alt_check(i+1) = Alt_check(i) + Alt_check(i)*dt(i);
     
-    Alt(i+1) = r(i+1) - r_E;
+    v_check(i+1) = v_check(i) + v_check(i)*dt(i);
     
-    xi(i+1) = xi(i) + xidot(i)*dt + (xidot(i) - xidot(i-1))/2*dt;
+    gamma_check(i+1) = gamma_check(i) + gamma_check(i)*dt(i);
     
-    phi(i+1) = phi(i) + phidot(i)*dt + (phidot(i) - phidot(i-1))/2*dt;
+    xi(i+1) = xi(i) + xidot(i)*dt(i) + (xidot(i) - xidot(i-1))/2*dt(i);
     
-    gamma(i+1) = gamma(i) + gammadot(i)*dt + (gammadot(i) - gammadot(i-1))/2*dt;
+    phi(i+1) = phi(i) + phidot(i)*dt(i) + (phidot(i) - phidot(i-1))/2*dt(i);
     
-    v(i+1) = v(i) + vdot(i)*dt + (vdot(i) - vdot(i-1))/2*dt;
-    
-    zeta(i+1) = zeta(i) + zetadot(i)*dt + (zetadot(i) - zetadot(i-1))/2*dt;
+    zeta(i+1) = zeta(i) + zetadot(i)*dt(i) + (zetadot(i) - zetadot(i-1))/2*dt(i);
     end
 
     i = i+1;
 end
-
-gamma(end) = 0;
 
 AltF = Alt(end);
 AltF_actual = Alt(end);

@@ -1,12 +1,13 @@
-function Target = Payload(x,k,j,u, phi0, zeta0)
+function Target = Payload(x,k,j,u, phi0, zeta0, lb,num_div)
 mScale = 1;
 mfuel_burn = x/mScale;
 
 
 
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA,q,gamma] = ThirdStageSim(mfuel_burn,k,j,u, phi0, zeta0);
+[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(mfuel_burn,k,j,u, phi0, zeta0, lb,num_div);
 
 Target = -mpayload ;
-% Target = (Alt(end) - 567000)^2 ;
+
+% Target = -vF ;
 
 end

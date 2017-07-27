@@ -1,4 +1,4 @@
-function [EndpointCost, RunningCost] = SecondStageReturnCost(primal, algorithm)
+function [EndpointCost, RunningCost] = ThirdStageCost(primal, algorithm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Cost function for Rocket-Scramjet-Rocket System
@@ -30,50 +30,62 @@ iteration = iteration + 1;
 V = primal.states(1,:) ; 
 
 v = primal.states(2,:) ; 
-
  
 gamma = primal.states(3,:) ; 
 
-alpha = primal.states(4,:);
+Alpha = primal.states(4,:) ; 
 
-zeta = primal.states(5,:);
 
-phi = primal.states(6,:);
-
-xi = primal.states(7,:);
 
 alphadot  = primal.controls(1,:); %
 
+global time
 time = primal.nodes;
 
-global Atmosphere
-density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
-q = 0.5*density.*v.^2;
+phi0 = -0.13;
 
-% figure out horizontal motion
-H(1) = 0;
-for i = 1:nodes-1
-H(i+1) = v(i)*(time(i+1) - time(i))*cos(gamma(i)) + H(i);
-end
+zeta0 = 1.76;
+
+global rdot
+global vdot
+global gammadot
+global zeta
+global phi
+global Vec_angle
+global inc
+global mpayload
+global q
+global mdot
+global m1
+global T
+global L
+global D
+global AltF_actual
+global Alt1
+global Alt_check
+global v_check
+global gamma_check
+
+[AltF_first, vF, Alt1, v, mpayload, Alpha, m1,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L, rdot, vdot, gammadot, Alt_check, v_check, gamma_check,mdot] = ThirdStageSim(V, v, gamma, Alpha, phi0, zeta0,nodes,time);
+
+
+[AltF_actual, vF, Alt, v_forward2, t, mpayload, Alpha, m,gamma_forward2,zeta,phi, inc] = ThirdStageSimPostAt(V(end),gamma(end),v(end), phi(end), zeta(end), m1(end)-125.6);
+
+
 
 RunningCost = 0;
 
-% RunningCost = q.^2;
+EndpointCost = -mpayload;
 
-% EndpointCost = time(end);
-EndpointCost = 0;
-% EndpointCost = H(end);
-% EndpointCost = -V(end);
-% EndpointCost = -zeta(end);
-% EndpointCost = phi(end);
-EndpointCost = -v(end);
-% EndpointCost = v(end);
 global iterative_V
 global iterative_t
 global iterative_V_f
 
 if rem(iteration,5000) == 0
-    
+    V-Alt_check
+    mpayload
+    AltF_actual
+    rad2deg(Vec_angle)
     iterative_V_f(end+1,:) = cumtrapz(time,v.*sin(gamma));
     
     cla

@@ -54,8 +54,9 @@ interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 
 options.Algorithm = 'sqp';
 options.Display = 'iter';
+options.DiffMinChange = 0.0005;
 
-num_div = 20;% no of timestep divisions
+num_div = 15;% no of timestep divisions
 
 Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 
@@ -67,7 +68,7 @@ Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 eta_00 = 1; % initial roll guess
 AoA_00 = 7;
 
-controls0 = [0*ones(1,num_div) 0*ones(1,num_div) 450 eta_00 AoA_00];
+controls0 = [0*ones(1,num_div) 0*ones(1,num_div) 600 eta_00 AoA_00];
 
 lb = [-1*ones(1,num_div) -.1*ones(1,num_div) 400 -1 0];
 ub = [1*ones(1,num_div) .1*ones(1,num_div) 600 1.5 8];

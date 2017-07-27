@@ -21,8 +21,8 @@ options.FunValCheck = 'on';
 % options.Algorithm = 'active-set';
 
 
-% options.TolFun = 1e-3;
-% options.TolX = 1e-3;
+options.TolFun = 1e-4;
+options.TolX = 1e-4;
 
 mpayload = 0;
 x=0;
@@ -31,8 +31,8 @@ x=0;
 % for i3 = 0:.5:6
 % for i2 = 0:10
 count = 1
-for i3 = 0:2
-%     for i3 = 2
+% for i3 = 0:3
+%     for i3 = 0
     
 %   for i3 = 0 
 % for i2 = 0:2.5:5
@@ -41,8 +41,11 @@ for i3 = 0:2
 % for i3 = 0:.25:6
 
 % for i4 = 0:.25:5;
-    for i4 = 0:.25:2;
-    
+
+    for i4 = 0:.25:3;
+    for i5 = 0:3;
+%     for  
+        i3 = 3;
 % for i4 = 1;
 % i2 = 1;
 % i4=0;
@@ -57,33 +60,41 @@ AoA_max_abs = deg2rad(15); % maximum angle of attack
 
 % x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000+i2*5/10000]; % initial guess uses first max aoa
 
-num_div = 10;
-x0 = [deg2rad(5)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+num_div = 10+i5;
+x0 = [deg2rad(12)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
 
 % Initiate optimiser
 options.DiffMinChange = 0.0005*i3;
 
+lb = [deg2rad(0)*ones(1,num_div) 2500/10000  200/1000];
+ub = [AoA_max_abs*ones(1,num_div) 2900/10000  240/1000];
+
 % [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max_abs*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
 % [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max(1) AoA_max_abs*ones(1,9)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,num_div) 2500/10000  200/1000],[AoA_max_abs*ones(1,num_div) 2900/10000  240/1000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0,lb,num_div),x0,[],[],[],[],lb,ub,@(x)Constraint(x,k,j,u, phi0, zeta0,lb,num_div),options);
 
 %  [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
  
 exitflag
-[AltF_actual, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0);
+[AltF_actual, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0, lb,num_div);
 mpayload_temp
 AltF_actual
-% Vec_angle
-if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3)
+
+Vec_angle_constraint = max(Vec_angle - deg2rad(25)); % check for thrust vector validity (constraints are not necessarily satisfied)
+
+if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3) && Vec_angle_constraint <= 0 
     mpayload = mpayload_temp;
     x = x_temp;
+    num_div_best = num_dev;
 end
-
+x
 mpayload
 end
 % end
-end
-[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0);
+    end
+%     end
+x
+[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div_best);
 
 
 mfuel_burn = x(1)

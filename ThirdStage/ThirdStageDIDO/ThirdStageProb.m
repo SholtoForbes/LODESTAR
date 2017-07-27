@@ -29,24 +29,6 @@ iterative_V_f = [];
 Timestamp = datestr(now,30)
 
 %% Inputs ============================================
-%Take inputs of communicator matrices, these should be .txt files 
-communicator = importdata('communicator.txt');
-communicator_trim = importdata('communicator_trim.txt');
-
-
-scattered.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
-
-
-[MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
-Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-Cd_Grid = reshape(communicator(:,4),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-pitchingmoment_Grid = reshape(communicator(:,11),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-
-scattered.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
-scattered.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
-scattered.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
 % Produce Atmosphere Data
 global Atmosphere
@@ -55,10 +37,6 @@ Atmosphere = dlmread('atmosphere.txt');
 
 
 %=============================================== 
-
-% V0 = 20000.;
-% Vf = 50000.; %
-
 %===================
 % Problem variables:
 % control factor: omega
@@ -76,69 +54,29 @@ Atmosphere = dlmread('atmosphere.txt');
 % search space, but tight enough that a solution can be found efficiently.  These bounds must be
 % chosen carefully, with the physical model in mind. 
 
-VL = 10000;
-VU = 50000; 
+VL = 1000;
+VU = 85000; 
 
-% vL = 1500;
-vL = 500;
-vU = 3000; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
+vL = 2800;
+vU = 8000; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
-
-gammaL = -.5;
-gammaU = .5; % 
-
-
-
-global scale
-
-scale.V = 1;
-scale.v = 1;
-scale.gamma = 1;
-scale.gammadot = 1;
+gammaL = -.1;
+gammaU = .4; % 
 
 alphaL = 0;
-alphaU = deg2rad(8);
-
-zetaL = 1.6;
-zetaU = 5;
-
-phiL = -.2;
-phiU = 0;
-
-xiL = -0.5;
-xiU = 0;
-
-% etaL = -.5;
-% etaU = .5;
-etaL = -1;
-etaU = 1;
+alphaU = deg2rad(15);
 
 alphadotL = -0.01;
 alphadotU = 0.01;
 
-etadotL = -0.01;
-etadotU = 0.01;
+
+bounds.lower.states = [VL ; vL; gammaL; alphaL];
+bounds.upper.states = [VU ; vU; gammaU; alphaU];
 
 
-bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
-bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
+ bounds.lower.controls = [alphadotL];
+bounds.upper.controls = [alphadotU]; 
 
-% bounds.lower.states = [VL ; vL; gammaL; zetaL; phiL; xiL; etaL];
-% bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
-
-% control bounds
-
-% alphadot2L = -0.001;
-% alphadot2U = 0.001;
-% 
-% bounds.lower.controls = [alphadot2L];
-% bounds.upper.controls = [alphadot2U]; 
-
- bounds.lower.controls = [alphadotL;etadotL];
-bounds.upper.controls = [alphadotU;etadotU]; 
-
-% bounds.lower.controls = [etadotL];
-% bounds.upper.controls = [etadotU]; 
 %------------------
 % bound the horizon
 %------------------
@@ -146,7 +84,7 @@ bounds.upper.controls = [alphadotU;etadotU];
 
 t0	    = 0;
 
- tfMax 	= 10000;
+ tfMax 	= 300;
 
 bounds.lower.time 	= [t0; 100];	
 bounds.upper.time	= [t0; tfMax];
@@ -156,25 +94,17 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 
 v0 = 2920;
-vf = 1550;
-
 
 %% Define Events
-V0 = 36800;
-gamma0 = 0.048;
-zeta0 = 1.69;
-phi0 = -0.12913;
-xi0 = 0;
-% zetaf = 1.6915;
-zetaf = 4.7124;
-% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;zetaf; 35000];
-% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
+V0 = 35000;
+gamma0 = 0.00;
 
-bounds.upper.events = bounds.lower.events;      % equality event function bounds
+bounds.lower.events = [V0;v0; gamma0; 100000];
 
-    bounds.lower.path = 0;
-bounds.upper.path = 50000;
+bounds.upper.events = [V0;v0; gamma0; 500000];      % equality event function bounds
+
+    bounds.lower.path = [-deg2rad(25)];
+bounds.upper.path = [deg2rad(25)];
 
 
 
@@ -183,10 +113,10 @@ bounds.upper.path = 50000;
 % Define the problem using DIDO expresssions:
 %============================================
 % Call the files whih DIDO uses
-TwoStage2d.cost 		= 'SecondStageReturnCost';
-TwoStage2d.dynamics	    = 'SecondStageReturnDynamics';
-TwoStage2d.events		= 'SecondStageReturnEvents';	
-TwoStage2d.path		= 'SecondStageReturnPath';
+TwoStage2d.cost 		= 'ThirdStageCost';
+TwoStage2d.dynamics	    = 'ThirdStageDynamics';
+TwoStage2d.events		= 'ThirdStageEvents';	
+TwoStage2d.path		= 'ThirdStagePath';
 TwoStage2d.bounds       = bounds;
 
 
@@ -196,38 +126,27 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [100]; 
 global nodes
 nodes = algorithm.nodes;
 
 
 %%  Guess =================================================================
 
-
-% guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
-% guess.states(1,:) = [V0 ,V0 ];
-guess.states(1,:) = [V0 ,35000 ];
-guess.states(2,:) = [v0, 1500];
+guess.states(1,:) = [V0 ,40000 ];
+guess.states(2,:) = [v0, 7000];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(6),deg2rad(6)];
+guess.states(4,:) = [deg2rad(5),deg2rad(15)];
 
-guess.states(5,:) = [1.69,2];
-
-guess.states(6,:) = [-0.1293,0];
-
-guess.states(7,:) = [0,-0.1];
-
-guess.states(8,:) = [1,1];
-
-% guess.states(8,:) = [0,0];
+% guess.states(5,:) = [3300,500];
 
 % Control guess.
 guess.controls(1,:)    = [0,0]; 
-guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,380];
+
+guess.time        = [t0 ,100];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -264,9 +183,9 @@ tStart= cputime;    % start CPU clock
 EndTime = datestr(now,30)
 
 
-V = primal.states(1,:)*scale.V;
+V = primal.states(1,:);
 
-v = primal.states(2,:)*scale.v;
+v = primal.states(2,:);
 
 t = primal.nodes;
 
