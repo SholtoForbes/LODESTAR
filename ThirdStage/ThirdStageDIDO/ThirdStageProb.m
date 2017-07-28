@@ -99,9 +99,9 @@ v0 = 2920;
 V0 = 35000;
 gamma0 = 0.00;
 
-bounds.lower.events = [V0;v0; gamma0; 100000];
+bounds.lower.events = [V0;v0; gamma0;85000; 100000];
 
-bounds.upper.events = [V0;v0; gamma0; 500000];      % equality event function bounds
+bounds.upper.events = [V0;v0; gamma0;85000; 500000];      % equality event function bounds
 
     bounds.lower.path = [-deg2rad(25)];
 bounds.upper.path = [deg2rad(25)];
@@ -126,14 +126,14 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [100]; 
+algorithm.nodes		= [70]; 
 global nodes
 nodes = algorithm.nodes;
 
 
 %%  Guess =================================================================
 
-guess.states(1,:) = [V0 ,40000 ];
+guess.states(1,:) = [V0 ,90000 ];
 guess.states(2,:) = [v0, 7000];
 
 guess.states(3,:) = [0.05,0.00];

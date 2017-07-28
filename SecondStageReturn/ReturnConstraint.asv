@@ -1,13 +1,11 @@
 function [constraint,ceq] = ReturnConstraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond,num_div)
 
-[cost,phi,t,y,q,xi,zeta,y_discrete] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
+[cost,phi,t,y,q,xi,y_discrete] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
 % 
 
 % return_constraint = (phi(end) - returncond.phi)^2 + (xi(end) - returncond.xi)^2 - returncond.rad^2;
 
 return_constraint = (phi(end) - returncond.phi)^2 - returncond.rad^2;
-
-Heading_constraint = 6/4*pi - zeta(end);
 
 q_constraint = max(q) - 50000; % dynamic pressure must be less than 50kPa
 
@@ -27,7 +25,7 @@ alphamax_constraint = max(y(:,8) - 8)*100;
 
 % MS_constraint = Altitude_0 - y_discrete(1:end-1);
 
-constraint = [q_constraint crash_constraint etamin_constraint etamax_constraint alphamin_constraint alphamax_constraint Heading_constraint];
+constraint = [q_constraint crash_constraint etamin_constraint etamax_constraint alphamin_constraint alphamax_constraint Headin];
 % constraint = [];
 % ceq = [MS_constraint];
 ceq = [];

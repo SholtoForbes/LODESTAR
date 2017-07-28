@@ -63,10 +63,10 @@ options{i}.TolX = 1e-4;
 % for i3 = 0:3
 % for i4 = 0:.25:3;
     
-    for i4 = 0:.25:3;
-    for i5 = 0:3
-        i3 = 3;
-    
+    for i4 = 0:.25:1;
+    for i3 = 0:3
+%         i3 = 3;
+    i5 = 0;
 % i2 = 1;
 % i4 = 0;
 
@@ -84,7 +84,7 @@ AoA_max_abs = deg2rad(15);
 % x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
 
 num_div = 10+i5;
-x0 = [deg2rad(12)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+x0 = [deg2rad(14)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
 
 
 options{i}.DiffMinChange = 0.0005*i3;

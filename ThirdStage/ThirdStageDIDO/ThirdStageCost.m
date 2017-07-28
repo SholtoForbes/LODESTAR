@@ -66,10 +66,10 @@ global Alt_check
 global v_check
 global gamma_check
 
-[AltF_first, vF, Alt1, v, mpayload, Alpha, m1,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L, rdot, vdot, gammadot, Alt_check, v_check, gamma_check,mdot] = ThirdStageSim(V, v, gamma, Alpha, phi0, zeta0,nodes,time);
+[ m1,q,gamma,D,zeta,phi,Vec_angle,T,CL,L, rdot, vdot, gammadot, Alt_check, v_check, gamma_check,mdot] = ThirdStageSim(V, v, gamma, Alpha, phi0, zeta0,nodes,time);
 
 
-[AltF_actual, vF, Alt, v_forward2, t, mpayload, Alpha, m,gamma_forward2,zeta,phi, inc] = ThirdStageSimPostAt(V(end),gamma(end),v(end), phi(end), zeta(end), m1(end)-125.6);
+[AltF_actual, vF, Alt, v_forward2, t, mpayload, Alpha, m,gamma_forward2,zeta2,phi2, inc] = ThirdStageSimPostAt(V(end),gamma(end),v(end), phi(end), zeta(end), m1(end)-125.6);
 
 
 

@@ -42,10 +42,11 @@ count = 1
 
 % for i4 = 0:.25:5;
 
-    for i4 = 0:.25:3;
-    for i5 = 0:3;
+    for i4 = 0:.25:2;
+    for i3 = 0:3;
 %     for  
-        i3 = 3;
+%         i3 = 3;
+        i5 = 0;
 % for i4 = 1;
 % i2 = 1;
 % i4=0;
@@ -60,8 +61,8 @@ AoA_max_abs = deg2rad(15); % maximum angle of attack
 
 % x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000+i2*5/10000]; % initial guess uses first max aoa
 
-num_div = 10+i5;
-x0 = [deg2rad(12)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+num_div = 15+i5;
+x0 = [deg2rad(13)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
 
 % Initiate optimiser
 options.DiffMinChange = 0.0005*i3;
@@ -85,7 +86,7 @@ Vec_angle_constraint = max(Vec_angle - deg2rad(25)); % check for thrust vector v
 if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3) && Vec_angle_constraint <= 0 
     mpayload = mpayload_temp;
     x = x_temp;
-    num_div_best = num_dev;
+    num_div_best = num_div;
 end
 x
 mpayload

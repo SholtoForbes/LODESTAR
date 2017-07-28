@@ -1,4 +1,4 @@
-function [cost,phi,t,y,q,xi,y_discrete] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div)
+function [cost,phi,t,y,q,xi,zeta,y_discrete] = BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div)
 %BANKOPT A function for banking optimisation
 %   Runs ForwardSimReturn and outputs latitude
 
@@ -46,7 +46,9 @@ q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
 phi = y(:,2);
 xi = y(:,6);
+zeta = y(:,5);
 
-cost = 0.01*v(end);
+% cost = 0.01*v(end);
+cost = -V(end);
 end
 

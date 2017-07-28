@@ -16,12 +16,12 @@ gammaf = primal.states(3,end);
 
 
 
-endpointFunction = zeros(4,1); % 
+endpointFunction = zeros(5,1); % 
 
 endpointFunction(1) = V0;
 endpointFunction(2) = v0;
 endpointFunction(3) = gamma0;
-
-endpointFunction(4) = AltF_actual;
+endpointFunction(4) = Vf;
+endpointFunction(5) = AltF_actual;
 
 end

@@ -54,7 +54,7 @@ interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 
 options.Algorithm = 'sqp';
 options.Display = 'iter';
-options.DiffMinChange = 0.0005;
+% options.DiffMinChange = 0.0005;
 
 num_div = 15;% no of timestep divisions
 
@@ -70,13 +70,13 @@ AoA_00 = 7;
 
 controls0 = [0*ones(1,num_div) 0*ones(1,num_div) 600 eta_00 AoA_00];
 
-lb = [-1*ones(1,num_div) -.1*ones(1,num_div) 400 -1 0];
-ub = [1*ones(1,num_div) .1*ones(1,num_div) 600 1.5 8];
+lb = [-.1*ones(1,num_div) -.01*ones(1,num_div) 400 -1 0];
+ub = [.1*ones(1,num_div) .01*ones(1,num_div) 600 1.5 8];
 
 % [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[1*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)],[],options)
 [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div),controls0,[],[],[],[],lb,ub,@(controls)ReturnConstraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond,num_div),options)
 
-[cost,phi,t,y,q,xi] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
+[cost,phi,t,y,q,xi,zeta] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
 
 
 figure(401)
