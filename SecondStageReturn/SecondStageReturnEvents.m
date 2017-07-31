@@ -23,7 +23,7 @@ xif = primal.states(6,end);
 
 
 
-endpointFunction = zeros(7,1); % 
+endpointFunction = zeros(6,1); % 
 
 endpointFunction(1) = V0;
 endpointFunction(2) = v0;
@@ -32,6 +32,6 @@ endpointFunction(4) = zeta0;
 endpointFunction(5) = phi0;
 endpointFunction(6) = xi0;
 % endpointFunction(7) = vf;
-endpointFunction(7) = zetaf;
-endpointFunction(8) = Vf;
+% endpointFunction(7) = zetaf;
+% endpointFunction(7) = Vf;
 end

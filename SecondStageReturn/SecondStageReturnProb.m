@@ -76,12 +76,12 @@ Atmosphere = dlmread('atmosphere.txt');
 % search space, but tight enough that a solution can be found efficiently.  These bounds must be
 % chosen carefully, with the physical model in mind. 
 
-VL = 10000;
+VL = 10;
 VU = 50000; 
 
 % vL = 1500;
-vL = 500;
-vU = 3000; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
+vL = 10;
+vU = 1500; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
 
 gammaL = -.5;
@@ -99,7 +99,7 @@ scale.gammadot = 1;
 alphaL = 0;
 alphaU = deg2rad(8);
 
-zetaL = 1.6;
+zetaL = 4;
 zetaU = 5;
 
 phiL = -.2;
@@ -110,35 +110,31 @@ xiU = 0;
 
 % etaL = -.5;
 % etaU = .5;
-etaL = -1;
-etaU = 1;
+% etaL = -1;
+% etaU = 1;
 
 alphadotL = -0.01;
 alphadotU = 0.01;
 
-etadotL = -0.01;
-etadotU = 0.01;
+% etadotL = -0.01;
+% etadotU = 0.01;
+
+% 
+% bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
+% bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 
 
-bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL; etaL];
-bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
-
-% bounds.lower.states = [VL ; vL; gammaL; zetaL; phiL; xiL; etaL];
-% bounds.upper.states = [VU ; vU; gammaU; zetaU; phiU; xiU; etaU];
+bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL];
+bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU];
 
 % control bounds
+ bounds.lower.controls = [alphadotL];
+bounds.upper.controls = [alphadotU]; 
 
-% alphadot2L = -0.001;
-% alphadot2U = 0.001;
-% 
-% bounds.lower.controls = [alphadot2L];
-% bounds.upper.controls = [alphadot2U]; 
+%  bounds.lower.controls = [alphadotL;etadotL];
+% bounds.upper.controls = [alphadotU;etadotU]; 
 
- bounds.lower.controls = [alphadotL;etadotL];
-bounds.upper.controls = [alphadotU;etadotU]; 
 
-% bounds.lower.controls = [etadotL];
-% bounds.upper.controls = [etadotU]; 
 %------------------
 % bound the horizon
 %------------------
@@ -155,21 +151,21 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 
-v0 = 2920;
+v0 = 1000;
 vf = 1550;
 
 
 %% Define Events
-V0 = 36800;
+V0 = 35000;
 gamma0 = 0.048;
-zeta0 = 1.69;
+zeta0 = 4.7;
 phi0 = -0.12913;
 xi0 = 0;
 % zetaf = 1.6915;
-zetaf = 4.7124;
+% zetaf = 4.7124;
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;zetaf; 35000];
-% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
+% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0; 35000];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -206,26 +202,26 @@ nodes = algorithm.nodes;
 
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
 % guess.states(1,:) = [V0 ,V0 ];
-guess.states(1,:) = [V0 ,35000 ];
-guess.states(2,:) = [v0, 1500];
+guess.states(1,:) = [V0 ,1000 ];
+guess.states(2,:) = [v0, 100];
 
 guess.states(3,:) = [0.05,0.00];
 
 guess.states(4,:) = [deg2rad(6),deg2rad(6)];
 
-guess.states(5,:) = [1.69,2];
+guess.states(5,:) = [4.7,4.7];
 
-guess.states(6,:) = [-0.1293,0];
+guess.states(6,:) = [-0.1293,-.2];
 
 guess.states(7,:) = [0,-0.1];
 
-guess.states(8,:) = [1,1];
+% guess.states(8,:) = [1,1];
 
 % guess.states(8,:) = [0,0];
 
 % Control guess.
 guess.controls(1,:)    = [0,0]; 
-guess.controls(2,:)    = [0,0]; 
+% guess.controls(2,:)    = [0,0]; 
 
 guess.time        = [t0 ,380];
 % Tell DIDO the guess

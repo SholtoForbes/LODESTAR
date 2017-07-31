@@ -54,6 +54,8 @@ interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 
 options.Algorithm = 'sqp';
 options.Display = 'iter';
+options.MaxFunEvals = 5000;
+% options.ScaleProblem = 'obj-and-constr';
 % options.DiffMinChange = 0.0005;
 
 num_div = 15;% no of timestep divisions

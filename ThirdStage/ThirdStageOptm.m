@@ -14,7 +14,7 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 % options.Display = 'iter-detailed';
 options.Algorithm = 'sqp';
 options.FunValCheck = 'on';
-% options.ScaleProblem = 'obj-and-constr'
+options.ScaleProblem = 'obj-and-constr'
 % options.DiffMinChange = 0.0005;
 % options.TypicalX = x0;
 % options.UseParallel = 1;
@@ -28,62 +28,49 @@ mpayload = 0;
 x=0;
 % Run each case for a range of initial guesses and DiffMinChange values.
 % This mostly ensures that the optimal solution will be found.
-% for i3 = 0:.5:6
-% for i2 = 0:10
+
 count = 1
-% for i3 = 0:3
-%     for i3 = 0
-    
-%   for i3 = 0 
-% for i2 = 0:2.5:5
-    
-% 
-% for i3 = 0:.25:6
 
-% for i4 = 0:.25:5;
+    for i4 = 0:.5:1;
+    for i3 = 0:1;
+    for i5 = 0:1;
 
-    for i4 = 0:.25:2;
-    for i3 = 0:3;
-%     for  
-%         i3 = 3;
-        i5 = 0;
-% for i4 = 1;
-% i2 = 1;
-% i4=0;
+% for i4 = 0:5;
+%     for i3 = 0:2;
+%     for i5 = 0;
+
+
+        
 count = count+1
 AoA_max_abs = deg2rad(15); % maximum angle of attack
 
-% x0 = [AoA_max(1)*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000]; % initial guess uses first max aoa
-% 
-% if AoA_max(1) > AoA_max_abs
-%     x0 = [AoA_max_abs*ones(1,10)-i4*AoA_max(1)*0.01 250/10000+i2*5/10000];
-% end
 
-% x0 = [deg2rad(5)*ones(1,10)+deg2rad(i4) 250/10000+i2*5/10000]; % initial guess uses first max aoa
+num_div = 50+i5;
+% num_div = 15-i4;
 
-num_div = 15+i5;
-x0 = [deg2rad(13)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+x0 = [deg2rad(14)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
+% x0 = [(40+i4*10)/1000 deg2rad(15)*ones(1,num_div) 2800/10000 230/1000];
 
 % Initiate optimiser
 options.DiffMinChange = 0.0005*i3;
 
 lb = [deg2rad(0)*ones(1,num_div) 2500/10000  200/1000];
 ub = [AoA_max_abs*ones(1,num_div) 2900/10000  240/1000];
+% lb = [20/1000 deg2rad(0)*ones(1,num_div) 2500/10000  200/1000];
+% ub = [150/1000 AoA_max_abs*ones(1,num_div) 2900/10000  240/1000];
 
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10) 200/10000],[AoA_max_abs*ones(1,10) 350/10000],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
-% [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max(1) AoA_max_abs*ones(1,9)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
+
 [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0,lb,num_div),x0,[],[],[],[],lb,ub,@(x)Constraint(x,k,j,u, phi0, zeta0,lb,num_div),options);
 
-%  [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0),x0,[],[],[],[],[deg2rad(0)*ones(1,10)],[AoA_max*ones(1,10)],@(x)Constraint(x,k,j,u, phi0, zeta0),options);
  
 exitflag
 [AltF_actual, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0, lb,num_div);
 mpayload_temp
 AltF_actual
 
-Vec_angle_constraint = max(Vec_angle - deg2rad(25)); % check for thrust vector validity (constraints are not necessarily satisfied)
+Vec_angle_constraint = max(Vec_angle - deg2rad(20)); % check for thrust vector validity (constraints are not necessarily satisfied)
 
-if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3) && Vec_angle_constraint <= 0 
+if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3) %&& Vec_angle_constraint <= 0 
     mpayload = mpayload_temp;
     x = x_temp;
     num_div_best = num_div;
@@ -91,7 +78,7 @@ end
 x
 mpayload
 end
-% end
+end
     end
 %     end
 x

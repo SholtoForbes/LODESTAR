@@ -18,6 +18,6 @@ CD = Drag_interp(M,rad2deg(Alpha));
         Vec_angle = asin(2.5287/2.9713*L/T); % calculate the thrust vector angle necessary to resist the lift force moment.
 
    
-Vec_angle_search = (Vec_angle - deg2rad(25))^2;
+Vec_angle_search = (Vec_angle - deg2rad(20))^2;
 end
 

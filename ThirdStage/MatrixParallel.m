@@ -10,10 +10,10 @@ u = [2825:25:2925] % velocity range. The routine is parallelised around this vel
 phi0 = -0.13 % initial latitude, this has very minimal effect
 % zeta0 = 1.69 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
  zeta0 = 1.76 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
-for k = [35000:1000:38000] % altitude range
+for k = [33000:1000:38000] % altitude range
 
-% for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
-for j = [0.025 0.0375 0.05]
+for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
+% for j = [0.025 0.0375 0.05]
     
 temp_guess_no = 1;
 
@@ -41,7 +41,7 @@ options{i}.Display = 'none';
 % options{i}.Display = 'iter';
 options{i}.Algorithm = 'sqp';
 % options{i}.Algorithm = 'active-set';
-% options{i}.ScaleProblem = 'obj-and-constr';
+options{i}.ScaleProblem = 'obj-and-constr';
 
 options{i}.TolFun = 1e-4;
 options{i}.TolX = 1e-4;
@@ -64,9 +64,9 @@ options{i}.TolX = 1e-4;
 % for i4 = 0:.25:3;
     
     for i4 = 0:.25:1;
-    for i3 = 0:3
+    for i3 = 0:2
 %         i3 = 3;
-    i5 = 0;
+   for i5 = 0:1;
 % i2 = 1;
 % i4 = 0;
 
@@ -83,7 +83,7 @@ AoA_max_abs = deg2rad(15);
 
 % x0 = [AoA_max*ones(1,10)-i4*AoA_max*0.01];
 
-num_div = 10+i5;
+num_div = 20+i5;
 x0 = [deg2rad(14)*ones(1,num_div)+deg2rad(i4) 2800/10000 230/1000];
 
 
@@ -98,13 +98,14 @@ lb = [deg2rad(0)*ones(1,num_div) 2500/10000  200/1000];
 [x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u(i), phi0, zeta0,lb,num_div),x0,[],[],[],[],lb,[AoA_max_abs*ones(1,num_div) 2900/10000  240/1000],@(x)Constraint(x,k,j,u(i), phi0, zeta0,lb,num_div),options{i});
 
 [AltF(i), vF(i), Alt, v, t, mpayload_temp, Alpha, m,AoA,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle] = ThirdStageSim(x_temp,k,j,u(i), phi0, zeta0,lb,num_div);
-Vec_angle_constraint = max(Vec_angle - deg2rad(25));
+Vec_angle_constraint = max(Vec_angle - deg2rad(20));
 
 if mpayload_temp > mpayload(i) && (exitflag ==1 || exitflag ==2|| exitflag ==3) && Vec_angle_constraint <= 0 
     mpayload(i) = mpayload_temp; % if payload improves, set new max payload
 end
 end
-end
+    end
+    end
 temp_payload(i) = mpayload(i);
 end
 mat = [mat;[phi0*ones(length(u),1),zeta0*ones(length(u),1),k*ones(length(u),1),j*ones(length(u),1),u.',temp_payload.']];

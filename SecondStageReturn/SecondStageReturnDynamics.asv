@@ -37,7 +37,6 @@ phi = primal.states(6,:);
 xi = primal.states(7,:);
 
 % eta = primal.states(8,:);
-eta = 0;
 
 
 % alphadot  = primal.states(8,:);
@@ -54,6 +53,7 @@ time = primal.nodes;
 % %=========================================================================================
 
 
+
 global q
 global M
 global Fd
@@ -62,7 +62,7 @@ global L
 
 %======================================================
 
-XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot];
+
 % XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; etadot];
 
 end

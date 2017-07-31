@@ -9,6 +9,7 @@ for temp_it = 1:length(x)
    end
 end
 
+% x(1) = x(1)*1000;
 x(end) = x(end)*1000; % de-scale
 x(end-1) = x(end-1)*10000; % de-scale
 
@@ -167,36 +168,13 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
         t(i+1) = t(i) + dt;
         
-%     if t(i) <= x(end) && Fuel == true
-%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     else
-%         Alpha(i) = 0;
-%     end
-    
-%     elseif t(i) > x(end)
-%         Alpha(i) = 0;
-%     end
-   
 
-%     if t(i) <= 220
-%         Alpha(i) = interp1(0:220/(length(x)-1):220,x(1:end),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > 220 && t(i) <= burntime
-%         Alpha(i) = -x(end)*(t(i) - 220)/(burntime - 220) + x(end);
-%     elseif t(i) > burntime
-%         Alpha(i) = 0;
-%     end
 
-%     if t(i) <= x(end)
-%         Alpha(i) = interp1(0:x(end)/(length(x)-2):x(end),x(1:end-1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-%     elseif t(i) > x(end) && t(i) <= burntime
-%         Alpha(i) = -x(end-1)*(t(i) - x(end))/(burntime - x(end)) + x(end-1);
-%     elseif t(i) > burntime
-%         Alpha(i) = 0;
-%     end
 
     if t(i) <= x(end)
         Alpha(i) = interp1(0:x(end)/(num_div-1):x(end),x(1:num_div),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
-
+%     Alpha(i) = interp1([0:10:90 100:(x(end)-100)/(num_div-11):x(end)],x(1:num_div),t(i),'pchip');
+    
     elseif t(i) > x(end) && t(i) <= burntime
         Alpha(i) = -x(num_div)*(t(i) - x(end))/(burntime - x(end)) + x(num_div);
     elseif t(i) > burntime
@@ -248,7 +226,32 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     %calculate axial and normal coefficient, and then lift and drag
     %coefficients. from Dawid (3i)
-
+    
+    
+    
+%     if t(i) < x(1)-10
+%         
+%     Alpha(i) = fminbnd(@(Alpha) AlphaFind(Alpha,v(i),rho(i),Drag_interp,Lift_interp,T(i),M(i),A),0,deg2rad(15));
+%         if Alpha(i) > deg2rad(15)
+%             Alpha(i) = deg2rad(15);
+%         end
+%         
+%     elseif t(i) < x(1)
+%         Alpha_firstsection_final = Alpha(i-1);
+%         
+%         Alpha(i) = (x(2)-Alpha_firstsection_final)*(t(i) - x(1) +10 )/(10) + Alpha_firstsection_final;
+%         
+%     elseif t(i) <= x(end)
+%         Alpha(i) = interp1(x(1):(x(end)-x(1))/(num_div-1):x(end),x(2:num_div+1),t(i),'pchip'); % interpolate between angle of attack points using an interior pchip spline
+% %     Alpha(i) = interp1([0:10:90 100:(x(end)-100)/(num_div-11):x(end)],x(1:num_div),t(i),'pchip');
+%     
+%     elseif t(i) > x(end) && t(i) <= burntime
+%         Alpha(i) = -x(num_div+1)*(t(i) - x(end))/(burntime - x(end)) + x(num_div+1);
+%     elseif t(i) > burntime
+%         Alpha(i) = 0;
+%     end
+    
+    
     
     CD(i) = Drag_interp(M(i),rad2deg(Alpha(i)));
     
@@ -275,12 +278,12 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Vec_angle(i) = deg2rad(80);
     end
     
-    T(i) = T(i)*cos(Vec_angle(i));
-    L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
+%     T(i) = T(i)*cos(Vec_angle(i));
+%     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
     
     %%
    
-    [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i));
+    [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i),Vec_angle(i));
     
 %     if i == 1 && gammadot < 0 && x(1) ~= 0
 %         fprintf('BAD CONDITIONS!');

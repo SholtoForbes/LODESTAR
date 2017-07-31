@@ -49,6 +49,8 @@ xi = y(:,6);
 zeta = y(:,5);
 
 % cost = 0.01*v(end);
-cost = -V(end);
+% cost = -V(end);
+cost = -0.001*v(end);
+% cost = 0;
 end
 
