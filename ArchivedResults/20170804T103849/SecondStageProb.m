@@ -207,7 +207,7 @@ ThirdStageData = sortrows(ThirdStageData);
 % [VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:38000,[0 0.0125 0.025 0.0375 0.05],[2875:25:2950]);
 
 % [VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.0125 0.025 0.0375 0.05],[2825:25:2925]); % must match the data in thirdstage.dat
-[VGrid,thetaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat
+[VGrid,thetaGrid,vGrid] = ndgrid(34000:1000:38000,[0.05 0.075 0.1],[2825:25:2925]); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
 
@@ -346,11 +346,9 @@ vf = 2839.51;
 
 % Zetaf = 1.69;
 Zetaf = 1.76;
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];
 
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; min(ThirdStageData(:,3)); min(ThirdStageData(:,4))];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
-
-bounds.upper.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; max(ThirdStageData(:,3)); max(ThirdStageData(:,4))];
-% bounds.upper.events = bounds.lower.events;      % equality event function bounds
+bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
 %% Define Path Constraints

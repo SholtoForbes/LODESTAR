@@ -10,7 +10,8 @@ global const
 V0 = primal.states(1,1); 
 Vf = primal.states(1,end); 
 v0 = primal.states(2,1);  
-gamma0 = primal.states(3,1);  
+gamma0 = primal.states(3,1);
+gammaf = primal.states(3,end); 
 mfuel0 = primal.states(4,1);
 mfuelf = primal.states(4,end);
 
@@ -19,34 +20,15 @@ omegaf = primal.states(5,end);
 
 zetaf = primal.states(6,end);
 
-% if const == 1 || const == 12 || const == 14 || const == 13
-% % endpointFunction = zeros(3,1); % 
-% %  endpointFunction = zeros(3,1); % 
-% end
 
-% if const == 13
-% endpointFunction = zeros(4,1); 
-% % endpointFunction = zeros(3,1); 
-% end
-
-% if const == 3
-% endpointFunction = zeros(4,1);
-% end
-
+endpointFunction = zeros(6,1);
 %===========================================================
-
-
-%     endpointFunction(1) = V0;
-%     endpointFunction(2) = v0;
-% endpointFunction(3) = mfuel0;
-% endpointFunction(4) = mfuelf;
-% endpointFunction(5) = zetaf;
 
 
     endpointFunction(1) = v0;
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
 endpointFunction(4) = zetaf;
-
-
+endpointFunction(5) = Vf; 
+endpointFunction(6) = gammaf;
 end
