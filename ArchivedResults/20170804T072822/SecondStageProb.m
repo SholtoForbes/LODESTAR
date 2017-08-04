@@ -206,8 +206,7 @@ ThirdStageData = sortrows(ThirdStageData);
 %% THIS INTERPOLATEs FOR ANY MISSING THIRD STAGE POINTS, BE CAREFUL WITH THIS
 % [VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:38000,[0 0.0125 0.025 0.0375 0.05],[2875:25:2950]);
 
-% [VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.0125 0.025 0.0375 0.05],[2825:25:2925]); % must match the data in thirdstage.dat
-[VGrid,thetaGrid,vGrid] = ndgrid(34000:1000:38000,[0.05 0.075 0.1],[2825:25:2925]); % must match the data in thirdstage.dat
+[VGrid,thetaGrid,vGrid] = ndgrid(33000:1000:37000,[0 0.0125 0.025 0.0375 0.05],[2825:25:2925]); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
 
@@ -247,8 +246,7 @@ thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING (ie. scramjet 
 end
 
 if const == 1  || const == 12 || const == 13 || const == 14
-% thetaU = 0.05; % 
-thetaU = 0.1;
+thetaU = 0.05; % 
 else
 thetaU = 0.1;  
 end
@@ -285,8 +283,7 @@ end
 % control bounds
 if const == 1 || const == 12 || const == 13 || const == 14
 omegadotL = -0.00005;
-% omegadotU = 0.00005;
-omegadotU = 0.0001;
+omegadotU = 0.00005;
 else
 omegadotL = -0.0001;
 omegadotU = 0.0001;
@@ -354,14 +351,14 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14
-    bounds.lower.path = [0; 0];
-    bounds.upper.path = [50000 ;9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 50000;
 elseif const == 12
-    bounds.lower.path = [0 ;0];
-    bounds.upper.path = [55000 ;9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 55000;
 elseif const == 13
-    bounds.lower.path = [0 ;0];
-    bounds.upper.path = [45000; 9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 45000;
 elseif const ==3 
     % No path
 end
@@ -391,7 +388,7 @@ TwoStage2d.bounds       = bounds;
 if const == 3 || const == 31 || const == 32
     algorithm.nodes		= [100]; 
 elseif const == 1
-    algorithm.nodes		= [90];
+    algorithm.nodes		= [100];
 elseif const == 12 
     algorithm.nodes		= [93]; 
 elseif const == 13
@@ -411,7 +408,7 @@ nodes = algorithm.nodes;
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-    guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500 ]; 
+    guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35500 ]; 
 elseif const == 12
     guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13
@@ -432,8 +429,7 @@ guess.states(2,:) = [v0, 2900];
 end
 
 % Trajectory angle guess. 
-% guess.states(3,:) = [0.05,0.05];
-guess.states(3,:) = [0.00,0.09];
+guess.states(3,:) = [0.05,0.05];
 
 % Mass guess. Simply the exact values at beginning and end (also constraints).
 guess.states(4,:) = [mfuelU, 0]/scale.m;

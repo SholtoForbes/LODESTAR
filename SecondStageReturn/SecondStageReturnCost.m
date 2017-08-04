@@ -66,14 +66,18 @@ EndpointCost = 0;
 % EndpointCost = -V(end);
 % EndpointCost = -zeta(end);
 % EndpointCost = phi(end);
-EndpointCost = -v(end);
-% EndpointCost = v(end);
+% EndpointCost = -v(end);
+EndpointCost = v(end);
 global iterative_V
 global iterative_t
 global iterative_V_f
 
 if rem(iteration,5000) == 0
-    
+    v
+    phi
+    zeta
+    gamma
+    alpha
     iterative_V_f(end+1,:) = cumtrapz(time,v.*sin(gamma));
     
     cla

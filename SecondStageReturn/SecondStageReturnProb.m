@@ -81,11 +81,11 @@ VU = 50000;
 
 % vL = 1500;
 vL = 10;
-vU = 1500; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
+vU = 1500; 
 
 
-gammaL = -.5;
-gammaU = .5; % 
+gammaL = -1;
+gammaU = 1; % 
 
 
 
@@ -97,16 +97,16 @@ scale.gamma = 1;
 scale.gammadot = 1;
 
 alphaL = 0;
-alphaU = deg2rad(8);
+alphaU = deg2rad(20);
 
 zetaL = 4;
-zetaU = 5;
+zetaU = 6;
 
-phiL = -.2;
-phiU = 0;
+phiL = -.5;
+phiU = -0.05;
 
 xiL = -0.5;
-xiU = 0;
+xiU = 0.5;
 
 % etaL = -.5;
 % etaU = .5;
@@ -152,22 +152,25 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 
 v0 = 1000;
-vf = 1550;
+% vf = 1550;
 
 
 %% Define Events
 V0 = 35000;
 gamma0 = 0.048;
 zeta0 = 4.7;
-phi0 = -0.12913;
+phi0 = -0.05;
 xi0 = 0;
 % zetaf = 1.6915;
 % zetaf = 4.7124;
-% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;vf;zetaf];
-% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0; 35000];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0];
 
-bounds.upper.events = bounds.lower.events;      % equality event function bounds
+
+% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0;deg2rad(-45)];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0];
+
+% bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;20000;0];
+bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;1000];
+% bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
     bounds.lower.path = 0;
 bounds.upper.path = 50000;
@@ -201,13 +204,13 @@ nodes = algorithm.nodes;
 
 
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
-% guess.states(1,:) = [V0 ,V0 ];
-guess.states(1,:) = [V0 ,1000 ];
+guess.states(1,:) = [V0 ,V0 ];
+% guess.states(1,:) = [V0 ,1000 ];
 guess.states(2,:) = [v0, 100];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(6),deg2rad(6)];
+guess.states(4,:) = [deg2rad(9),deg2rad(9)];
 
 guess.states(5,:) = [4.7,4.7];
 
@@ -223,7 +226,7 @@ guess.states(7,:) = [0,-0.1];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,380];
+guess.time        = [t0 ,500];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -268,16 +271,16 @@ t = primal.nodes;
 
 gamma = primal.states(3,:);
 
-Alpha = rad2deg(primal.states(4,:));
+Alpha = primal.states(4,:);
 % Alpha = deg2rad(7)*ones(1,length(V));
 
-zeta = rad2deg(primal.states(5,:));
+zeta = primal.states(5,:);
 
 phi = primal.states(6,:);
 
 xi = primal.states(7,:);
 
-eta = rad2deg(primal.states(8,:));
+% eta = rad2deg(primal.states(8,:));
 
 alphadot = primal.controls(1,:)*scale.gamma;
 
@@ -434,12 +437,12 @@ xlabel('time (s)')
 ax3 = gca;
 xlim([min(t) max(t)]);
 line(t, Alpha,'Parent',ax3,'Color','k', 'LineStyle','-')
-line(t, eta,'Parent',ax3,'Color','k', 'LineStyle','--')
+% line(t, eta,'Parent',ax3,'Color','k', 'LineStyle','--')
 line(t, zeta,'Parent',ax3,'Color','k', 'LineStyle',':')
 % line(t, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 
 % g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
-g = legend(ax3, 'AoA (degrees)','Roll Angle (degrees)','heading Angle (degrees)');
+g = legend(ax3, 'AoA (degrees)','heading Angle (degrees)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
@@ -578,16 +581,20 @@ set(g, 'Position', rect2)
 % % Note, because the nodes are spaced widely, small interpolation
 % % differences result in the forward simulation being slightly different
 % % than the actual. This is mostly a check to see if they are close. 
-% 
-% forward0 = [V(1),phi(1),gamma(1),v(1),zeta(1),9.7725e+03];
-% 
-% % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-% [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,AlphaInterp(t,lift,f_t),AlphaInterp(t,Fd,f_t),AlphaInterp(t,Thrust,f_t),AlphaInterp(t,flapdeflection,f_t)),t(1:end),forward0);
-% 
-% figure(212)
-% hold on
-% plot(f_t(1:end),f_y(:,1));
-% plot(t,V);
+
+mstruct = 4910.5 - 132.8 + 179.41; % mass of everything but fuel from dawids work
+eta = 0;
+m = mstruct;
+forward0 = [V(1),gamma(1),v(1),zeta(1),phi(1),xi(1)];
+
+% [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y, nodes,scattered, Atmosphere,ControlInterp(t,Alpha,f_t),eta),t(1:end),forward0);
+
+
+figure(212)
+hold on
+plot(f_t(1:end),f_y(:,1));
+plot(t,V);
 % 
 % 
 % %% plot engine interpolation visualiser

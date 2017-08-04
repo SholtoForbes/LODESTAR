@@ -1,4 +1,11 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha,eta)
+function ydot = VehicleModelReturn_forward(f_t, f_y, nodes,scattered, Atmosphere,alpha,eta)
+
+V = f_y(1);
+gamma = f_y(2);
+v = f_y(3);
+zeta = f_y(4);
+phi = f_y(5);
+xi = f_y(6);
 
 % =======================================================
 % Vehicle Model
@@ -79,6 +86,7 @@ M = v./c; % Calculating Mach No (Descaled)
 
 v_H = v.*cos(gamma);
 
+ydot = [rdot;gammadot;a;zetadot;phidot;xidot];
 % =========================================================================
 end
 

@@ -285,8 +285,7 @@ end
 % control bounds
 if const == 1 || const == 12 || const == 13 || const == 14
 omegadotL = -0.00005;
-% omegadotU = 0.00005;
-omegadotU = 0.0001;
+omegadotU = 0.00005;
 else
 omegadotL = -0.0001;
 omegadotU = 0.0001;
@@ -354,14 +353,14 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14
-    bounds.lower.path = [0; 0];
-    bounds.upper.path = [50000 ;9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 50000;
 elseif const == 12
-    bounds.lower.path = [0 ;0];
-    bounds.upper.path = [55000 ;9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 55000;
 elseif const == 13
-    bounds.lower.path = [0 ;0];
-    bounds.upper.path = [45000; 9];
+    bounds.lower.path = 0;
+    bounds.upper.path = 45000;
 elseif const ==3 
     % No path
 end

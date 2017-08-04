@@ -7,7 +7,9 @@ global scattered
 global q
 global const
 global M
+global Alpha
 DynamicPressure = q;
+AoA = Alpha;
 v0 = v(1);
 
 
@@ -25,7 +27,8 @@ if const == 3
 %    path = vfunc*ones(1,length(v)); 
 else
 % path = [DynamicPressure ;vfunc*ones(1,length(v))];
-path = [DynamicPressure];
+
+path = [DynamicPressure; AoA];
 % path = [DynamicPressure ;Mfunc*ones(1,length(v));qfunc*ones(1,length(v))];
 end
 % path = DynamicPressure ;

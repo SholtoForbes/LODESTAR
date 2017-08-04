@@ -188,13 +188,11 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if Alt(i) < 85000
         c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
         rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
-        q(i) = 1/2*rho(i)*v(i)^2;
         AoA_max(i) = deg2rad(Max_AoA_interp(M_init,CN_50*50000/q(i))); %maximum allowable AoA
     else
         c(i) = ppval(c_spline, 85000);
         rho(i) = 0;
-        q(i) = 0;
-        AoA_max(i) = deg2rad(30); % much larger than the actual max aoa, for constraint purposes
+        AoA_max(i) = inf;
     
     end
     
