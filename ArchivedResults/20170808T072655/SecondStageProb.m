@@ -347,14 +347,11 @@ vf = 2839.51;
 % Zetaf = 1.69;
 Zetaf = 1.76;
 
-if const ==3
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
-bounds.upper.events = bounds.lower.events;      % equality event function bounds 
-else
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; min(ThirdStageData(:,3)); min(ThirdStageData(:,4))];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
+
 bounds.upper.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; max(ThirdStageData(:,3)); max(ThirdStageData(:,4))];
 % bounds.upper.events = bounds.lower.events;      % equality event function bounds
-end
+
 
 %% Define Path Constraints
 % This limits the dynamic pressure.
@@ -437,12 +434,8 @@ guess.states(2,:) = [v0, 2900];
 end
 
 % Trajectory angle guess. 
-if const == 3
- guess.states(3,:) = [0.0,0.0];   
-else
 % guess.states(3,:) = [0.05,0.05];
 guess.states(3,:) = [0.00,0.09];
-end
 
 % Mass guess. Simply the exact values at beginning and end (also constraints).
 guess.states(4,:) = [mfuelU, 0]/scale.m;

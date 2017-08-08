@@ -205,6 +205,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
         T(i) = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
+        
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false
@@ -280,9 +281,11 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     
     %% Thrust vectoring
+    diffcP = 0.0158; % difference in gd and place CG is measured from
+    
     if T(i) > 0
 %         Vec_angle(i) = asin(2.5287/2.9713*L(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment.
-        Vec_angle(i) = asin((7.5-2.9554+cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
+        Vec_angle(i) = asin((diffcP + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
     else
         Vec_angle(i) = 0;
     end
@@ -290,7 +293,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if L(i) > T(i)*sin(deg2rad(80)); % this is not a limit, it just stops it going imaginary
         Vec_angle(i) = deg2rad(80);
     end
-    
+
+
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
     

@@ -20,15 +20,21 @@ omegaf = primal.states(5,end);
 
 zetaf = primal.states(6,end);
 
-
+if const == 3
+endpointFunction = zeros(4,1);
+%===========================================================
+    endpointFunction(1) = v0;
+endpointFunction(2) = mfuel0;
+endpointFunction(3) = mfuelf;
+endpointFunction(4) = zetaf;
+else
 endpointFunction = zeros(6,1);
 %===========================================================
-
-
     endpointFunction(1) = v0;
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
 endpointFunction(4) = zetaf;
 endpointFunction(5) = Vf; 
 endpointFunction(6) = gammaf;
+end
 end

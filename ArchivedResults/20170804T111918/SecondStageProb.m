@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 3
+const = 1
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -285,8 +285,8 @@ end
 % control bounds
 if const == 1 || const == 12 || const == 13 || const == 14
 omegadotL = -0.00005;
-omegadotU = 0.00005;
-% omegadotU = 0.0001;
+% omegadotU = 0.00005;
+omegadotU = 0.0001;
 else
 omegadotL = -0.0001;
 omegadotU = 0.0001;
@@ -347,14 +347,11 @@ vf = 2839.51;
 % Zetaf = 1.69;
 Zetaf = 1.76;
 
-if const ==3
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
-bounds.upper.events = bounds.lower.events;      % equality event function bounds 
-else
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; min(ThirdStageData(:,3)); min(ThirdStageData(:,4))];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
+
 bounds.upper.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; max(ThirdStageData(:,3)); max(ThirdStageData(:,4))];
 % bounds.upper.events = bounds.lower.events;      % equality event function bounds
-end
+
 
 %% Define Path Constraints
 % This limits the dynamic pressure.
@@ -424,7 +421,7 @@ elseif const == 13
 elseif const == 14
     guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33000]; 
 elseif const ==3
-    guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,32000 ]/scale.V; 
+    guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33000 ]/scale.V; 
 elseif const == 32
    guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33000 ] ;
 end
@@ -437,12 +434,8 @@ guess.states(2,:) = [v0, 2900];
 end
 
 % Trajectory angle guess. 
-if const == 3
- guess.states(3,:) = [0.0,0.0];   
-else
 % guess.states(3,:) = [0.05,0.05];
 guess.states(3,:) = [0.00,0.09];
-end
 
 % Mass guess. Simply the exact values at beginning and end (also constraints).
 guess.states(4,:) = [mfuelU, 0]/scale.m;

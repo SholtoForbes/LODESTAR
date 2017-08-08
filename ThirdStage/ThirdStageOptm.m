@@ -32,10 +32,11 @@ x=0;
 % count = 1
 
     
-    for i3 = 1;
+    for i5 = 0:1;
     for i2 = 0:.5:3;
-        for i4 = 0:.5:1;
-i5 = 0;
+        for i4 = 0:1;
+
+i3 = 1;
 % for i4 = 0:5;
 %     for i3 = 0:2;
 %     for i5 = 0;
@@ -50,7 +51,7 @@ num_div = 20+i5;
 % num_div = 15-i4;
 
 % x0 = [deg2rad(11)*ones(1,num_div)+deg2rad(i4) 2650/10000 245/1000];
-x0 = [deg2rad(11)*ones(1,num_div)+deg2rad(i4) 2400/10000+i2*100/10000 230/1000];
+x0 = [deg2rad(15)*ones(1,num_div)+deg2rad(i4) 2450/10000+i2*50/10000 230/1000];
 
 % x0 = [deg2rad(11)*ones(1,num_div)+deg2rad(i4) 2650/10000 85/1000];
 
@@ -81,7 +82,7 @@ exitflag
 mpayload_temp
 AltF_actual
 % Alpha
-Vec_angle_constraint = max(Vec_angle - deg2rad(8)); % check for thrust vector validity (constraints are not necessarily satisfied)
+Vec_angle_constraint = max(Vec_angle - deg2rad(7)); % check for thrust vector validity (constraints are not necessarily satisfied)
 
 if mpayload_temp > mpayload && (exitflag ==1 || exitflag ==2|| exitflag ==3) && Vec_angle_constraint <= 0 
     mpayload = mpayload_temp;

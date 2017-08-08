@@ -15,12 +15,12 @@ gamma0 = primal.states(3,1);
 gammaf = primal.states(3,end);
 % omega0 = primal.states(4,1);
 % omegaf = primal.states(4,end);
-zeta0 = primal.states(4,1);
-zetaf = primal.states(4,end);
-phi0 = primal.states(5,1);
-phif = primal.states(5,end);
-xi0 = primal.states(6,1);
-xif = primal.states(6,end);
+zeta0 = primal.states(5,1);
+zetaf = primal.states(5,end);
+phi0 = primal.states(6,1);
+phif = primal.states(6,end);
+xi0 = primal.states(7,1);
+xif = primal.states(7,end);
 
 
 
@@ -34,6 +34,6 @@ endpointFunction(5) = phi0;
 endpointFunction(6) = xi0;
 % endpointFunction(7) = vf;
 % endpointFunction(7) = zetaf;
-endpointFunction(7) = Vf;
-% endpointFunction(8) = gammaf;
+% endpointFunction(7) = Vf;
+endpointFunction(7) = gammaf;
 end

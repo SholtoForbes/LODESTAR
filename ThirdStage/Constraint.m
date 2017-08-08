@@ -12,7 +12,7 @@ if length(AoA_constraint) < 250
     AoA_constraint = [AoA_constraint zeros(1,(250-length(AoA_constraint)))]; % in case the rocket crashes and doesnt reach 100s flight
 end
 
-Vec_angle_constraint = (Vec_angle - deg2rad(8))*1e6;
+Vec_angle_constraint = (Vec_angle - deg2rad(7))*1e6;
 
 if length(Vec_angle_constraint) < 250
     Vec_angle_constraint = [Vec_angle_constraint zeros(1,(250-length(Vec_angle_constraint)))]; % in case the rocket crashes and doesnt reach 100s flight
