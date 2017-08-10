@@ -63,11 +63,11 @@ RunningCost = 0;
 % EndpointCost = time(end);
 EndpointCost = 0;
 % EndpointCost = H(end);
-% EndpointCost = V(end);
+% EndpointCost = 0.001*V(end);
 % EndpointCost = -zeta(end);
-% EndpointCost = phi(end);
+EndpointCost = phi(end);
 % EndpointCost = v(end);
-% EndpointCost = v(end) + V(end);
+% EndpointCost = 0.01*v(end) + 0.001*V(end);
 
 
 global iterative_V

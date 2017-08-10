@@ -1,4 +1,4 @@
-function [mpayload, x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L] = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF_actual,vF] = ThirdStageOptm(k,j,u, phi0, zeta0)
 % A function to calculate the optimal trajectory of the SPARTAN third stage.
 % Sholto Forbes-Spyratos
 
@@ -13,7 +13,7 @@ mScale = 1; % This needs to be manually changed in altitude and velocity files a
 
 % options.Display = 'iter-detailed';
 options.Algorithm = 'sqp';
-options.FunValCheck = 'on';
+% options.FunValCheck = 'on';
 options.ScaleProblem = 'obj-and-constr'
 % options.DiffMinChange = 0.0005;
 % options.TypicalX = x0;
@@ -21,8 +21,8 @@ options.ScaleProblem = 'obj-and-constr'
 % options.Algorithm = 'active-set';
 
 
-options.TolFun = 1e-4;
-options.TolX = 1e-4;
+% options.TolFun = 1e-4;
+% options.TolX = 1e-4;
 
 mpayload = 0;
 x=0;
@@ -32,26 +32,26 @@ x=0;
 % count = 1
 
     
-    for i5 = 0:1;
-    for i2 = 0:.5:3;
-        for i4 = 0:1;
+    for i5 = 0;
+    for i2 = 0:.25:1.5;
+        for i4 = 0;
 
 i3 = 1;
 % for i4 = 0:5;
 %     for i3 = 0:2;
 %     for i5 = 0;
 
-[i3 i2 i4 ]
+[i5 i2 i4 ]
         
 % count = count+1
-AoA_max_abs = deg2rad(20); % maximum angle of attack
+AoA_max_abs = deg2rad(15); % maximum angle of attack
 
 
 num_div = 20+i5; 
 % num_div = 15-i4;
 
 % x0 = [deg2rad(11)*ones(1,num_div)+deg2rad(i4) 2650/10000 245/1000];
-x0 = [deg2rad(15)*ones(1,num_div)+deg2rad(i4) 2450/10000+i2*50/10000 230/1000];
+x0 = [deg2rad(14)*ones(1,num_div)+deg2rad(i4) 2450/10000+i2*50/10000 220/1000];
 
 % x0 = [deg2rad(11)*ones(1,num_div)+deg2rad(i4) 2650/10000 85/1000];
 

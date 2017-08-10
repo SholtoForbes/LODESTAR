@@ -34,6 +34,7 @@ endpointFunction(5) = phi0;
 endpointFunction(6) = xi0;
 % endpointFunction(7) = vf;
 % endpointFunction(7) = zetaf;
-% endpointFunction(7) = Vf;
+
 endpointFunction(7) = gammaf;
+% endpointFunction(8) = Vf;
 end

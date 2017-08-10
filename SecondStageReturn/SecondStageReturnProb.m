@@ -103,7 +103,7 @@ zetaL = 4;
 zetaU = 6;
 
 phiL = -.5;
-phiU = -0.1;
+phiU = -0.0;
 
 xiL = -0.5;
 xiU = 0.5;
@@ -169,7 +169,7 @@ xi0 = 0;
 bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0];
 
 % bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;20000;0];
-% bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;40000];
+% bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;0; 10000];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
     bounds.lower.path = 0;
@@ -195,7 +195,7 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [90]; 
+algorithm.nodes		= [150]; 
 global nodes
 nodes = algorithm.nodes;
 
@@ -205,16 +205,16 @@ nodes = algorithm.nodes;
 
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
 % guess.states(1,:) = [V0 ,V0 ];
-guess.states(1,:) = [V0 ,20000 ];
+guess.states(1,:) = [V0 ,1000 ];
 guess.states(2,:) = [v0, 100];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(9),deg2rad(9)];
+guess.states(4,:) = [deg2rad(19),deg2rad(19)];
 
-guess.states(5,:) = [4.7,4.71];
+guess.states(5,:) = [4.7,4.761];
 
-guess.states(6,:) = [-0.05,-.08];
+guess.states(6,:) = [-0.1,-.14];
 
 guess.states(7,:) = [0,-0.1];
 
@@ -226,7 +226,7 @@ guess.states(7,:) = [0,-0.1];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,1010];
+guess.time        = [t0 ,550];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;

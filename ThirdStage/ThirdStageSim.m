@@ -293,7 +293,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if L(i) > T(i)*sin(deg2rad(80)); % this is not a limit, it just stops it going imaginary
         Vec_angle(i) = deg2rad(80);
     end
-
+% Vec_angle(i) = 0;
 
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
@@ -391,4 +391,4 @@ m3 = m2/(exp(v23/(Isp*g_standard)));
 m4 = m3/(exp(v34/(Isp*g_standard)));
 
 mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
-
+% mpayload = m4 - (m(1) - mHS)*0.108695 -mEng; % structural mass used from falcon 1 guide, second stage masses, this assumes fariing not included in dry mass
