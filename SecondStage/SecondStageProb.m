@@ -345,7 +345,7 @@ vf = 2839.51;
 % These correspond to the values in SecondStageEvents.m
 
 % Zetaf = 1.69;
-Zetaf = 1.76;
+Zetaf = 1.78;
 
 if const ==3
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat

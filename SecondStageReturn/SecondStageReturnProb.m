@@ -166,11 +166,11 @@ xi0 = 0;
 
 
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0;deg2rad(-45)];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0];
+bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0;0];
 
 % bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;20000;0];
-% bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;0; 10000];
-bounds.upper.events = bounds.lower.events;      % equality event function bounds
+bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;0; 100];
+% bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
     bounds.lower.path = 0;
 bounds.upper.path = 50000;
@@ -195,7 +195,7 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [150]; 
+algorithm.nodes		= [100]; 
 global nodes
 nodes = algorithm.nodes;
 

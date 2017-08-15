@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb, num_div)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L,inc_diff] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb, num_div)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -12,6 +12,7 @@ end
 % x(1) = x(1)*1000;
 x(end) = x(end)*1000; % de-scale
 x(end-1) = x(end-1)*10000; % de-scale
+% x(end-2) = x(end-2)*1000; % de-scale
 
 
 SCALE_Engine = 1; % changes characteristic length
@@ -93,7 +94,7 @@ Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessa
 %Reference area
 A = 0.866; % diameter of 1.05m
 
-g = 9.81; %standard gravity
+g = 9.806; %standard gravity
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
@@ -131,10 +132,12 @@ mEng = 52; %Kestrel
 % mEng = 138; %Aestus 2 / RS72 from https://web.archive.org/web/20141122143945/http://cs.astrium.eads.net/sp/launcher-propulsion/rocket-engines/aestus-rs72-rocket-engine.html
 
 m(1) = 3300;
-% m(1) = 3000;
+% m(1) = 3200;
+% m(1) = x(end-2);
 
 % mdot = 14.71; %RL10
-mdot = 9.86; %Kestrel
+% mdot = 9.86977; %Kestrel
+mdot = 9.86977*1.5; %Kestrel Modified
 % mdot = 14.8105; %HM7B
 % mdot = 16.5; %Aestus 2
 
@@ -205,7 +208,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
         T(i) = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
-        
+
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
         if q(i) < 10 && exocond == false
@@ -285,7 +288,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     if T(i) > 0
 %         Vec_angle(i) = asin(2.5287/2.9713*L(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment.
-        Vec_angle(i) = asin((diffcP + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
+%         Vec_angle(i) = asin((diffcP + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
+        Vec_angle(i) = asin((7.5 - 2.9554 + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
     else
         Vec_angle(i) = 0;
     end
@@ -293,7 +297,8 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     if L(i) > T(i)*sin(deg2rad(80)); % this is not a limit, it just stops it going imaginary
         Vec_angle(i) = deg2rad(80);
     end
-% Vec_angle(i) = 0;
+
+Vec_angle(i) = 0;
 
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
@@ -368,11 +373,10 @@ Omega_E = 7.2921e-5 ; % rotation rate of the Earth rad/s
 vexo = sqrt((v(end)*sin(zeta(end)))^2 + (v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))^2); %Change coordinate system when exoatmospheric, add velocity component from rotation of the Earth
 
 inc = acos((v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))/vexo);  % initial orbit inclination angle
+inc_diff = acos(-((566.89+6371)/12352)^(7/2))-inc;
 
-v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo + 2*(v(end))*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-inc)/2); % Final term of this is inclination change cost to get into heliosync orbit
-
-% v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 + 2*(v(end)+v12)*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-zeta(end))); % Final term of this is inclination change cost to get into heliosynch orbit
-
+% v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo + 2*(v(end))*sin(abs(acos(-((566.89+6371)/12352)^(7/2))-inc)/2); % Final term of this is inclination change cost to get into heliosync orbit
+v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo; % without inclination change.It is assumed that the third stage will be near the desired inclination.
 v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3 ; 
 
 v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
