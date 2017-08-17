@@ -157,27 +157,27 @@ xlabel('time (s)')
 set(gcf,'position',[300 300 800 600])
 
 %% Plotting
-subplot(2,1,1);
-hold on
-plot(t, Alt/100, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
-plot(t,v, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
-plot(t, m, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
-legend(  'Altitude (km x 10)', 'Velocity (m/s)',  'Mass (kg)');
-subplot(2,1,2);
-hold on
-
-plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
-plot(t(1:end-1),q/10000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-
-plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
-plot(t(1:end-1),rad2deg(Vec_angle)/10, 'LineStyle', ':','Color','k', 'lineWidth', 1.1)
-legend(  'Trajectory Angle (degrees)','Dynamic Pressure (kPa) x 10','Angle of Attack (deg)x10', 'Thrust Vector Angle (deg)x10');
-ylabel('Time (s)');
-ylim([-1 8])
-xlim([0 t(end)])
-% Write data to file
-dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')
-
-Integrated_Drag = cumtrapz(t(1:end-1),D) ;
-Integrated_Drag(end)
+% subplot(2,1,1);
+% hold on
+% plot(t, Alt/100, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
+% plot(t,v, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
+% plot(t, m, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
+% legend(  'Altitude (km x 10)', 'Velocity (m/s)',  'Mass (kg)');
+% subplot(2,1,2);
+% hold on
+% 
+% plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
+% plot(t(1:end-1),q/10000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+% 
+% plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
+% plot(t(1:end-1),rad2deg(Vec_angle)/10, 'LineStyle', ':','Color','k', 'lineWidth', 1.1)
+% legend(  'Trajectory Angle (degrees)','Dynamic Pressure (kPa) x 10','Angle of Attack (deg)x10', 'Thrust Vector Angle (deg)x10');
+% ylabel('Time (s)');
+% ylim([-1 8])
+% xlim([0 t(end)])
+% % Write data to file
+% dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')
+% 
+% Integrated_Drag = cumtrapz(t(1:end-1),D) ;
+% Integrated_Drag(end)
 end

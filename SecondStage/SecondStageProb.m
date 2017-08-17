@@ -347,8 +347,10 @@ vf = 2839.51;
 % Zetaf = 1.69;
 Zetaf = 1.78;
 
+thetaf = deg2rad(1);
+
 if const ==3
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; thetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
 bounds.upper.events = bounds.lower.events;      % equality event function bounds 
 else
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; min(ThirdStageData(:,3)); min(ThirdStageData(:,4))];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
