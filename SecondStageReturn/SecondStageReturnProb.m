@@ -151,15 +151,15 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 
-v0 = 1000;
+v0 = 943;
 % vf = 1550;
 
 
 %% Define Events
 V0 = 35000;
-gamma0 = 0.048;
-zeta0 = 4.7;
-phi0 = -0.05;
+gamma0 = -0.2722;
+zeta0 = 4.7121;
+phi0 = -0.0442;
 xi0 = 0;
 % zetaf = 1.6915;
 % zetaf = 4.7124;

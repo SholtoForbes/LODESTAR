@@ -92,13 +92,14 @@ r_E = 6371000; % earth radius
 Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
 
 %Reference area
-A = 0.866; % diameter of 1.05m
-
+% A = 0.866; % diameter of 1.05m
+A = 0.95; % diameter of 1.1m
 g = 9.806; %standard gravity
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
-Isp = 317; %Kestrel, from Falcon 1 users guide
+Isp = 317*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction
+% Isp = 320
 % Isp = 446; %HM7B
 % Isp = 340; %Aestus 2
 %% Define starting condtions
@@ -138,6 +139,7 @@ m(1) = 3300;
 % mdot = 14.71; %RL10
 % mdot = 9.86977; %Kestrel
 mdot = 9.86977*1.5; %Kestrel Modified
+% mdot = 14.72
 % mdot = 14.8105; %HM7B
 % mdot = 16.5; %Aestus 2
 
@@ -207,7 +209,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     if Fuel == true
 %         T = Isp*mdot*9.81 + (1400 - p(i))*1.; % Thrust (N), exit pressure from Rocket Propulsion Analysis program.
-        T(i) = Isp*mdot*9.81 - p(i)*A; % Thrust (N)
+        T(i) = Isp*mdot*g - p(i)*A; % Thrust (N)
 
         mfuel(i+1) = mfuel(i) - mdot*dt;
         
@@ -284,12 +286,12 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     
     %% Thrust vectoring
-    diffcP = 0.0158; % difference in gd and place CG is measured from
+
     
     if T(i) > 0
 %         Vec_angle(i) = asin(2.5287/2.9713*L(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment.
-%         Vec_angle(i) = asin((diffcP + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
-        Vec_angle(i) = asin((7.5 - 2.9554 + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
+        Vec_angle(i) = asin((cP(i)*1.1)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
+%         Vec_angle(i) = asin((7.5 - 2.9554 + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
     else
         Vec_angle(i) = 0;
     end
@@ -298,7 +300,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Vec_angle(i) = deg2rad(80);
     end
 
-Vec_angle(i) = 0;
+% Vec_angle(i) = 0;
 
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
