@@ -13,7 +13,7 @@ phi0 = -0.13 % initial latitude, this has very minimal effect
 % for k = [33000:1000:36000] % altitude range
 for k = [33000:500:36000]
 % for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
-for j = [deg2rad(1) deg2rad(2) deg2rad(3) deg2rad(4) deg2rad(5)]
+for j = [deg2rad(2): deg2rad(1): deg2rad(5)]
     
 temp_guess_no = 1;
 
@@ -35,7 +35,7 @@ for i = 1:length(u)
 % for i = 1:length(u)
 u(i)
 
-[mpayload(i), x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF(i),vF(i)] = ThirdStageOptm(k,j,u(i), phi0, zeta0);
+[mpayload(i), x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF(i),vF(i)] = ThirdStageOptm(k,j,u(i), phi0, zeta0, 0);
 
 temp_payload(i) = mpayload(i);
 end

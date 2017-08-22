@@ -1,4 +1,4 @@
-function [mpayload, x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF_actual,vF,inc_diff] = ThirdStageOptm(k,j,u, phi0, zeta0)
+function [mpayload, x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF_actual,vF,inc_diff] = ThirdStageOptm(k,j,u, phi0, zeta0,plotflag)
 % A function to calculate the optimal trajectory of the SPARTAN third stage.
 % Sholto Forbes-Spyratos
 
@@ -41,7 +41,7 @@ AoA_max_abs = deg2rad(20); % maximum angle of attack
 
 
 
-    parfor i = 1:18
+    parfor i = 1:32
 %         i4=0;
         i5=0;
         
@@ -61,6 +61,9 @@ i4 = 3;
         elseif i <= 32
                       i3 = i-25;
 i4 = 4;     
+        elseif i <= 40
+                      i3 = i-33;
+i4 = 5;     
         end
 
 num_div = 20+i5;
@@ -79,7 +82,7 @@ num_div = 20+i5;
  lb = [deg2rad(0)*ones(1,num_div) 1300/10000  70/1000];
 ub = [AoA_max_abs*ones(1,num_div) 2200/10000  130/1000];
 
-x0 = [deg2rad(18)*ones(1,num_div)+deg2rad(i4) 1900/10000+i3*25/10000 110/1000];
+x0 = [deg2rad(18)*ones(1,num_div)+.5*deg2rad(i4) 1900/10000+i3*25/10000 110/1000];
 
 
 % Initiate optimiser
@@ -153,31 +156,35 @@ x(end)
 mpayload
 zeta(end)
 figure(301)
-xlabel('time (s)')
-set(gcf,'position',[300 300 800 600])
+set(gcf,'position',[300 300 1000 500])
 
 %% Plotting
-% subplot(2,1,1);
-% hold on
-% plot(t, Alt/100, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
-% plot(t,v, 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
-% plot(t, m, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
-% legend(  'Altitude (km x 10)', 'Velocity (m/s)',  'Mass (kg)');
-% subplot(2,1,2);
-% hold on
-% 
-% plot(t, rad2deg(gamma), 'LineStyle', '--','Color','k', 'lineWidth', 1.3)
-% plot(t(1:end-1),q/10000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-% 
-% plot(t(1:end-1),rad2deg(Alpha)/10, 'LineStyle', '-','Color','k', 'lineWidth', 1.1)
-% plot(t(1:end-1),rad2deg(Vec_angle)/10, 'LineStyle', ':','Color','k', 'lineWidth', 1.1)
-% legend(  'Trajectory Angle (degrees)','Dynamic Pressure (kPa) x 10','Angle of Attack (deg)x10', 'Thrust Vector Angle (deg)x10');
-% ylabel('Time (s)');
-% ylim([-1 8])
-% xlim([0 t(end)])
-% % Write data to file
-% dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')
-% 
-% Integrated_Drag = cumtrapz(t(1:end-1),D) ;
-% Integrated_Drag(end)
+if plotflag == 1
+    addpath('addaxis')
+    hold on
+
+    plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
+    plot(t,[q q(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+    ylabel('Altitude (km), Dynamic Pressure (kPa)');
+    
+
+    addaxis(t,v, [0 6000], 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
+    addaxisplot(t, m,2, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
+    addaxislabel(2,'Velocity (m/s), Mass (kg)');
+
+    addaxis(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '-.','Color','k', 'lineWidth', 1.1)
+    addaxisplot(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 3, 'LineStyle', ':','Color','b', 'lineWidth', 1.1)
+    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','b', 'lineWidth', 1.3)
+    addaxislabel(3,'Angle of Attack (deg), Thrust Vector Angle (deg), Trajectory Angle (deg)');
+
+    legend(  'Altitude','Dynamic Pressure', 'Velocity',  'Mass','Angle of Attack', 'Thrust Vector Angle', 'Trajectory Angle' );
+    xlabel('Time (s)');
+    xlim([0 t(end)])
+    box off
+    % Write data to file
+    dlmwrite('ThirdStageData',[t.', Alt.', v.', m.',[q q(end)].',gamma.',[D D(end)].',zeta.'], ' ')
+
+    Integrated_Drag = cumtrapz(t(1:end-1),D) ;
+    Integrated_Drag(end)
+end
 end

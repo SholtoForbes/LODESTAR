@@ -23,9 +23,9 @@ v0 = v(1);
 %     vfunc = v0 -scattered.FirstStagev(V(1),theta(1));
 % end
     
-if const == 3
-%    path = vfunc*ones(1,length(v)); 
-else
+% if const == 3
+% %    path = vfunc*ones(1,length(v)); 
+% else
 % path = [DynamicPressure ;vfunc*ones(1,length(v))];
 
 path = [DynamicPressure; AoA];

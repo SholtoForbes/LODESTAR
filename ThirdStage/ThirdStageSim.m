@@ -98,7 +98,9 @@ g = 9.806; %standard gravity
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
+
 Isp = 317*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction
+
 % Isp = 320
 % Isp = 446; %HM7B
 % Isp = 340; %Aestus 2
@@ -125,7 +127,7 @@ v(1) = u;
 zeta(1) = zeta0;
 
 %% Define Vehicle Properties
-mHS = 125.65; % Heat Shield Mass
+mHS = 130.9; % Heat Shield Mass
 
 % mEng = 100; %RL10
 mEng = 52; %Kestrel
@@ -138,7 +140,9 @@ m(1) = 3300;
 
 % mdot = 14.71; %RL10
 % mdot = 9.86977; %Kestrel
+
 mdot = 9.86977*1.5; %Kestrel Modified
+
 % mdot = 14.72
 % mdot = 14.8105; %HM7B
 % mdot = 16.5; %Aestus 2
@@ -300,7 +304,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Vec_angle(i) = deg2rad(80);
     end
 
-% Vec_angle(i) = 0;
+Vec_angle(i) = 0;
 
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force
