@@ -304,7 +304,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Vec_angle(i) = deg2rad(80);
     end
 
-Vec_angle(i) = 0;
+% Vec_angle(i) = 0;
 
 %     T(i) = T(i)*cos(Vec_angle(i));
 %     L(i) = L(i) + T(i).*sin(Vec_angle(i)); % add the vectored component of thrust to the lift force

@@ -173,8 +173,8 @@ if plotflag == 1
     addaxislabel(2,'Velocity (m/s), Mass (kg)');
 
     addaxis(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '-.','Color','k', 'lineWidth', 1.1)
-    addaxisplot(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 3, 'LineStyle', ':','Color','b', 'lineWidth', 1.1)
-    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','b', 'lineWidth', 1.3)
+    addaxisplot(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 3, 'LineStyle', ':','Color','b', 'lineWidth', 1.9)
+    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','b', 'lineWidth', .8)
     addaxislabel(3,'Angle of Attack (deg), Thrust Vector Angle (deg), Trajectory Angle (deg)');
 
     legend(  'Altitude','Dynamic Pressure', 'Velocity',  'Mass','Angle of Attack', 'Thrust Vector Angle', 'Trajectory Angle' );

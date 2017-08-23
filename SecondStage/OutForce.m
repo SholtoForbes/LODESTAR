@@ -12,17 +12,18 @@ function [Drag, Alpha, flapdeflection,lift_search] = OutForce(theta,M,q,m,scatte
 %use LiftForceInterp splines
 
 Alpha = scattered.AoA(v,V,lift_search);
-flapdeflection = scattered.flapdeflection(v,V,lift_search);
+% flapdeflection = scattered.flapdeflection(v,V,lift_search);
 Drag = scattered.drag(v,V,lift_search); 
 
 
-% Flap_pitchingmoment = scattered.flap_pm(v,V,lift_search);
+Flap_pitchingmoment = scattered.flap_pm(v,V,lift_search);
 
-% omegadot = diff(thetadot)./diff(time);
-% I = 150000; % from hand calculation
-% extramoment = [0 -omegadot*I];
-% 
-% flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment + extramoment);
+omegadot = diff(thetadot)./diff(time);
+alphadot = diff(Alpha)./diff(time);
+I = 150000; % from hand calculation
+extramoment = [0 (omegadot+alphadot)*I];
+
+flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment + extramoment);
 
 
 
