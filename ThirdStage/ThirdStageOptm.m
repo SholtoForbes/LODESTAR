@@ -41,7 +41,7 @@ AoA_max_abs = deg2rad(20); % maximum angle of attack
 
 
 
-    parfor i = 1:32
+    parfor i = 1:40
 %         i4=0;
         i5=0;
         
@@ -82,7 +82,7 @@ num_div = 20+i5;
  lb = [deg2rad(0)*ones(1,num_div) 1300/10000  70/1000];
 ub = [AoA_max_abs*ones(1,num_div) 2200/10000  130/1000];
 
-x0 = [deg2rad(18)*ones(1,num_div)+.5*deg2rad(i4) 1900/10000+i3*25/10000 110/1000];
+x0 = [deg2rad(17.5)*ones(1,num_div)+.5*deg2rad(i4) 1900/10000+i3*25/10000 110/1000];
 
 
 % Initiate optimiser
@@ -156,26 +156,27 @@ x(end)
 mpayload
 zeta(end)
 figure(301)
-set(gcf,'position',[300 300 1000 500])
+set(gcf,'position',[300 300 1300 700])
 
 %% Plotting
 if plotflag == 1
     addpath('addaxis')
     hold on
 
-    plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 1.3)
+    plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.0)
     plot(t,[q q(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-    ylabel('Altitude (km), Dynamic Pressure (kPa)');
+    plot(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '-.','Color','k', 'lineWidth', 1.1)
+    ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
     
 
     addaxis(t,v, [0 6000], 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
     addaxisplot(t, m,2, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
     addaxislabel(2,'Velocity (m/s), Mass (kg)');
 
-    addaxis(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '-.','Color','k', 'lineWidth', 1.1)
-    addaxisplot(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 3, 'LineStyle', ':','Color','b', 'lineWidth', 1.9)
-    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','b', 'lineWidth', .8)
-    addaxislabel(3,'Angle of Attack (deg), Thrust Vector Angle (deg), Trajectory Angle (deg)');
+
+    addaxis(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 'LineStyle', ':','Color','k', 'lineWidth', 1.9)
+    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','k', 'lineWidth', .8)
+    addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
 
     legend(  'Altitude','Dynamic Pressure', 'Velocity',  'Mass','Angle of Attack', 'Thrust Vector Angle', 'Trajectory Angle' );
     xlabel('Time (s)');

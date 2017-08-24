@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 1
+const = 3
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -285,9 +285,10 @@ end
 
 % control bounds
 if const == 1 || const == 12 || const == 13 || const == 14
-omegadotL = -0.00005;
-omegadotU = 0.00005;
-% omegadotU = 0.0001;
+% omegadotL = -0.00005;
+% omegadotU = 0.00005;
+omegadotL = -0.00003;
+omegadotU = 0.0002;
 else
 omegadotL = -0.00003;
 omegadotU = 0.0002;
@@ -348,7 +349,7 @@ vf = 2839.51;
 % Zetaf = 1.69;
 Zetaf = 1.78;
 
-thetaf = deg2rad(2);
+thetaf = deg2rad(1);
 
 if const ==3
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; thetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
@@ -400,11 +401,11 @@ TwoStage2d.bounds       = bounds;
 if const == 3 || const == 31 || const == 32
     algorithm.nodes		= [100]; 
 elseif const == 1
-    algorithm.nodes		= [99];
+    algorithm.nodes		= [100];
 elseif const == 12 
-    algorithm.nodes		= [93]; 
+    algorithm.nodes		= [100]; 
 elseif const == 13
-    algorithm.nodes		= [96]; 
+    algorithm.nodes		= [101]; 
 elseif const == 14
     algorithm.nodes		= [100];
 end
@@ -420,7 +421,7 @@ nodes = algorithm.nodes;
 % the expected end solution. It is good for this end guess to be lower than
 % expected.
 if const == 1
-    guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500 ]; 
+    guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,33500 ]; 
 elseif const == 12
     guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34000];
 elseif const == 13
@@ -720,9 +721,9 @@ sp3 = subplot(2,6,[10,12]);
 xlabel('time (s)')
 ax3 = gca;
 xlim([min(t) max(t)]);
-line(t, Alpha,'Parent',ax3,'Color','k', 'LineStyle','-')
+line(t, [Alpha(1:end-1) Alpha(end-1)],'Parent',ax3,'Color','k', 'LineStyle','-')
 
-line(t, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
+line(t, [flapdeflection(1:end-1) flapdeflection(end-1)],'Parent',ax3,'Color','k', 'LineStyle','--')
 
 
 % line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
@@ -794,13 +795,14 @@ dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alph
 dlmwrite('payload.txt', ThirdStagePayloadMass);
 dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
 dlmwrite('ThirdStage.txt',[ThirdStageZeta;ThirdStagePhi;ThirdStageAlt;ThirdStagev;ThirdStaget;[ThirdStageAlpha 0];ThirdStagem;ThirdStagegamma;[ThirdStageq 0]]);
-
+dlmwrite('LD.txt', Separation_LD);
 
 
 copyfile('primal.txt',sprintf('../ArchivedResults/%s/primal_%s.txt',Timestamp,Timestamp))
 copyfile('dual.txt',sprintf('../ArchivedResults/%s/dual_%s.txt',Timestamp,Timestamp))
 copyfile('payload.txt',sprintf('../ArchivedResults/%s/payload_%s.txt',Timestamp,Timestamp))
 copyfile('ThirdStage.txt',sprintf('../ArchivedResults/%s/ThirdStage_%s.txt',Timestamp,Timestamp))
+copyfile('LD.txt',sprintf('../ArchivedResults/%s/LD_%s.txt',Timestamp,Timestamp))
 primal_old = primal;
 
 ts = timeseries(Isp,t);
@@ -981,6 +983,9 @@ plot(phi)
 plot(ThirdStagePhi)
 title('Latitude')
 
+%% SAVE FIGS
+saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
+saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);
 %%
 
 % =========================================================================

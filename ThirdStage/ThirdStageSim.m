@@ -400,5 +400,5 @@ m3 = m2/(exp(v23/(Isp*g_standard)));
 
 m4 = m3/(exp(v34/(Isp*g_standard)));
 
-mpayload = m4 - (m(1) - mHS)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
+mpayload = m4 - (m(1) - mHS - mEng)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
 % mpayload = m4 - (m(1) - mHS)*0.108695 -mEng; % structural mass used from falcon 1 guide, second stage masses, this assumes fariing not included in dry mass
