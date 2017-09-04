@@ -43,8 +43,40 @@ Atmosphere = dlmread('atmosphere.txt');
 % interp.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
 
-interp.Cl_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+% interp.Cl_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
+% interp.Cd_spline = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+
+aero = importdata('SPARTANaero.txt');
+
+interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
+interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+
+
+[MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
+% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+
+Cl_Grid = [];
+Cd_Grid = [];
+
+for i = 1:numel(MList)
+    M_temp = MList(i);
+    AoA_temp = AOAList(i);
+    
+    Cl_temp = interp.Cl_scattered(M_temp,AoA_temp);
+    Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
+    
+    I = cell(1, ndims(MList)); 
+    [I{:}] = ind2sub(size(MList),i);
+    
+    Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
+
+end
+
+interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
+
 
 % Alpha = 7; % aoa (deg)
 % FlapDeflection = 0;
@@ -58,7 +90,7 @@ options.MaxFunEvals = 5000;
 % options.ScaleProblem = 'obj-and-constr';
 % options.DiffMinChange = 0.0005;
 
-num_div = 15;% no of timestep divisions
+num_div = 100;% no of timestep divisions
 
 Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 

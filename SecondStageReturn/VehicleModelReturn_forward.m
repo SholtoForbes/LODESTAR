@@ -1,4 +1,4 @@
-function ydot = VehicleModelReturn_forward(f_t, f_y, nodes,scattered, Atmosphere,alpha,eta)
+function ydot = VehicleModelReturn_forward(f_t, f_y, nodes,interp, Atmosphere,alpha,eta)
 
 V = f_y(1);
 gamma = f_y(2);
@@ -33,12 +33,12 @@ m = mstruct;
 %===================================================
 
 %======================================================
-speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),V);
+speedOfSound = spline(Atmosphere(:,1),Atmosphere(:,5),V);
 mach = v./speedOfSound;
-density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
+density = spline(Atmosphere(:,1),Atmosphere(:,4),V);
 % interpolate coefficients
-Cd = scattered.Cd_spline(mach,rad2deg(alpha));
-Cl = scattered.Cl_spline(mach,rad2deg(alpha));
+Cd = interp.Cd_spline(mach,rad2deg(alpha));
+Cl = interp.Cl_spline(mach,rad2deg(alpha));
 
 %%%% Compute the drag and lift:
 

@@ -1,9 +1,9 @@
-function [Target,ceq] = Constraint(x,k,j,u, phi0, zeta0, lb,num_div)
+function [Target,ceq] = Constraint(x,k,j,u, phi0, zeta0, lb,num_div,plotflag)
 
 
 
 ceq = 0;
-[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div);
+[AltF, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div,plotflag);
 
 % ceq = AltF - 110000;
 

@@ -231,8 +231,12 @@ MoonLander.bounds = bounds;
 if const == 3
 %     algorithm.nodes = [82]; 
 algorithm.nodes = [90]; 
+elseif const == 13
+    algorithm.nodes = [91]; 
+  elseif const == 32
+    algorithm.nodes = [92];   
 else
-  algorithm.nodes = [82]; 
+  algorithm.nodes = [90]; 
 end
 %  algorithm.nodes = [60]; 
   % Change this by a few nodes to potentially change the solution slightly

@@ -11,7 +11,7 @@ clc
 global SPARTAN_SCALE
 SPARTAN_SCALE = 1 % volumetric scale
 
-global scattered
+global interp
 % Counts iterations of DIDO
 global iterative_V
 iterative_V = [];
@@ -30,23 +30,36 @@ Timestamp = datestr(now,30)
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
-communicator = importdata('communicator.txt');
-communicator_trim = importdata('communicator_trim.txt');
+aero = importdata('SPARTANaero.txt');
+
+interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
+interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 
 
-scattered.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-scattered.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-scattered.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+[MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
+% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 
+Cl_Grid = [];
+Cd_Grid = [];
 
-[MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
-Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-Cd_Grid = reshape(communicator(:,4),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
-pitchingmoment_Grid = reshape(communicator(:,11),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+for i = 1:numel(MList)
+    M_temp = MList(i);
+    AoA_temp = AOAList(i);
+    
+    Cl_temp = interp.Cl_scattered(M_temp,AoA_temp);
+    Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
+    
+    I = cell(1, ndims(MList)); 
+    [I{:}] = ind2sub(size(MList),i);
+    
+    Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
 
-scattered.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
-scattered.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
-scattered.pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
+end
+
+interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 
 % Produce Atmosphere Data
 global Atmosphere
@@ -77,7 +90,7 @@ Atmosphere = dlmread('atmosphere.txt');
 % chosen carefully, with the physical model in mind. 
 
 VL = 10;
-VU = 50000; 
+VU = 70000; 
 
 % vL = 1500;
 vL = 10;
@@ -97,16 +110,16 @@ scale.gamma = 1;
 scale.gammadot = 1;
 
 alphaL = 0;
-alphaU = deg2rad(20);
+alphaU = deg2rad(10);
 
-zetaL = 4;
-zetaU = 6;
-
-phiL = -.5;
-phiU = -0.0;
-
-xiL = -0.5;
-xiU = 0.5;
+% zetaL = 4;
+% zetaU = 6;
+% 
+% phiL = -.5;
+% phiU = -0.0;
+% 
+% xiL = -0.5;
+% xiU = 0.5;
 
 % etaL = -.5;
 % etaU = .5;
@@ -124,8 +137,11 @@ alphadotU = 0.01;
 % bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU; etaU];
 
 
-bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL];
-bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU];
+% bounds.lower.states = [VL ; vL; gammaL; alphaL; zetaL; phiL; xiL];
+% bounds.upper.states = [VU ; vU; gammaU; alphaU; zetaU; phiU; xiU];
+
+bounds.lower.states = [VL ; vL; gammaL; alphaL];
+bounds.upper.states = [VU ; vU; gammaU; alphaU];
 
 % control bounds
  bounds.lower.controls = [alphadotL];
@@ -151,30 +167,37 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 
-v0 = 943;
+
 % vf = 1550;
 
 
 %% Define Events
+
+global initial
+initial.zeta = 4.7121;
+initial.phi = -0.0442;
+initial.xi = 0;
+
 V0 = 35000;
+v0 = 943;
 gamma0 = -0.2722;
-zeta0 = 4.7121;
-phi0 = -0.0442;
-xi0 = 0;
 % zetaf = 1.6915;
 % zetaf = 4.7124;
 
 
 % bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0;deg2rad(-45)];
-bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;0;0];
+% bounds.lower.events = [V0;v0; gamma0;zeta0;phi0;xi0;-1;10];
 
 % bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;20000;0];
-bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;0; 100];
+% bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;1; 100000];
 % bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
-    bounds.lower.path = 0;
-bounds.upper.path = 50000;
+bounds.lower.events = [V0;v0; gamma0]
+bounds.upper.events = [V0;v0; gamma0];
 
+    bounds.lower.path = 0;
+% bounds.upper.path = 50000;
+bounds.upper.path = 10000000000000;
 
 
 %% 
@@ -195,7 +218,7 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [100]; 
+algorithm.nodes		= [200]; 
 global nodes
 nodes = algorithm.nodes;
 
@@ -205,18 +228,20 @@ nodes = algorithm.nodes;
 
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
 % guess.states(1,:) = [V0 ,V0 ];
+guess.states(1,:) = [20000 ,20000 ];
 guess.states(1,:) = [V0 ,1000 ];
+
 guess.states(2,:) = [v0, 100];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(19),deg2rad(19)];
+guess.states(4,:) = [deg2rad(9),deg2rad(9)];
 
-guess.states(5,:) = [4.7,4.761];
-
-guess.states(6,:) = [-0.1,-.14];
-
-guess.states(7,:) = [0,-0.1];
+% guess.states(5,:) = [4.7,4.761];
+% 
+% guess.states(6,:) = [-0.1,-.14];
+% 
+% guess.states(7,:) = [0,-0.1];
 
 % guess.states(8,:) = [1,1];
 
@@ -588,7 +613,7 @@ m = mstruct;
 forward0 = [V(1),gamma(1),v(1),zeta(1),phi(1),xi(1)];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y, nodes,scattered, Atmosphere,ControlInterp(t,Alpha,f_t),eta),t(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y, nodes,interp, Atmosphere,ControlInterp(t,Alpha,f_t),eta),t(1:end),forward0);
 
 
 figure(212)

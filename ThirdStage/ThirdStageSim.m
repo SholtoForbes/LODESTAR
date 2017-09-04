@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L,inc_diff] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb, num_div)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L,inc_diff] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb, num_div, plotflag)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -107,7 +107,11 @@ Isp = 317*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction
 %% Define starting condtions
 t(1) = 0.;
 
+if plotflag ==0
 dt_main = 1; %time step
+elseif plotflag == 1
+    dt_main = 1;
+end
 dt = dt_main;
 
 i=1;
@@ -167,7 +171,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
 % iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
 
     if t(i) > x(end-1)
-        dt = 2; % Increase timestep after end of angle of attack variation. Accuracy doesnt matter as much at that point. 
+        dt = 2*dt_main; % Increase timestep after end of angle of attack variation. Accuracy doesnt matter as much at that point. 
     end
 
     mfuel_temp = mfuel(i) - mdot*dt;
@@ -400,5 +404,6 @@ m3 = m2/(exp(v23/(Isp*g_standard)));
 
 m4 = m3/(exp(v34/(Isp*g_standard)));
 
-mpayload = m4 - (m(1) - mHS - mEng)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
+% mpayload = m4 - (m(1) - mHS - mEng)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
+mpayload = m4 - (m(1) - mHS)*0.09; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
 % mpayload = m4 - (m(1) - mHS)*0.108695 -mEng; % structural mass used from falcon 1 guide, second stage masses, this assumes fariing not included in dry mass

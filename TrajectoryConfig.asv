@@ -1,0 +1,42 @@
+% Optimisation Config
+
+
+%% First Stage
+
+% Initial and End Conditions
+
+% Bounds
+
+% Number of Nodes
+
+% Initial Guesses
+
+%% Second Stage %%=========================================================
+
+% Number of Nodes %--------------------------------------------------------
+
+% 50kPa Limit %
+
+% Constant 50kpa Dynamic Pressure
+
+% Initial Guesses %--------------------------------------------------------
+
+% Initial Guesses %--------------------------------------------------------
+
+% 50kPa Limit %
+SecondStage50kPa.guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33500];
+SecondStage50kPa.guess.states(2,:) = [v0, 2900];
+SecondStage50kPa.guess.states(3,:) = [0.0,deg2rad(4.5)];
+SecondStage50kPa.guess.states(4,:) = [mfuelU, 0];
+SecondStage50kPa.guess.states(5,:) = [0,0];
+SecondStage50kPa.guess.states(6,:) = [1.682,1.699];
+SecondStage50kPa.guess.controls(1,:) = [0,0]; 
+SecondStage50kPa.guess.time = [t0 ,360];
+
+% Constant 50kpa Dynamic Pressure %
+SecondStageConstq.guess.states
+
+%% Third Stage
+
+
+%% Second Stage Return

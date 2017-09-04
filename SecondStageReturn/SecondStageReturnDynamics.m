@@ -15,7 +15,7 @@ global const
 global scale
 global zetadot
 global nodes
-global scattered
+global interp
 global Atmosphere
 
 
@@ -30,14 +30,14 @@ gamma = primal.states(3,:)*scale.gamma ;
 alpha = primal.states(4,:);
 % alpha = deg2rad(7)*ones(1,length(V));
 
-zeta = primal.states(5,:);
-
-phi = primal.states(6,:);
-
-xi = primal.states(7,:);
+% zeta = primal.states(5,:);
+% 
+% phi = primal.states(6,:);
+% 
+% xi = primal.states(7,:);
 
 % eta = primal.states(8,:);
-eta = 0;
+eta = zeros(1,length(V));
 
 
 % alphadot  = primal.states(8,:);
@@ -58,13 +58,15 @@ global q
 global M
 global Fd
 global L
-[Vdot,xidot,phidot,gammadot,a,zetadot, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha,eta);
+global initial
+global phi
+[Vdot,xi,phi,gammadot,a,zeta, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,initial.zeta,initial.phi,initial.xi,alpha,eta);
 
 %======================================================
 
-XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot];
-% XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot; etadot];
+% XDOT = [Vdot;a; gammadot; alphadot; zetadot; phidot; xidot];
 
+ XDOT = [Vdot;a; gammadot; alphadot];
 end
 
 %======================================================

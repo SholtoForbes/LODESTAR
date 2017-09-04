@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,scattered, Atmosphere,zeta,phi,xi,alpha,eta)
+function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,zeta,phi,xi,alpha,eta)
 
 % =======================================================
 % Vehicle Model
@@ -26,12 +26,12 @@ m = mstruct;
 %===================================================
 
 %======================================================
-speedOfSound = interp1(Atmosphere(:,1),Atmosphere(:,5),V);
+speedOfSound = spline(Atmosphere(:,1),Atmosphere(:,5),V);
 mach = v./speedOfSound;
-density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
+density = spline(Atmosphere(:,1),Atmosphere(:,4),V);
 % interpolate coefficients
-Cd = scattered.Cd_spline(mach,rad2deg(alpha));
-Cl = scattered.Cl_spline(mach,rad2deg(alpha));
+Cd = interp.Cd_spline(mach,rad2deg(alpha));
+Cl = interp.Cl_spline(mach,rad2deg(alpha));
 
 %%%% Compute the drag and lift:
 
@@ -50,8 +50,15 @@ i= 1;
 
 T =0;
 
-[rdot,xidot,phidot,gammadot,a,zetadot] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta);
+[rdot(i),xidot(i),phidot(i),gammadot(i),a(i),zetadot(i)] = RotCoordsReturn(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m,alpha(i),eta(i));
 
+for i = 2:length(time)
+xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
+phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
+zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
+
+[rdot(i),xidot(i),phidot(i),gammadot(i),a(i),zetadot(i)] = RotCoordsReturn(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m,alpha(i),eta(i));
+end
 
 % Aero Data =============================================================
 c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data

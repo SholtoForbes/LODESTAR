@@ -88,9 +88,9 @@ x0 = [deg2rad(17.5)*ones(1,num_div)+.5*deg2rad(i4) 1900/10000+i3*25/10000 110/10
 % Initiate optimiser
 
 
-[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0,lb,num_div),x0,[],[],[],[],lb,ub,@(x)Constraint(x,k,j,u, phi0, zeta0,lb,num_div),options);
+[x_temp,fval,exitflag] = fmincon(@(x)Payload(x,k,j,u, phi0, zeta0,lb,num_div,plotflag),x0,[],[],[],[],lb,ub,@(x)Constraint(x,k,j,u, phi0, zeta0,lb,num_div,plotflag),options);
 
- [~, ~,~, ~, ~, mpayload_temp, ~, ~,~,~,~,~,~,~,~, ~,Vec_angle] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0, lb,num_div);
+ [~, ~,~, ~, ~, mpayload_temp, ~, ~,~,~,~,~,~,~,~, ~,Vec_angle] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0, lb,num_div,plotflag);
 
 % exitflag
 % [AltF_actual, vF, Alt, v, t, mpayload_temp, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x_temp,k,j,u, phi0, zeta0, lb,num_div);
@@ -121,7 +121,7 @@ ub = [AoA_max_abs*ones(1,num_div_best) 2900/10000  240/1000];
 x
 % [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div_best);
 if any(successflag)
-[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L,inc_diff] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div_best);
+[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,AoA_init,q,gamma,D,AoA_max,zeta,phi, inc,Vec_angle,T,CL,L,inc_diff] = ThirdStageSim(x,k,j,u, phi0, zeta0, lb,num_div_best,plotflag);
 else
 AltF_actual=0;
     vF=0; 

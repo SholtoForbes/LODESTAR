@@ -23,8 +23,9 @@ global nodes
 % =========================================================================================
 
 global iteration
+global phi
 
-iteration = iteration + 1;
+
 
 
 V = primal.states(1,:) ; 
@@ -36,11 +37,11 @@ gamma = primal.states(3,:) ;
 
 alpha = primal.states(4,:);
 
-zeta = primal.states(5,:);
-
-phi = primal.states(6,:);
-
-xi = primal.states(7,:);
+% zeta = primal.states(5,:);
+% 
+% phi = primal.states(6,:);
+% 
+% xi = primal.states(7,:);
 
 alphadot  = primal.controls(1,:); %
 
@@ -65,7 +66,13 @@ EndpointCost = 0;
 % EndpointCost = H(end);
 % EndpointCost = 0.001*V(end);
 % EndpointCost = -zeta(end);
+
+if iteration == 1
+EndpointCost =  0;
+else
 EndpointCost = phi(end);
+end
+
 % EndpointCost = v(end);
 % EndpointCost = 0.01*v(end) + 0.001*V(end);
 
@@ -120,5 +127,5 @@ if rem(iteration,5000) == 0
     
    
 end
-
+iteration = iteration + 1;
 end

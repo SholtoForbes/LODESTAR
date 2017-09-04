@@ -24,8 +24,8 @@ iterative_V_f = [];
 % This saves the entire problem file every time the program is run. 
 % Disable this for conservatin of hard drive space
 Timestamp = datestr(now,30)
-copyfile('SecondStageProb.m',sprintf('../ArchivedResults/SecondStageProb_%s.m',Timestamp))
-copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',Timestamp))
+% copyfile('SecondStageProb.m',sprintf('../ArchivedResults/SecondStageProb_%s.m',Timestamp))
+% copyfile('SecondStageCost.m',sprintf('../ArchivedResults/SecondStageCost_%s.m',Timestamp))
 
 
 % Inputs ============================================
@@ -73,7 +73,7 @@ scattered.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','lin
 
 
 
-scattered.data = dlmread('RESTM12DATA.txt');  
+scattered.data = dlmread('ENGINEDATA.txt');  
 data = scattered.data;
 
 newdata = [];

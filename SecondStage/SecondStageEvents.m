@@ -20,7 +20,7 @@ omegaf = primal.states(5,end);
 
 zetaf = primal.states(6,end);
 
-if const == 3
+if const == 3 || const == 32
 endpointFunction = zeros(4,1);
 %===========================================================
     endpointFunction(1) = v0;

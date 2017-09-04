@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 12
+const = 32
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -349,9 +349,9 @@ vf = 2839.51;
 % Zetaf = 1.69;
 Zetaf = 1.78;
 
-thetaf = deg2rad(2);
+thetaf = deg2rad(1.5);
 
-if const ==3
+if const ==3 || const == 32
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; Zetaf; thetaf];  % constrains initial values, final fuel and end altitude and trajectory angle within the bounds of thirdstage.dat
 bounds.upper.events = bounds.lower.events;      % equality event function bounds 
 else
@@ -371,7 +371,7 @@ elseif const == 12
 elseif const == 13
     bounds.lower.path = [0 ;0];
     bounds.upper.path = [45000; 9];
-elseif const ==3 
+elseif const ==3 ||
         bounds.lower.path = [0 ;0];
     bounds.upper.path = [50010; 9];
     
@@ -399,15 +399,15 @@ TwoStage2d.bounds       = bounds;
 % Always try a variety of node values
 
 if const == 3 || const == 31 || const == 32
-    algorithm.nodes		= [100]; 
-elseif const == 1
-    algorithm.nodes		= [100];
-elseif const == 12 
-    algorithm.nodes		= [100]; 
-elseif const == 13
     algorithm.nodes		= [101]; 
+elseif const == 1
+    algorithm.nodes		= [104];
+elseif const == 12 
+    algorithm.nodes		= [103]; 
+elseif const == 13
+    algorithm.nodes		= [103]; 
 elseif const == 14
-    algorithm.nodes		= [100];
+    algorithm.nodes		= [104];
 end
 
 global nodes
@@ -721,9 +721,9 @@ sp3 = subplot(2,6,[10,12]);
 xlabel('time (s)')
 ax3 = gca;
 xlim([min(t) max(t)]);
-line(t, Alpha,'Parent',ax3,'Color','k', 'LineStyle','-')
+line(t, [Alpha(1:end-1) Alpha(end-1)],'Parent',ax3,'Color','k', 'LineStyle','-')
 
-line(t, [flapdeflection(1:end-1) ,'Parent',ax3,'Color','k', 'LineStyle','--')
+line(t, [flapdeflection(1:end-1) flapdeflection(end-1)],'Parent',ax3,'Color','k', 'LineStyle','--')
 
 
 % line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
