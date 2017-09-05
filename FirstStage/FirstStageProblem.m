@@ -24,9 +24,9 @@ global mach
 %-----------------------------------
 % Define the problem function files:
 %-----------------------------------
-MoonLander.cost 		= 'FirstStageCost';
-MoonLander.dynamics	    = 'FirstStageDynamics';
-MoonLander.events		= 'FirstStageEvents';	
+FirstStage.cost 		= 'FirstStageCost';
+FirstStage.dynamics	    = 'FirstStageDynamics';
+FirstStage.events		= 'FirstStageEvents';	
 % MoonLander.path		= 'LanderPath';
 global scattered
 
@@ -218,7 +218,7 @@ bounds.upper.events = bounds.lower.events;
 % Tell DIDO the bounds on the problem
 %------------------------------------
 
-MoonLander.bounds = bounds;
+FirstStage.bounds = bounds;
 
 %------------------------------------------------------
 % Select the number of nodes for the spectral algorithm
@@ -301,7 +301,7 @@ algorithm.guess = guess;
 %----------------------------
 
 startTimeUserguess = cputime;
-[cost, primal, dual] = dido(MoonLander, algorithm);
+[cost, primal, dual] = dido(FirstStage, algorithm);
 runTimeWguess = cputime-startTimeUserguess
 
 

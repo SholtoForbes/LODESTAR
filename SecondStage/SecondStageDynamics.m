@@ -10,34 +10,24 @@ function XDOT = TwoStage2d(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global a
-global Fueldt
-global const
-global scale
 global zetadot
+global Engine
+global Vehicle
 
-
-V = primal.states(1,:)*scale.V ; 
-
-v = primal.states(2,:)*scale.v ; 
-
+v = primal.states(2,:); 
 vdot = a;
- 
-theta = primal.states(3,:)*scale.theta ; 
+gamma = primal.states(3,:); 
+mfueldot = -Engine.Fueldt; 
+gammadot = primal.states(5,:);
+omegadot  = primal.controls(1,:); 
 
-mfueldot = -Fueldt ; 
+%==========================================================================
 
-thetadot = primal.states(5,:)*scale.thetadot;
+Vdot = v.*sin(gamma);
 
-% thetadot  = primal.controls(1,:)*scale.theta; %
+%==========================================================================
 
-omegadot  = primal.controls(1,:)*scale.thetadot; %
-% %=========================================================================================
-
-Vdot = v.*sin(theta);
-
-%======================================================
-
-XDOT = [Vdot/scale.V;vdot/scale.v; thetadot/scale.thetadot; mfueldot/scale.m; omegadot/scale.thetadot; zetadot];
+XDOT = [Vdot;vdot; gammadot; mfueldot; omegadot; zetadot];
 
 end
 

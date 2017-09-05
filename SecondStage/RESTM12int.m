@@ -1,4 +1,4 @@
-function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0)
+function [Isp,wf,eq] = RESTM12int(M, Alpha, scattered,T0,P0)
 % Engine Interpolator for engine data
 
 T1 = scattered.tempgridded(M,Alpha).*T0;

@@ -60,7 +60,9 @@ global Fd
 global L
 global initial
 global phi
-[Vdot,xi,phi,gammadot,a,zeta, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,initial.zeta,initial.phi,initial.xi,alpha,eta);
+global gammadot
+global Vdot
+
 
 %======================================================
 

@@ -1,16 +1,10 @@
 function path = SecondStagePath(primal)
-V = primal.states(1,:);
-v = primal.states(2,:);
-theta  = primal.states(3, :);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-global scattered
 global q
-global const
-global M
-global Alpha
+global Vehicle
 DynamicPressure = q;
-AoA = Alpha;
-v0 = v(1);
+AoA = Vehicle.Alpha;
 
 
 % vfunc = v0 -scattered.FirstStagev(V(1),theta(1));

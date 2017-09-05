@@ -97,8 +97,8 @@ vL = 10;
 vU = 1500; 
 
 
-gammaL = -1;
-gammaU = 1; % 
+gammaL = -1.5;
+gammaU = 1.5; % 
 
 
 
@@ -126,8 +126,8 @@ alphaU = deg2rad(10);
 % etaL = -1;
 % etaU = 1;
 
-alphadotL = -0.01;
-alphadotU = 0.01;
+alphadotL = -deg2rad(1);
+alphadotU = deg2rad(1);
 
 % etadotL = -0.01;
 % etadotU = 0.01;
@@ -192,12 +192,12 @@ gamma0 = -0.2722;
 % bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;1; 100000];
 % bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
-bounds.lower.events = [V0;v0; gamma0]
-bounds.upper.events = [V0;v0; gamma0];
+bounds.lower.events = [V0;v0; gamma0; -.1; 100];
+bounds.upper.events = [V0;v0; gamma0; .1; 500];
 
     bounds.lower.path = 0;
-% bounds.upper.path = 50000;
-bounds.upper.path = 10000000000000;
+bounds.upper.path = 50000;
+% bounds.upper.path = 10000000000000;
 
 
 %% 
@@ -218,24 +218,23 @@ TwoStage2d.bounds       = bounds;
 % node number can have a large effect on results.
  
 
-algorithm.nodes		= [200]; 
+algorithm.nodes		= [100]; 
 global nodes
 nodes = algorithm.nodes;
 
 
 %%  Guess =================================================================
 
-
 % guess.states(1,:) = [35000 ,35000 ]; % test for new interpolation
 % guess.states(1,:) = [V0 ,V0 ];
-guess.states(1,:) = [20000 ,20000 ];
+% guess.states(1,:) = [20000 ,20000 ];
 guess.states(1,:) = [V0 ,1000 ];
 
-guess.states(2,:) = [v0, 100];
+guess.states(2,:) = [v0, v0-100];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(9),deg2rad(9)];
+guess.states(4,:) = [deg2rad(5),deg2rad(5)];
 
 % guess.states(5,:) = [4.7,4.761];
 % 
@@ -251,7 +250,7 @@ guess.states(4,:) = [deg2rad(9),deg2rad(9)];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,550];
+guess.time        = [t0 ,100];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;
@@ -299,11 +298,11 @@ gamma = primal.states(3,:);
 Alpha = primal.states(4,:);
 % Alpha = deg2rad(7)*ones(1,length(V));
 
-zeta = primal.states(5,:);
-
-phi = primal.states(6,:);
-
-xi = primal.states(7,:);
+% zeta = primal.states(5,:);
+% 
+% phi = primal.states(6,:);
+% 
+% xi = primal.states(7,:);
 
 % eta = rad2deg(primal.states(8,:));
 
@@ -330,7 +329,9 @@ global flapdeflection
 
 global a
 global eq
-
+global zeta
+global phi
+global xi
 
 % figure out horizontal motion
 H(1) = 0;
@@ -610,7 +611,7 @@ set(g, 'Position', rect2)
 mstruct = 4910.5 - 132.8 + 179.41; % mass of everything but fuel from dawids work
 eta = 0;
 m = mstruct;
-forward0 = [V(1),gamma(1),v(1),zeta(1),phi(1),xi(1)];
+forward0 = [V(1),gamma(1),v(1),initial.zeta,initial.phi,initial.xi];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y, nodes,interp, Atmosphere,ControlInterp(t,Alpha,f_t),eta),t(1:end),forward0);

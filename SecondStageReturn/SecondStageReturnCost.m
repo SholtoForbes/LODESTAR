@@ -47,9 +47,26 @@ alphadot  = primal.controls(1,:); %
 
 time = primal.nodes;
 
+% global Atmosphere
+% density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
+% q = 0.5*density.*v.^2;
+
+global q
+global M
+global Fd
+global L
+global initial
+global gammadot
+global Vdot
+global a
+global interp
 global Atmosphere
-density = interp1(Atmosphere(:,1),Atmosphere(:,4),V);
-q = 0.5*density.*v.^2;
+global zeta
+global xi
+
+eta = zeros(1,length(V));
+
+[Vdot,xi,phi,gammadot,a,zeta, q, M, Fd, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,initial.zeta,initial.phi,initial.xi,alpha,eta);
 
 % figure out horizontal motion
 H(1) = 0;
@@ -67,11 +84,11 @@ EndpointCost = 0;
 % EndpointCost = 0.001*V(end);
 % EndpointCost = -zeta(end);
 
-if iteration == 1
-EndpointCost =  0;
-else
+% if iteration == 1
+% EndpointCost =  0;
+% else
 EndpointCost = phi(end);
-end
+% end
 
 % EndpointCost = v(end);
 % EndpointCost = 0.01*v(end) + 0.001*V(end);
@@ -83,8 +100,8 @@ global iterative_V_f
 
 if rem(iteration,5000) == 0
     v
-    phi
-    zeta
+%     phi
+%     zeta
     gamma
     alpha
     iterative_V_f(end+1,:) = cumtrapz(time,v.*sin(gamma));

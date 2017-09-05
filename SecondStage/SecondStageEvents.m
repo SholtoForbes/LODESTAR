@@ -29,13 +29,13 @@ endpointFunction(3) = mfuelf;
 endpointFunction(4) = zetaf;
 endpointFunction(5) = gammaf;
 else
-endpointFunction = zeros(6,1);
+endpointFunction = zeros(5,1);
 %===========================================================
     endpointFunction(1) = v0;
 endpointFunction(2) = mfuel0;
 endpointFunction(3) = mfuelf;
 endpointFunction(4) = zetaf;
-endpointFunction(5) = Vf; 
-endpointFunction(6) = gammaf;
+% endpointFunction(5) = Vf; 
+endpointFunction(5) = gammaf;
 end
 end

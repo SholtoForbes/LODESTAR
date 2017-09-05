@@ -1,15 +1,13 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere, SPARTAN_SCALE,zeta,mstruct,mThirdStage)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, gridded, const,thetadot, Atmosphere,zeta,mstruct,mThirdStage)
 
 % =======================================================
 % Vehicle Model for SPARTAN Scramjet Accelerator
 % =======================================================
-A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
+A = 62.77; % reference area (m^2)
 
 eta = .0*ones(1,length(time)); % Roll angle
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
-
-
 
 m = mfuel + mstruct + mThirdStage ;
 
@@ -84,7 +82,7 @@ lift = lift_search;
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
 P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 
 
-[Isp,Fueldt,eq] = RESTM12int(M, Alpha, scattered, SPARTAN_SCALE,T0,P0);
+[Isp,Fueldt,eq] = RESTM12int(M, Alpha, scattered,T0,P0);
 
 for i = 1:length(time)
   if q(i) < 20000

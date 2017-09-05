@@ -90,7 +90,7 @@ options.MaxFunEvals = 5000;
 % options.ScaleProblem = 'obj-and-constr';
 % options.DiffMinChange = 0.0005;
 
-num_div = 100;% no of timestep divisions
+num_div = 50;% no of timestep divisions
 
 Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 

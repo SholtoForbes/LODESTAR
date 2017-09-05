@@ -24,7 +24,7 @@ gammaf = primal.states(3,end);
 
 
 
-endpointFunction = zeros(3,1); % 
+endpointFunction = zeros(5,1); % 
 
 endpointFunction(1) = V0;
 endpointFunction(2) = v0;
@@ -35,6 +35,6 @@ endpointFunction(3) = gamma0;
 % endpointFunction(7) = vf;
 % endpointFunction(7) = zetaf;
 
-% endpointFunction(7) = gammaf;
-% endpointFunction(8) = Vf;
+endpointFunction(4) = gammaf;
+endpointFunction(5) = Vf;
 end
