@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,zeta,phi,xi,alpha,eta)
+function [rdot,xi,phi,gammadot,a,zeta, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,zeta,phi,xi,alpha,eta)
 
 % =======================================================
 % Vehicle Model

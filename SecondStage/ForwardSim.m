@@ -1,4 +1,4 @@
-function dz = ForwardSim(y,alpha,communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered,liftact,dragact,thrustact,flapdeflection)
+function dz = ForwardSim(y,alpha,communicator,communicator_trim,Atmosphere,const,scattered,liftact,dragact,thrustact,flapdeflection)
 
 V = y(1);
 phi = y(2);
@@ -25,7 +25,7 @@ Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
 Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 pitchingmoment_spline = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
-A = 62.77*SPARTAN_SCALE^(2/3); % reference area (m^2)
+A = 62.77; % reference area (m^2)
 
 
 c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
@@ -43,7 +43,7 @@ M = v./c; % Calculating Mach No (Descaled)
 T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
 P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 
 
-[Isp,Fueldt] = RESTM12int(M, alpha, scattered, SPARTAN_SCALE,T0,P0);
+[Isp,Fueldt] = RESTM12int(M, alpha, scattered,T0,P0);
 
 Thrust = Isp.*Fueldt*9.81;
 

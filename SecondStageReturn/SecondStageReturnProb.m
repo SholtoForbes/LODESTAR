@@ -29,7 +29,7 @@ iterative_V_f = [];
 Timestamp = datestr(now,30)
 
 %% Inputs ============================================
-%Take inputs of communicator matrices, these should be .txt files 
+%Take input of aero
 aero = importdata('SPARTANaero.txt');
 
 interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
@@ -192,8 +192,8 @@ gamma0 = -0.2722;
 % bounds.upper.events = [V0;v0; gamma0;zeta0;phi0;xi0;1; 100000];
 % bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
-bounds.lower.events = [V0;v0; gamma0; -.1; 100];
-bounds.upper.events = [V0;v0; gamma0; .1; 500];
+bounds.lower.events = [V0;v0; gamma0; -2; 100];
+bounds.upper.events = [V0;v0; gamma0; 2; 5000000000];
 
     bounds.lower.path = 0;
 bounds.upper.path = 50000;
@@ -230,11 +230,11 @@ nodes = algorithm.nodes;
 % guess.states(1,:) = [20000 ,20000 ];
 guess.states(1,:) = [V0 ,1000 ];
 
-guess.states(2,:) = [v0, v0-100];
+guess.states(2,:) = [v0, 100];
 
 guess.states(3,:) = [0.05,0.00];
 
-guess.states(4,:) = [deg2rad(5),deg2rad(5)];
+guess.states(4,:) = [deg2rad(9),deg2rad(9)];
 
 % guess.states(5,:) = [4.7,4.761];
 % 
@@ -250,7 +250,7 @@ guess.states(4,:) = [deg2rad(5),deg2rad(5)];
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(2,:)    = [0,0]; 
 
-guess.time        = [t0 ,100];
+guess.time        = [t0 ,600];
 % Tell DIDO the guess
 %========================
 algorithm.guess = guess;

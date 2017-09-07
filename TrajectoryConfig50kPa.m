@@ -84,8 +84,8 @@ Stage2.Guess.time       = [0, 360]; % Time Guess, s
 Stage3.Bounds.AoA       = 20; % Maximum Angle of Attack, deg
 
 % Adaptive Constraints %---------------------------------------------------
-Stage3.Bounds.Alt       = [100000 400000]; % Altitude Bounds, m
-Stage3.Bounds.VecAng    = 8; % Vector Angle Constraint, deg
+Stage3.Bounds.Alt       = [100000 400000]; % End Altitude Bounds, m
+Stage3.Bounds.VecAng    = 8; % Maximum Vector Angle, deg
 
 %% Second Stage Return
 % DIDO Inputs

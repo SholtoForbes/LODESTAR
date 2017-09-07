@@ -87,7 +87,7 @@ EndpointCost = 0;
 % if iteration == 1
 % EndpointCost =  0;
 % else
-EndpointCost = phi(end);
+EndpointCost = 1000*phi(end);
 % end
 
 % EndpointCost = v(end);

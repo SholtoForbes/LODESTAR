@@ -84,13 +84,14 @@ interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 
 % [t, y] = ode45(@(f_t,f_y) ForwardSimReturn(f_y,Alpha,eta,Atmosphere,interp,FlapDeflection,mSPARTAN_empty),[0 400],Initial_States);
 
-options.Algorithm = 'sqp';
+% options.Algorithm = 'sqp';
 options.Display = 'iter';
-options.MaxFunEvals = 5000;
+% options.MaxFunEvals = 5000;
+
 % options.ScaleProblem = 'obj-and-constr';
 % options.DiffMinChange = 0.0005;
 
-num_div = 50;% no of timestep divisions
+num_div = 20;% no of timestep divisions
 
 Altitude_0 = V0-V0*(1:(num_div-1))/(num_div-1);
 
@@ -107,10 +108,10 @@ controls0 = [0*ones(1,num_div) 0*ones(1,num_div) 600 eta_00 AoA_00];
 lb = [-.1*ones(1,num_div) -.01*ones(1,num_div) 400 -1 0];
 ub = [.1*ones(1,num_div) .01*ones(1,num_div) 600 1.5 8];
 
-% [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty),controls0,[],[],[],[],[1*ones(1,length(controls0)/2) -1*ones(1,length(controls0)/2)],[8*ones(1,length(controls0)/2) 1*ones(1,length(controls0)/2)],[],options)
 [controls_opt,fval,exitflag] = fmincon(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div),controls0,[],[],[],[],lb,ub,@(controls)ReturnConstraint(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,returncond,num_div),options)
+% [controls_opt,fval,exitflag] = particleswarm(@(controls)BankOpt(controls,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div),length(lb),lb,ub)
 
-[cost,phi,t,y,q,xi,zeta] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div);
+[cost,phi,t,y,q,xi,zeta] = BankOpt(controls_opt,Initial_States,Atmosphere,interp,mSPARTAN_empty,num_div,options);
 
 
 figure(401)
