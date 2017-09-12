@@ -55,17 +55,6 @@ auxdata.Atmosphere = dlmread('atmosphere.txt');
 %------------------ Provide Auxiliary Data for Problem -------------------%
 %-------------------------------------------------------------------------%
 auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
-auxdata.S    = 62;                    % Vehicle Reference Area (m^2)
-auxdata.cl   = [-0.2070 1.6756];               % Parameters for Lift Coefficient
-auxdata.cd   = [0.0785 -0.3529 2.0400];        % Parameters for Drag Coefficient
-
-
-auxdata.b    = [0.07854 -0.061592 0.00621408]; % Parameters for Heat Rate Model
-auxdata.H    = 7254.24;                        % Density Scale Height (m)
-auxdata.al   = [-0.20704 0.029244];            % Parameters for Heat Rate Model
-auxdata.rho0 = 1.225570827014494;              % Sea Level Atmospheric Density (kg/m^3)
-auxdata.mu   = 3.986031954093051e14;           % Earth Gravitational Parameter (m^3/s^2) 
-
 auxdata.mass = mstruct;               % Vehicle Mass (kg)
 
 %-------------------------------------------------------------------%
@@ -74,7 +63,7 @@ auxdata.mass = mstruct;               % Vehicle Mass (kg)
 t0     = 0;
 alt0   = 35000;   
 rad0   = alt0+auxdata.Re;
-altf   = 30000;   
+altf   = 10000;   
 radf   = altf+auxdata.Re;
 lon0   = 0;
 lat0   = 0;
@@ -94,30 +83,56 @@ lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
-aziMin = -360*pi/180; aziMax =  360*pi/180;
+aziMin = 60*pi/180; aziMax =  360*pi/180;
 aoaMin = 0;  aoaMax = 10*pi/180;
-bankMin = -90*pi/180; bankMax =   90*pi/180;
+bankMin = -1*pi/180; bankMax =   80*pi/180;
 
 %-------------------------------------------------------------------%
 %--------------- Set Up Problem Using Data Provided Above ----------%
 %-------------------------------------------------------------------%
+% bounds.phase.initialtime.lower = t0;
+% bounds.phase.initialtime.upper = t0;
+% bounds.phase.finaltime.lower = tfMin;
+% bounds.phase.finaltime.upper = tfMax;
+% bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0];
+% bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0];
+% bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin];
+% bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax];
+% bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif];
+% bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, deg2rad(5), azif];
+% bounds.phase.control.lower = [aoaMin, bankMin];
+% bounds.phase.control.upper = [aoaMax, bankMax];
+
 bounds.phase.initialtime.lower = t0;
 bounds.phase.initialtime.upper = t0;
 bounds.phase.finaltime.lower = tfMin;
 bounds.phase.finaltime.upper = tfMax;
-bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0];
-bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0];
-bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin];
-bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax];
-bounds.phase.finalstate.lower = [radf, lonMin, latMin, speedMin, fpaf, azif];
-bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, fpaf, azif];
-bounds.phase.control.lower = [aoaMin, bankMin];
-bounds.phase.control.upper = [aoaMax, bankMax];
-% bounds.phase.control.lower = [aoaMin];
-% bounds.phase.control.upper = [aoaMax];
+bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin];
+bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax];
+bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin];
+bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax];
+bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
+bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, deg2rad(5), azif, aoaMax, bankMax];
+bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10)];
+bounds.phase.control.upper = [deg2rad(1), deg2rad(10)];
+
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
 %-------------------------------------------------------------------------%
+% tGuess              = [0; 500];
+% radGuess            = [rad0; radf];
+% lonGuess            = [lon0; lon0+10*pi/180];
+% latGuess            = [lat0; lat0+10*pi/180];
+% speedGuess          = [speed0; speedf];
+% fpaGuess            = [fpa0; fpaf];
+% aziGuess            = [azi0; azif];
+% aoaGuess            = [8*pi/180; 8*pi/180];
+% bankGuess           = [60*pi/180; 60*pi/180];
+% guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess];
+% guess.phase.control = [aoaGuess, bankGuess];
+% % guess.phase.control = [aoaGuess];
+% guess.phase.time    = tGuess;
+
 tGuess              = [0; 500];
 radGuess            = [rad0; radf];
 lonGuess            = [lon0; lon0+10*pi/180];
@@ -126,9 +141,9 @@ speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
 aoaGuess            = [8*pi/180; 8*pi/180];
-bankGuess           = [-25*pi/180; -25*pi/180];
-guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess];
-guess.phase.control = [aoaGuess, bankGuess];
+bankGuess           = [60*pi/180; 60*pi/180];
+guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess];
+guess.phase.control = [[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
 guess.phase.time    = tGuess;
 
@@ -136,7 +151,7 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 2;
+mesh.maxiterations = 5;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 30;
 mesh.tolerance    = 1e-6;

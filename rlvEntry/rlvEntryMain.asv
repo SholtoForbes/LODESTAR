@@ -74,7 +74,7 @@ auxdata.mass = mstruct;               % Vehicle Mass (kg)
 t0     = 0;
 alt0   = 35000;   
 rad0   = alt0+auxdata.Re;
-altf   = 30000;   
+altf   = 10000;   
 radf   = altf+auxdata.Re;
 lon0   = 0;
 lat0   = 0;
@@ -94,9 +94,9 @@ lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
-aziMin = -360*pi/180; aziMax =  360*pi/180;
+aziMin = 60*pi/180; aziMax =  360*pi/180;
 aoaMin = 0;  aoaMax = 10*pi/180;
-bankMin = -90*pi/180; bankMax =   90*pi/180;
+bankMin = -1*pi/180; bankMax =   80*pi/180;
 
 %-------------------------------------------------------------------%
 %--------------- Set Up Problem Using Data Provided Above ----------%
@@ -109,8 +109,8 @@ bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0];
 bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0];
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax];
-bounds.phase.finalstate.lower = [radf, lonMin, latMin, speedMin, fpaf, azif];
-bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, fpaf, azif];
+bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif];
+bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, deg2rad(5), azif];
 bounds.phase.control.lower = [aoaMin, bankMin];
 bounds.phase.control.upper = [aoaMax, bankMax];
 % bounds.phase.control.lower = [aoaMin];
@@ -126,7 +126,7 @@ speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
 aoaGuess            = [8*pi/180; 8*pi/180];
-bankGuess           = [-25*pi/180; -25*pi/180];
+bankGuess           = [60*pi/180; 60*pi/180];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess];
 guess.phase.control = [aoaGuess, bankGuess];
 % guess.phase.control = [aoaGuess];
@@ -136,7 +136,7 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 2;
+mesh.maxiterations = 5;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 30;
 mesh.tolerance    = 1e-6;

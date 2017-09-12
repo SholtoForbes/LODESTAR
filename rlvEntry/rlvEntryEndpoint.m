@@ -19,5 +19,6 @@ lonf = input.phase.finalstate(2);
 vf = input.phase.finalstate(4);
 % altf = input.phase.finalstate(2);
 % cost
-% output.objective = -latf;
-output.objective = -vf;
+output.objective = latf;
+% output.objective = lonf;
+% output.objective = -vf;
