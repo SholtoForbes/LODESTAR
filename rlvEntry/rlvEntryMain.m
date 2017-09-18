@@ -56,18 +56,20 @@ auxdata.Atmosphere = dlmread('atmosphere.txt');
 %-------------------------------------------------------------------------%
 auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
 auxdata.mass = mstruct;               % Vehicle Mass (kg)
-
+auxdata.A = 62.77; %m^2
 %-------------------------------------------------------------------%
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%
 t0     = 0;
 alt0   = 35000;   
 rad0   = alt0+auxdata.Re;
-altf   = 10000;   
+altf   = 30000;   
 radf   = altf+auxdata.Re;
 lon0   = 0;
 lat0   = 0;
 speed0 = +2872.88;
+% speed0 = 1000;
+
 speedf = +762;
 fpa0   = 3*pi/180; 
 fpaf   = 0*pi/180;
@@ -109,12 +111,18 @@ bounds.phase.finaltime.lower = tfMin;
 bounds.phase.finaltime.upper = tfMax;
 bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin];
 bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax];
+
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax];
-bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
-bounds.phase.finalstate.upper = [radf, lonMax, latMax, speedMax, deg2rad(5), azif, aoaMax, bankMax];
+
+bounds.phase.finalstate.lower = [radMin, lonMin, -0.5, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
+bounds.phase.finalstate.upper = [radMax, lonMax, -0.2, speedMax, deg2rad(5), azif, aoaMax, bankMax];
+
 bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10)];
 bounds.phase.control.upper = [deg2rad(1), deg2rad(10)];
+
+bounds.phase.path.lower = 0;
+bounds.phase.path.upper = 50000;
 
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
@@ -180,15 +188,15 @@ setup.method                         = 'RPM-Differentiation';
 output = gpops2(setup);
 
 solution = output.result.solution;
-aoa       = solution.phase(1).control(:,1);
-bank      = solution.phase(1).control(:,2);
+aoa  = solution.phase.state(:,7);
+bank  = solution.phase.state(:,8);
 t = solution.phase(1).time;
 
 m = mstruct;
-forward0 = [alt0,fpa0,speed0,azi0-deg2rad(90),lat0,lon0];
+forward0 = [alt0,fpa0,speed0,azi0,lat0,lon0];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata.interp, auxdata.Atmosphere,ControlInterp(t,aoa,f_t),ControlInterp(t,bank,f_t)),t(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(t,aoa,f_t),ControlInterp(t,bank,f_t)),t(1:end),forward0);
 
 altitude  = (solution.phase(1).state(:,1)-auxdata.Re);
 figure(212)

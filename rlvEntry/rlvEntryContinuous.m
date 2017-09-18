@@ -36,3 +36,4 @@ auxdata = input.auxdata;
 % ---------------------------------------------------%
 
 phaseout.dynamics  = [raddot.', londot.', latdot.', vdot.', fpadot.', azidot.', aoadot, bankdot];
+phaseout.path = q;

@@ -163,22 +163,22 @@ if plotflag == 1
     addpath('addaxis')
     hold on
 
-    plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.0)
+    plot(t, Alt/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
     plot(t,[q q(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-    plot(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '-.','Color','k', 'lineWidth', 1.1)
+    plot(t,[rad2deg(Alpha) rad2deg(Alpha(end))], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
     ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
     
 
-    addaxis(t,v, [0 6000], 'LineStyle', '--','Color','k', 'lineWidth', 1.2)
-    addaxisplot(t, m,2, 'LineStyle', ':','Color','k', 'lineWidth', 1.4)
+    addaxis(t,v, [0 6000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
+    addaxisplot(t, m,2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
     addaxislabel(2,'Velocity (m/s), Mass (kg)');
 
 
-    addaxis(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 'LineStyle', ':','Color','k', 'lineWidth', 1.9)
-    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','k', 'lineWidth', .8)
+    addaxis(t,[rad2deg(Vec_angle) rad2deg(Vec_angle(end))], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+    addaxisplot(t, rad2deg(gamma),3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
     addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
 
-    legend(  'Altitude','Dynamic Pressure', 'Velocity',  'Mass','Angle of Attack', 'Thrust Vector Angle', 'Trajectory Angle' );
+    legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
     xlabel('Time (s)');
     xlim([0 t(end)])
     box off

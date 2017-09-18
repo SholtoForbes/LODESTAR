@@ -3,7 +3,7 @@ function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L] = VehicleModelRe
 % =======================================================
 % Vehicle Model
 % =======================================================
-A = 62.77; % reference area (m^2)
+A = auxdata.A; % reference area (m^2)
 
 % eta = .0*ones(1,length(time)); % Roll angle
 
@@ -16,9 +16,7 @@ g = 9.81;
 
 V = r - auxdata.Re;
 
-mstruct = 4910.5 - 132.8 + 179.41; % mass of everything but fuel from dawids work
-
-m = mstruct;
+m = auxdata.mass;
 
 %===================================================
 %
