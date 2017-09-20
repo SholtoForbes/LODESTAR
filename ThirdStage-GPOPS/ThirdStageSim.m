@@ -58,6 +58,7 @@ v(1) = v0;
 
 zeta(1) = zeta0;
 
+m = m0;
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
@@ -76,7 +77,7 @@ mEng = 52; %Kestrel
 % mEng = 165; %HM7B
 % mEng = 138; %Aestus 2 / RS72 from https://web.archive.org/web/20141122143945/http://cs.astrium.eads.net/sp/launcher-propulsion/rocket-engines/aestus-rs72-rocket-engine.html
 
-m = m0;
+
 
 %% Initiate Simulation
 exocond = false;
@@ -88,7 +89,7 @@ c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of soun
 rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
 Alpha = 0;
-
+% m = m-mHS
 while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000 
 % iterate until trajectory angle drops to 0, as long as 150s has passed (this allows for the trajectory angle to drop at the beginning of the trajectory)
     
@@ -103,10 +104,16 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
         rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
         q(i) = 1/2*rho(i)*v(i)^2;
+        
     else
+        if exocond == false
+            m = m-mHS; % RELEASE HEAT SHIELD
+        end
+        
         c(i) = ppval(c_spline, 85000);
         rho(i) = 0;
         q(i) = 0;
+        exocond = true;
     end
     
     
@@ -192,11 +199,6 @@ else
 end
 
 
-if exocond == false
-%     fprintf('Did not reach exoatmospheric conditions') % enable this if you are doing testing on the third stage
-    m(end) = m(end) - mHS;
-end
-
 %Hohmann Transfer, from Dawid (3i)
 
 mu = 398600;
@@ -229,7 +231,7 @@ m3 = m2/(exp(v23/(Isp*g_standard)));
 m4 = m3/(exp(v34/(Isp*g_standard)));
 
 % mpayload = m4 - (m(1) - mHS - mEng)*0.09 -mEng; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
-mpayload = m4 - (m(1) - mHS)*0.09; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
+mpayload = m4 - (auxdata.ThirdStagem - mHS)*0.09; % 9% structural mass used, from falcon 1 guide, second stage masses with no fairing
 % mpayload = m4 - (m(1) - mHS)*0.108695 -mEng; % structural mass used from falcon 1 guide, second stage masses, this assumes fariing not included in dry mass
 
 mpayload = mpayload*const;

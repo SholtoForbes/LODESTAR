@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max] = ThirdStageDyn(r,xi,phi,gamma,v,zeta,m,Alpha,auxdata)
+function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,xi,phi,gamma,v,zeta,m,Alpha,auxdata)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -6,7 +6,7 @@ function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max] = T
 
 time1 = cputime;
 
-r(isnan(r)) = auxdata.Re;
+alt(isnan(alt)) = 40000;
 
 % Atmosphere = dlmread('atmosphere.txt');
 % Aero = dlmread('AeroCoeffs.txt');
@@ -36,8 +36,8 @@ Max_AoA_interp = auxdata.Max_AoA_interp;
 iteration = 1;
 
 
-rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), r(1)-auxdata.Re);
-c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), r(1)-auxdata.Re);
+rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), alt(1));
+c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), alt(1));
 
 q_init = 0.5.*rho_init.*v.^2;
 M_init = v./c_init;
@@ -80,7 +80,7 @@ mEng = 52; %Kestrel
 % mEng = 165; %HM7B
 % mEng = 138; %Aestus 2 ./ RS72 from https:././web.archive.org./web./20141122143945./http:././cs.astrium.eads.net./sp./launcher-propulsion./rocket-engines./aestus-rs72-rocket-engine.html
 
-m(1) = 3300;
+% m(1) = 3300;
 % m(1) = 3200;
 % m(1) = x(end-2);
 
@@ -105,17 +105,17 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 % rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
 
-atmo_elem = find(r<=85000+auxdata.Re); % Find the elements that are within the atmosphere
-exo_elem = find(r>85000+auxdata.Re); % Find the elements that are exoatmospheric
+atmo_elem = find(alt<=85000); % Find the elements that are within the atmosphere
+exo_elem = find(alt>85000); % Find the elements that are exoatmospheric
 
 
-rho(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4), r(atmo_elem)-auxdata.Re);
-c(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,5), r(atmo_elem)-auxdata.Re);
-p(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3), r(atmo_elem)-auxdata.Re);
+rho(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4), alt(atmo_elem));
+c(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,5), alt(atmo_elem));
+p(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3), alt(atmo_elem));
 
-rho(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4),85000).*gaussmf(r(exo_elem)-auxdata.Re,[100 85000]);
+rho(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4),85000).*gaussmf(alt(exo_elem),[100 85000]);
 c(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000);
-p(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3),85000).*gaussmf(r(exo_elem)-auxdata.Re,[100 85000]);
+p(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3),85000).*gaussmf(alt(exo_elem),[100 85000]);
 
 rho = rho.';
 c = c.';
@@ -169,7 +169,7 @@ end
 
 % Vec_angle = Vec_angle.'
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r,xi,phi,gamma,v,zeta,L,D,T,m,Alpha,Vec_angle);
+[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(alt+auxdata.Re,xi,phi,gamma,v,zeta,L,D,T,m,Alpha,Vec_angle);
 
 end
 

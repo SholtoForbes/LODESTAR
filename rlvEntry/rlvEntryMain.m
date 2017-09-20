@@ -115,8 +115,8 @@ bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax,
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax];
 
-bounds.phase.finalstate.lower = [radMin, lonMin, -0.5, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
-bounds.phase.finalstate.upper = [radMax, lonMax, -0.2, speedMax, deg2rad(5), azif, aoaMax, bankMax];
+bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
+bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), azif, aoaMax, bankMax];
 
 bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10)];
 bounds.phase.control.upper = [deg2rad(1), deg2rad(10)];
@@ -203,3 +203,9 @@ figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(t,altitude);
+
+latitude  = (solution.phase(1).state(:,3));
+figure(213)
+hold on
+plot(f_t(1:end),f_y(:,5));
+plot(t,latitude);

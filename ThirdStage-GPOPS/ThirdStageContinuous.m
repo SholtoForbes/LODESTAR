@@ -12,16 +12,17 @@ function phaseout = ThirdStageContinuous(input)
 % m    = input.phase.state(:,7);
 
 
-r  = input.phase.state(:,1);
+alt  = input.phase.state(:,1);
 v    = input.phase.state(:,2);
 gamma  = input.phase.state(:,3);
 m    = input.phase.state(:,4);
+Alpha    = input.phase.state(:,5);
 
 xi = 0;
 phi = 0;
-zeta = 0;
+zeta = deg2rad(97);
 
-Alpha  = input.phase.control(:,1);
+Alphadot  = input.phase.control(:,1);
 % bank = input.phase.control(:,2);
 
 % ---------------------------------------------------%
@@ -58,11 +59,13 @@ Alpha  = input.phase.control(:,1);
 
 auxdata=input.auxdata;
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max] = ThirdStageDyn(r,xi,phi,gamma,v,zeta,m,Alpha,auxdata);
+[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T] = ThirdStageDyn(alt,xi,phi,gamma,v,zeta,m,Alpha,auxdata);
 
+% Vec_angle
 % phaseout.dynamics  = [rdot, xidot, phidot, vdot, gammadot, zetadot, -mdot*ones(length(rdot),1)];
-phaseout.dynamics  = [rdot, vdot, gammadot, -mdot*ones(length(rdot),1)];
-
+phaseout.dynamics  = [rdot, vdot, gammadot, -mdot*ones(length(rdot),1), Alphadot];
+% AoA_max
+% Alpha
 Alpha_constraint = Alpha-AoA_max;
-
+% Vec_angle
 phaseout.path = [Vec_angle,Alpha_constraint];
