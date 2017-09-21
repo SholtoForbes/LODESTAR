@@ -12,7 +12,6 @@ azi  = input.phase.state(:,6);
 
 aoa  = input.phase.state(:,7);
 bank  = input.phase.state(:,8);
-mFuel  = input.phase.state(:,9);
 
 % aoa  = input.phase.control(:,1);
 % bank = input.phase.control(:,2);
@@ -31,12 +30,12 @@ time = input.phase(1).time;
 
 auxdata = input.auxdata;
 
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
+[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
 % ---------------------------------------------------%
 
 % phaseout.dynamics  = [raddot.', londot.', latdot.', vdot.', fpadot.', azidot.', aoadot, bankdot];
-phaseout.dynamics  = [raddot, londot, latdot, vdot, fpadot, azidot, aoadot, bankdot, -Fueldt];
+phaseout.dynamics  = [raddot.', londot.', latdot.', vdot.', fpadot.', azidot.', aoadot, bankdot];
 phaseout.path = q;

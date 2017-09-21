@@ -49,6 +49,87 @@ auxdata.interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','li
 
 % Produce Atmosphere Data
 auxdata.Atmosphere = dlmread('atmosphere.txt');
+
+%% Engine Data
+% Import engine data
+auxdata.engine_data = dlmread('ENGINEDATA.txt');  % reads four columns; Mach no after conical shock, temp after conical shock, Isp, max equivalence ratio
+engine_data = auxdata.engine_data;
+
+
+%%
+ p=polyfitn([engine_data(:,1),engine_data(:,2)],engine_data(:,3),3);
+
+M_englist = unique(sort(engine_data(:,1))); % create unique list of Mach numbers from engine data
+M_eng_interp = unique(sort(engine_data(:,1)));
+
+T_englist = unique(sort(engine_data(:,2))); % create unique list of angle of attack numbers from engine data
+T_eng_interp = unique(sort(engine_data(:,2)));
+
+[grid.Mgrid_eng,grid.T_eng] =  ndgrid(M_eng_interp,T_eng_interp);
+%%
+% This sets the equivalence ratio interpolation region. VERY IMPORTANT
+
+% The interpolators have trouble with equivalence ratio because its equal
+% to 1 over a certain Mach no. (causes error in interpolator, as the
+% interpolator will find values of equivalence ratio < 1 where they should
+% not exist)
+
+% This makes anything outside of the region where it is actually changing
+% extrapolate to over 1 (which is then set to 1 by RESTM12int)
+
+% the the maximum of this to around where equivalence ratio stops changing,
+% and check the end results
+
+eq_data = [];
+j=1;
+for i = 1: length(engine_data(:,1))
+    if engine_data(i,1) < 5.
+        eq_data(j,:) = engine_data(i,:);
+        j=j+1;
+    end
+end
+
+auxdata.equivalence = scatteredInterpolant(eq_data(:,1),eq_data(:,2),eq_data(:,4), 'linear');
+grid.eq_eng = auxdata.equivalence(grid.Mgrid_eng,grid.T_eng);
+auxdata.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
+
+
+%% Load the interpolated Isp data
+
+% gridIsp_eng is the spline interpolated data set created by
+% engineint.m and engineinterpolator.exe
+load gridIsp_eng
+grid.Isp_eng = gridIsp_eng;
+
+% gridIsp_eng may have sections at which the Isp is 0. The following finds
+% these, and fills them in with linearly intepolated values.
+Isp_interpolator = scatteredInterpolant(engine_data(:,1),engine_data(:,2),engine_data(:,3));
+
+for i = 1:30 % must match engineint.m
+    for j= 1:30
+        % grid.Isp_eng(i,j) = polyvaln(p,[grid.Mgrid_eng(i,j) grid.T_eng(i,j)]);
+        if any(grid.Isp_eng(i,j)) == false
+            grid.Isp_eng(i,j) = Isp_interpolator(grid.Mgrid_eng(i,j), grid.T_eng(i,j));
+        end
+    end
+end
+
+auxdata.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','spline');
+
+%% Shock Data
+% Import conical shock data and create interpolation splines 
+shockdata = dlmread('ShockMat');
+[MList,AOAList] = ndgrid(unique(shockdata(:,1)),unique(shockdata(:,2)));
+M1_Grid = reshape(shockdata(:,3),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
+pres_Grid = reshape(shockdata(:,4),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
+temp_Grid = reshape(shockdata(:,5),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
+auxdata.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
+auxdata.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
+auxdata.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
+
+
+
+
 %=============================================== 
 
 %-------------------------------------------------------------------------%
@@ -66,7 +147,8 @@ rad0   = alt0+auxdata.Re;
 altf   = 30000;   
 radf   = altf+auxdata.Re;
 lon0   = 0;
-lat0   = 0;
+lat0   = -0.1346;
+latf   = -0.269;
 speed0 = +2872.88;
 % speed0 = 1000;
 
@@ -86,8 +168,11 @@ latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  360*pi/180;
+mFuelMin = 0; mFuelMax = 500;
+
 aoaMin = 0;  aoaMax = 10*pi/180;
 bankMin = -1*pi/180; bankMax =   80*pi/180;
+throttleMin = 0; throttleMax = 1;
 
 %-------------------------------------------------------------------%
 %--------------- Set Up Problem Using Data Provided Above ----------%
@@ -109,17 +194,17 @@ bounds.phase.initialtime.lower = t0;
 bounds.phase.initialtime.upper = t0;
 bounds.phase.finaltime.lower = tfMin;
 bounds.phase.finaltime.upper = tfMax;
-bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin];
-bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax];
+bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin, mFuelMin];
+bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax, mFuelMax];
 
-bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin];
-bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax];
+bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin, mFuelMin];
+bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax, mFuelMax];
 
-bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), azif, aoaMin, bankMin];
-bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), azif, aoaMax, bankMax];
+bounds.phase.finalstate.lower = [radMin, lonMin, latf, speedMin, deg2rad(-5), azif, aoaMin, bankMin, mFuelMin];
+bounds.phase.finalstate.upper = [radMax, lonMax, latf, speedMax, deg2rad(5), azif, aoaMax, bankMax, mFuelMin];
 
-bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10)];
-bounds.phase.control.upper = [deg2rad(1), deg2rad(10)];
+bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10), throttleMin];
+bounds.phase.control.upper = [deg2rad(1), deg2rad(10), throttleMax];
 
 bounds.phase.path.lower = 0;
 bounds.phase.path.upper = 50000;
@@ -150,8 +235,9 @@ fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
 aoaGuess            = [8*pi/180; 8*pi/180];
 bankGuess           = [60*pi/180; 60*pi/180];
-guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess];
-guess.phase.control = [[0;0],[0;0]];
+mFuelGuess          = [mFuelMax; mFuelMin];
+guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess];
+guess.phase.control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
 guess.phase.time    = tGuess;
 
@@ -159,10 +245,10 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 5;
+mesh.maxiterations = 2;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 30;
-mesh.tolerance    = 1e-6;
+mesh.tolerance    = 1e-4;
 
 %-------------------------------------------------------------------%
 %---------- Configure Setup Using the information provided ---------%
@@ -190,13 +276,16 @@ output = gpops2(setup);
 solution = output.result.solution;
 aoa  = solution.phase.state(:,7);
 bank  = solution.phase.state(:,8);
+mFuel  = solution.phase.state(:,9);
 t = solution.phase(1).time;
 
-m = mstruct;
-forward0 = [alt0,fpa0,speed0,azi0,lat0,lon0];
+throttle  = solution.phase.control(:,3);
+
+m = mstruct+mFuel;
+forward0 = [alt0,fpa0,speed0,azi0,lat0,lon0, m(1)];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(t,aoa,f_t),ControlInterp(t,bank,f_t)),t(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(t,aoa,f_t),ControlInterp(t,bank,f_t),ControlInterp(t,throttle,f_t)),t(1:end),forward0);
 
 altitude  = (solution.phase(1).state(:,1)-auxdata.Re);
 figure(212)

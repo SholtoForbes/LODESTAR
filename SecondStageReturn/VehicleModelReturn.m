@@ -1,4 +1,4 @@
-function [rdot,xi,phi,gammadot,a,zeta, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,zeta,phi,xi,alpha,eta)
+function [rdot,xi,phi,gammadot,a,zeta, q, M, D, rho,L] = VehicleModelReturn(time, gamma, V, v, nodes,interp, Atmosphere,zeta,phi,xi,alpha,eta,throttle)
 
 % =======================================================
 % Vehicle Model
@@ -41,6 +41,8 @@ L = 0.5*Cl.*A.*density.*v.^2;
 % D=D*2;
 % L=L*3;
 
+
+
 %Rotational Coordinates =================================================
 %=================================================
 
@@ -59,15 +61,6 @@ zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
 
 [rdot(i),xidot(i),phidot(i),gammadot(i),a(i),zetadot(i)] = RotCoordsReturn(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m,alpha(i),eta(i));
 end
-
-% Aero Data =============================================================
-c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
-
-rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using atmospheric data
-
-q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
-
-M = v./c; % Calculating Mach No (Descaled)
 
 %-heating---------------------------
 % kappa = 1.7415e-4;
