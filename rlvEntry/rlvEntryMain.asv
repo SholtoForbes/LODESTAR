@@ -262,10 +262,10 @@ guess.phase.time    = tGuess;
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
-% mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 10;
+mesh.method       = 'hp-LiuRao-Legendre';
+mesh.maxiterations = 5;
 mesh.colpointsmin = 3;
-mesh.colpointsmax = 10;
+mesh.colpointsmax = 150;
 mesh.tolerance    = 1e-6;
 
 
@@ -282,13 +282,11 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-% setup.derivatives.supplier = 'adigator';
-% setup.derivatives.supplier           = 'sparseFD';
-setup.derivatives.supplier           = 'sparseCD';
+setup.derivatives.supplier           = 'sparseFD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
-setup.nlp.ipoptoptions.maxiterations = 1000;
+
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
 %-------------------------------------------------------------------%

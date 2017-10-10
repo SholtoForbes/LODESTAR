@@ -30,11 +30,23 @@ Gator1Data = ADiGator_rlvEntryEndpointADiGatorGrd.rlvEntryEndpointADiGatorGrd.Ga
 latf.dv = input.phase.finalstate.dv(3);
 latf.f = input.phase.finalstate.f(3);
 %User Line: latf = input.phase.finalstate(3);
+lonf.dv = input.phase.finalstate.dv(2);
+lonf.f = input.phase.finalstate.f(2);
+%User Line: lonf = input.phase.finalstate(2);
+vf.dv = input.phase.finalstate.dv(4);
+vf.f = input.phase.finalstate.f(4);
+%User Line: vf = input.phase.finalstate(4);
+mFuel0.dv = input.phase.initialstate.dv(9);
+mFuel0.f = input.phase.initialstate.f(9);
+%User Line: mFuel0 = input.phase.initialstate(9);
+%User Line: % altf = input.phase.finalstate(2);
 %User Line: % cost
-output.objective.dv = -latf.dv;
-output.objective.f = uminus(latf.f);
-%User Line: output.objective = -latf;
-output.objective.dv_size = 14;
+%User Line: % output.objective = 1000*(latf+0.1)^2;
+%User Line: % output.objective = latf;
+%User Line: % output.objective = -vf;
+output.objective.dv = mFuel0.dv; output.objective.f = mFuel0.f;
+%User Line: output.objective = mFuel0;
+output.objective.dv_size = 22;
 output.objective.dv_location = Gator1Data.Index1;
 end
 

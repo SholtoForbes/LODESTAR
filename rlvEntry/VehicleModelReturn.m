@@ -1,5 +1,6 @@
 function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel)
 
+interp = auxdata.interp;
 % =======================================================
 % Vehicle Model
 % =======================================================
@@ -14,9 +15,11 @@ g = 9.81;
 
 % dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-V = r - auxdata.Re;
+alt = r - auxdata.Re;
 
 m = auxdata.mass+mFuel;
+
+
 
 %===================================================
 %
@@ -27,45 +30,52 @@ m = auxdata.mass+mFuel;
 
 %======================================================
 
-speedOfSound = spline(auxdata.Atmosphere(:,1),auxdata.Atmosphere(:,5),V);
-mach = v./speedOfSound;
-density = spline(auxdata.Atmosphere(:,1),auxdata.Atmosphere(:,4),V);
+% speedOfSound = spline(auxdata.Atmosphere(:,1),auxdata.Atmosphere(:,5),alt);
+
+% density = spline(auxdata.Atmosphere(:,1),auxdata.Atmosphere(:,4),alt);
 
 
+
+
+
+
+% D=D*2;
+% L=L*3;
+
+%% Flow =============================================================
+c = ppval(interp.c_spline,alt); % Calculate speed of sound using atmospheric data
+mach = v./c;
+rho = ppval(interp.rho_spline,alt); % Calculate density using atmospheric data
+
+q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
+
+M = v./c; % Calculating Mach No (Descaled)
+
+T0 = ppval(interp.T0_spline, alt); 
+
+P0 = ppval(interp.P0_spline, alt);
+
+%% Aerodynamics
 % interpolate coefficients
 Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha));
 
 %%%% Compute the drag and lift:
 
-D = 0.5*Cd.*A.*density.*v.^2;
-L = 0.5*Cl.*A.*density.*v.^2;
-
-% D=D*2;
-% L=L*3;
-
-%% Aero =============================================================
-c = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
-
-rho = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,4), V); % Calculate density using atmospheric data
-
-q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
-
-M = v./c; % Calculating Mach No (Descaled)
-
-T0 = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,2), V); 
-
-P0 = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,3), V); 
+D = 0.5*Cd.*A.*rho.*v.^2;
+L = 0.5*Cl.*A.*rho.*v.^2;
 
 %% Thrust 
 
 [Isp,Fueldt,eq] = RESTM12int(M, alpha, auxdata,T0,P0);
 
-for i = 1:length(r)
-  if q(i) < 20000
-        Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);
-  end  
-end
+% for i = 1:length(r)
+%   if q(i) < 20000
+%         Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);
+%   end  
+% end
+Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
+Fueldt(M<5.1) = 0;
 
 Fueldt = Fueldt.*throttle;
 
@@ -92,9 +102,9 @@ T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
 [rdot,xidot,phidot,gammadot,a,zetadot] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta);
 
 % Aero Data =============================================================
-c = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
-
-rho = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,4), V); % Calculate density using atmospheric data
+% c = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,5), alt); % Calculate speed of sound using atmospheric data
+% 
+% rho = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,4), alt); % Calculate density using atmospheric data
 
 q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 

@@ -1,3 +1,4 @@
+% [mpayload] = ThirdStageGPOPS(k,j,u, phi0, zeta0, 0);
 % ----------- Reusable Launch Vehicle Entry Example ------------%
 % This example is taken verbatim from the following reference:  %
 % Betts, J. T., Practical Methods for Optimal Control Using     %
@@ -47,24 +48,24 @@ auxdata.zeta0 = 1.78;
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%
 t0     = 0;
-alt0   = 35000;   
+alt0   = 32000;   
 % rad0   = alt0+auxdata.Re;
 altf   = 84000;   
 radf   = altf+auxdata.Re;
-lon0   = 0;
-lat0   = 0;
+% lon0   = 0;
+% lat0   = 0;
 speed0 = 2900;
 speedf = 7000;
-fpa0   = deg2rad(3); 
+fpa0   = deg2rad(2); 
 fpaf   = 0;
-azi0   = +90*pi/180; 
-azif   = -90*pi/180;
+% azi0   = +90*pi/180; 
+% azif   = -90*pi/180;
 
 %-------------------------------------------------------------------%
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
 tfMin = 0;            tfMax = 3000;
-altMin = 30000;  altMax = 84000;
+altMin = alt0;  altMax = 84000;
 lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 8000;
@@ -99,14 +100,14 @@ bounds.phase.initialstate.upper = [alt0, speed0, fpa0, auxdata.ThirdStagem, aoaM
 bounds.phase.state.lower = [altMin,speedMin, fpaMin, 0, aoaMin];
 bounds.phase.state.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, aoaMax];
 
-bounds.phase.finalstate.lower = [altMin, speedMin, 0, 0, aoaMin];
-bounds.phase.finalstate.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, aoaMax];
+bounds.phase.finalstate.lower = [altMin, speedMin, 0, 0, 0];
+bounds.phase.finalstate.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, 0];
 
 bounds.phase.control.lower = [aoadotMin];
 bounds.phase.control.upper = [aoadotMax];
 
-bounds.phase.path.lower = [-deg2rad(8), -inf];
-bounds.phase.path.upper = [deg2rad(8), 0];
+bounds.phase.path.lower = [-deg2rad(7), -inf];
+bounds.phase.path.upper = [deg2rad(7), 0];
 
 bounds.eventgroup.lower = 100000;
 bounds.eventgroup.upper = 566000;
@@ -116,11 +117,11 @@ bounds.eventgroup.upper = 566000;
 %-------------------------------------------------------------------------%
 tGuess              = [0; 250];
 altGuess            = [alt0; 80000];
-lonGuess            = [lon0; lon0];
-latGuess            = [lat0; lon0];
+% lonGuess            = [lon0; lon0];
+% latGuess            = [lat0; lon0];
 speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; rad2deg(10)];
-aziGuess            = [azi0; azif];
+% aziGuess            = [azi0; azif];
 mGuess              = [3300; 2000];
 aoaGuess            = [deg2rad(5); deg2rad(20)];
 % bankGuess           = [0; 0];
@@ -133,9 +134,9 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 2;
-mesh.colpointsmin = 3;
-mesh.colpointsmax = 20;
+mesh.maxiterations = 4;
+mesh.colpointsmin = 10;
+mesh.colpointsmax = 50;
 mesh.tolerance    = 1e-4;
 
 %-------------------------------------------------------------------%
@@ -151,7 +152,7 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-setup.nlp.ipoptoptions.maxiterations = 100;
+setup.nlp.ipoptoptions.maxiterations = 500;
 setup.derivatives.supplier           = 'sparseFD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
@@ -180,9 +181,9 @@ forward0 = [alt(1),v(1),gamma(1),m(1)];
 time = solution.phase(1).time;
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModel_forward(f_t, f_y,auxdata,ControlInterp(time,aoa,f_t)),time(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModel_forward(f_t, f_y,auxdata,ControlInterp(time,aoa,f_t),ControlInterp(time,aoadot,f_t)),time(1:end),forward0);
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,0,0,gamma,v,deg2rad(97),m,aoa,auxdata);
+[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,gamma,v,m,aoa,time,auxdata,aoadot);
 
 [AltF_actual, vF, Altexo, vexo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt(end),gamma(end),v(end), 0,0, deg2rad(97), m(end), auxdata);
 

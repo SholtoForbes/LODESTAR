@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,xi,phi,gamma,v,zeta,m,Alpha,auxdata)
+function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,gamma,v,m,Alpha,time,auxdata, Alphadot)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -94,6 +94,12 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 % mdot = 16.5; %Aestus 2
 
 
+% Moment of inertia
+% calculated in OneNote, thirdstage, 4 october 2017
+CG = 4.531; % m from end
+I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 + 161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
+
+
 
 %% Initiate Simulation
 
@@ -155,7 +161,7 @@ T  = Isp.*mdot.*g - p .*A; % Thrust (N)
     % Thrust vectoring
 
 
-        Vec_angle  = asin((cP.*1.1)./2.9554.*N./T ); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
+        Vec_angle  = asin((cP.*1.1)./(CG-1.5).*(N)./T - Alphadot.*I./((CG-1.5).*T)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
 
 
 
@@ -165,11 +171,28 @@ Vec_angle(L  > T*sin(deg2rad(80)))  = deg2rad(80);
 end
 
 
-
-
+phi = auxdata.phi0;
+xi = auxdata.xi0;
+zeta = auxdata.zeta0;
 % Vec_angle = Vec_angle.'
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(alt+auxdata.Re,xi,phi,gamma,v,zeta,L,D,T,m,Alpha,Vec_angle);
+rdot = [];
+xidot = [];
+phidot = [];
+gammadot = [];
+vdot = [];
+zetadot = [];
+for i = 1:length(time)
+    if i < length(time)
+        [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(alt(i)+auxdata.Re,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i),Vec_angle(i));
+        phi(i+1) = phi(i) + phidot(i)*(time(i+1)-time(i));
+        xi(i+1) = xi(i) + xidot(i)*(time(i+1)-time(i));
+        zeta(i+1) = zeta(i) + zetadot(i)*(time(i+1)-time(i));
+    elseif i == length(time)
+        [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(alt(i)+auxdata.Re,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i),Vec_angle(i));
+   
+    end
+end
 
 end
 

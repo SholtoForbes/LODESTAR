@@ -105,39 +105,21 @@ grid on
 print -depsc2 rlvEntryBankAngle.eps
 print -dpng rlvEntryBankAngle.png
 
-% for i=1:length(output.meshhistory),
-%   mesh(i).cumfraction = [0 cumsum(output.meshhistory(1).result.setup.mesh.phase(1).fraction)];
-%   mesh(i).sizecumfraction = i*ones(size(mesh(i).cumfraction));
-% end;
-% marks = {'bd','gs','r^','cv','mo','kh'};
-% figure(8);
-% pp = plot(mesh(1).cumfraction,mesh(1).sizecumfraction,marks{1},mesh(2).cumfraction,mesh(2).sizecumfraction,marks{2},mesh(3).cumfraction,mesh(3).sizecumfraction,marks{3},mesh(4).cumfraction,mesh(4).sizecumfraction,marks{4},mesh(5).cumfraction,mesh(5).sizecumfraction,marks{5});
-% yl = xlabel('Location of Mesh Points (Percent)');
-% xl = ylabel('Mesh Refinement Iteration Number');
-% set(xl,'FontSize',18);
-% set(yl,'FontSize',18);
-% set(gca,'FontSize',16);
-% set(gca,'YTick',0:1:length(output.meshhistory));
-% axis([0 1 0 5]);
-% 
-% print -depsc2 rlvEntryMeshHistory.png
-% print -dpng rlvEntryMeshHistory.png
-
-for i=1:length(output.meshhistory);
-  mesh(i).points = [0 cumsum(output.meshhistory(i).result.setup.mesh.phase.fraction)];
-  mesh(i).iteration = i*ones(size(mesh(i).points));
+for i=1:length(output.meshhistory),
+  mesh(i).cumfraction = [0 cumsum(output.meshhistory(1).result.setup.mesh.phase(1).fraction)];
+  mesh(i).sizecumfraction = i*ones(size(mesh(i).cumfraction));
 end;
+marks = {'bd','gs','r^','cv','mo','kh'};
+figure(8);
+pp = plot(mesh(1).cumfraction,mesh(1).sizecumfraction,marks{1},mesh(2).cumfraction,mesh(2).sizecumfraction,marks{2},mesh(3).cumfraction,mesh(4).sizecumfraction,marks{4},mesh(5).cumfraction,mesh(5).sizecumfraction,marks{4},mesh(5).cumfraction,mesh(5).sizecumfraction,marks{5});
+yl = xlabel('Location of Mesh Points (Percent)');
+xl = ylabel('Mesh Refinement Iteration Number');
+set(xl,'FontSize',18);
+set(yl,'FontSize',18);
+set(gca,'FontSize',16);
+set(gca,'YTick',0:1:length(output.meshhistory));
+axis([0 1 0 3]);
+grid on
+print -depsc2 rlvEntryMeshHistory.png
+print -dpng rlvEntryMeshHistory.png
 
-
-figure(6);
-for i=1:length(mesh);
-  pp = plot(mesh(i).points,mesh(i).iteration,'bo');
-  set(pp,'LineWidth',1.25);
-  hold on;
-end;
-xl = xlabel('Mesh Point Location (Fraction of Interval)');
-yl = ylabel('Mesh Iteration');
-set(xl,'Fontsize',18);
-set(yl,'Fontsize',18);
-set(gca,'YTick',0:length(mesh),'FontSize',16,'FontName','Times');
-grid on;
