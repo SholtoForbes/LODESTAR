@@ -13,13 +13,14 @@ azi  = input.phase.state(:,6);
 aoa  = input.phase.state(:,7);
 bank  = input.phase.state(:,8);
 mFuel  = input.phase.state(:,9);
+throttle  = input.phase.state(:,10);
 
 % aoa  = input.phase.control(:,1);
 % bank = input.phase.control(:,2);
 
 aoadot  = input.phase.control(:,1);
 bankdot = input.phase.control(:,2);
-% throttle = input.phase.control(:,3);
+throttledot = input.phase.control(:,3);
 
 % bank = 0*ones(length(aoa),1);
 % ---------------------------------------------------%
@@ -38,5 +39,5 @@ auxdata = input.auxdata;
 % ---------------------------------------------------%
 
 % phaseout.dynamics  = [raddot.', londot.', latdot.', vdot.', fpadot.', azidot.', aoadot, bankdot];
-phaseout.dynamics  = [raddot, londot, latdot, vdot, fpadot, azidot, aoadot, bankdot, -Fueldt];
-phaseout.path = q;
+phaseout.dynamics  = [raddot, londot, latdot, vdot, fpadot, azidot, aoadot, bankdot, -Fueldt, throttledot];
+phaseout.path = [q, ;

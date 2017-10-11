@@ -11,7 +11,8 @@ fpa       = solution.phase(1).state(:,5)*180/pi;
 azimuth   = solution.phase(1).state(:,6)*180/pi;
 aoa       = solution.phase(1).state(:,7)*180/pi;
 bank      = solution.phase(1).state(:,8)*180/pi;
-
+mfuel      = solution.phase(1).state(:,9);
+throttle      = solution.phase(1).state(:,10);
 %---------------%
 % Plot Solution %
 %---------------%
@@ -29,17 +30,6 @@ grid on
 print -depsc2 rlvEntryAltitude.eps
 print -dpng rlvEntryAltitude.png
 
-subplot(3,3,2)
-plot(longitude,latitude,'-o', 'markersize', 7, 'linewidth', 1.5);
-xl = xlabel('$\theta(t)$~(deg)','Interpreter','LaTeX');
-yl = ylabel('$\phi(t)$~(deg)','Interpreter','LaTeX');
-set(xl,'FontSize',18);
-set(yl,'FontSize',18);
-set(gca,'FontSize',16,'FontName','Times');
-set(pp,'LineWidth',1.25);
-grid on
-print -depsc2 rlvEntryLonLat.eps
-print -dpng rlvEntryLonLat.png
 
 subplot(3,3,3)
 plot(time,speed,'-o', 'markersize', 7, 'linewidth', 1.5);
@@ -105,6 +95,30 @@ grid on
 print -depsc2 rlvEntryBankAngle.eps
 print -dpng rlvEntryBankAngle.png
 
+
+subplot(3,3,8)
+plot(time,mfuel,'-o', 'markersize', 7, 'linewidth', 1.5);
+xl = xlabel('$t$~(s)','Interpreter','LaTeX');
+yl = ylabel('fuel','Interpreter','LaTeX');
+set(xl,'FontSize',18);
+set(yl,'FontSize',18);
+set(gca,'FontSize',16,'FontName','Times');
+set(gca,'FontSize',16,'YTick',[16.5 17 17.5]);
+set(gca,'FontSize',16);
+set(pp,'LineWidth',1.25);
+grid on
+
+subplot(3,3,9)
+plot(time,throttle,'-o', 'markersize', 7, 'linewidth', 1.5);
+xl = xlabel('$t$~(s)','Interpreter','LaTeX');
+yl = ylabel('throttle','Interpreter','LaTeX');
+set(xl,'FontSize',18);
+set(yl,'FontSize',18);
+set(gca,'FontSize',16,'FontName','Times');
+set(gca,'FontSize',16,'YTick',[16.5 17 17.5]);
+set(gca,'FontSize',16);
+set(pp,'LineWidth',1.25);
+grid on
 % for i=1:length(output.meshhistory),
 %   mesh(i).cumfraction = [0 cumsum(output.meshhistory(1).result.setup.mesh.phase(1).fraction)];
 %   mesh(i).sizecumfraction = i*ones(size(mesh(i).cumfraction));
@@ -128,6 +142,23 @@ for i=1:length(output.meshhistory);
   mesh(i).iteration = i*ones(size(mesh(i).points));
 end;
 
+figure(2)
+hold on
+
+geoshow('landareas.shp','FaceColor',[0.5 .8 0.5])
+xlim([min(longitude)-10,max(longitude)+10]);
+ylim([min(latitude)-10,max(latitude)+10]);
+
+plot(longitude,latitude,'-o', 'markersize', 7, 'linewidth', 1.5);
+xl = xlabel('$\theta(t)$~(deg)','Interpreter','LaTeX');
+yl = ylabel('$\phi(t)$~(deg)','Interpreter','LaTeX');
+set(xl,'FontSize',18);
+set(yl,'FontSize',18);
+set(gca,'FontSize',16,'FontName','Times');
+set(pp,'LineWidth',1.25);
+grid on
+print -depsc2 rlvEntryLonLat.eps
+print -dpng rlvEntryLonLat.png
 
 figure(6);
 for i=1:length(mesh);

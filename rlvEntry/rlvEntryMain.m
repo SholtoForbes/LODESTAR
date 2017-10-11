@@ -221,11 +221,14 @@ bounds.phase.finalstate.upper = [100+auxdata.Re, lonf+0.001, latf+0.001, speedMa
 %  bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), aziMin, aoaMin, bankMin, mFuelMin];
 % bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), aziMax, aoaMax, bankMax, mFuelMin];
 
-bounds.phase.control.lower = [deg2rad(-1), deg2rad(-10), -1];
-bounds.phase.control.upper = [deg2rad(1), deg2rad(10), 1];
+bounds.phase.control.lower = [deg2rad(-1), deg2rad(-5), -1];
+bounds.phase.control.upper = [deg2rad(1), deg2rad(5), 1];
 
 bounds.phase.path.lower = 0;
 bounds.phase.path.upper = 50000;
+
+% bounds.phase.path.lower = [0, 0];
+% bounds.phase.path.upper = [50000, 0];
 
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
@@ -253,7 +256,8 @@ fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
 aoaGuess            = [8*pi/180; 8*pi/180];
 bankGuess           = [60*pi/180; 60*pi/180];
-mFuelGuess          = [mFuelMax; mFuelMin];
+% mFuelGuess          = [mFuelMax; mFuelMin];
+mFuelGuess          = [mFuelMin; mFuelMin];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
 guess.phase.control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
@@ -262,10 +266,10 @@ guess.phase.time    = tGuess;
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
-% mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 10;
+mesh.method       = 'hp-LiuRao-Legendre';
+mesh.maxiterations = 3;
 mesh.colpointsmin = 3;
-mesh.colpointsmax = 10;
+mesh.colpointsmax = 20;
 mesh.tolerance    = 1e-6;
 
 
@@ -288,7 +292,7 @@ setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
-setup.nlp.ipoptoptions.maxiterations = 1000;
+setup.nlp.ipoptoptions.maxiterations = 2000;
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
 %-------------------------------------------------------------------%

@@ -40,4 +40,12 @@ auxdata = input.auxdata;
 
 % phaseout.dynamics  = [raddot.', londot.', latdot.', vdot.', fpadot.', azidot.', aoadot, bankdot];
 phaseout.dynamics  = [raddot, londot, latdot, vdot, fpadot, azidot, aoadot, bankdot, -Fueldt, throttledot];
+
+% Thrust_Constraint = Fueldt;
+% Thrust_Constraint(M>5.1) = 0;
+
+% Throttle_Constraint = throttle;
+% Throttle_Constraint(M>5.1) = 0;
+
 phaseout.path = q;
+% phaseout.path = [q, Throttle_Constraint];
