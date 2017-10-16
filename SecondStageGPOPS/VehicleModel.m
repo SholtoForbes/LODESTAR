@@ -1,11 +1,13 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot] = VehicleModel(time, theta, V, v, mfuel,scattered, const,thetadot, Atmosphere,zeta,mstruct,mThirdStage)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,zeta,phi,eq,zetadot,xi] = VehicleModel(time, theta, V, v, mfuel,scattered, const,thetadot, Atmosphere,zeta,mstruct,mThirdStage,auxdata)
 
 % =======================================================
 % Vehicle Model for SPARTAN Scramjet Accelerator
 % =======================================================
 A = 62.77; % reference area (m^2)
 
-eta = .0*ones(1,length(time)); % Roll angle
+
+eta = deg2rad(10)*ones(1,length(time)); % Roll angle, positive anti-clockwise
+
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
@@ -15,7 +17,6 @@ m = mfuel + mstruct + mThirdStage ;
 %Rotational Coordinates 
 %===================================================
 
-global xi
 xi = zeros(1,length(time));
 phi = zeros(1,length(time));
 
@@ -37,9 +38,9 @@ end
 
 
 % Aero Data =============================================================
-c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
+c = ppval(auxdata.interp.c_spline, V); % Calculate speed of sound using atmospheric data
 
-rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using atmospheric data
+rho = ppval(auxdata.interp.rho_spline, V); % Calculate density using atmospheric data
 
 q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
@@ -79,8 +80,8 @@ end
 
 lift = lift_search;
 
-T0 = spline( Atmosphere(:,1),  Atmosphere(:,2), V); 
-P0 = spline( Atmosphere(:,1),  Atmosphere(:,3), V); 
+T0 = ppval(auxdata.interp.T0_spline, V); 
+P0 = ppval(auxdata.interp.P0_spline, V); 
 
 [Isp,Fueldt,eq] = RESTM12int(M, Alpha, scattered,T0,P0);
 

@@ -14,6 +14,16 @@ interp.Atmosphere = dlmread('atmosphere.txt');
 
 auxdata.interp.Atmosphere = interp.Atmosphere;
 
+
+auxdata.interp.c_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
+
+auxdata.interp.rho_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,4)); % Calculate density using atmospheric data
+
+auxdata.interp.p_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); % Calculate density using atmospheric data
+
+auxdata.interp.T0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2)); 
+
+auxdata.interp.P0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); 
 %% Import Vehicle and trajectory Config Data %%============================
 addpath('../')
 run VehicleConfig.m
@@ -320,7 +330,7 @@ omegadot  = output.result.solution.phase.control.';
 
 time = output.result.solution.phase.time.';
 
-[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot);
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot,xi] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot);
 
 % =========================================================================
 
@@ -439,17 +449,17 @@ subplot(5,5,21)
 plot(time, Alpha)
 title('Angle of Attack (deg)')
 
-subplot(5,5,22);
-plot(time, dual.dynamics);
-title('costates')
-xlabel('time');
-ylabel('costates');
-legend('\lambda_1', '\lambda_2', '\lambda_3');
-
-subplot(5,5,23)
-Hamiltonian = dual.Hamiltonian(1,:);
-plot(time,Hamiltonian);
-title('Hamiltonian')
+% subplot(5,5,22);
+% plot(time, dual.dynamics);
+% title('costates')
+% xlabel('time');
+% ylabel('costates');
+% legend('\lambda_1', '\lambda_2', '\lambda_3');
+% 
+% subplot(5,5,23)
+% Hamiltonian = dual.Hamiltonian(1,:);
+% plot(time,Hamiltonian);
+% title('Hamiltonian')
 
 subplot(5,5,24)
 hold on

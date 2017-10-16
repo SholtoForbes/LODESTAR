@@ -24,8 +24,9 @@ Stage3 = input.auxdata.Stage3;
 interp = input.auxdata.interp;
 const = input.auxdata.const;
 
+auxdata = input.auxdata;
 
-[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot);
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
 
 vdot = a;
 mfueldot = -Engine.Fueldt; 

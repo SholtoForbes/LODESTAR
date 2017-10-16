@@ -370,7 +370,7 @@ setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
-setup.scales.method                  = 'automatic-guessUpdate';
+% setup.scales.method                  = 'automatic-guessUpdate';
 
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
@@ -396,7 +396,7 @@ omegadot  = output.result.solution.phase(1).control.';
 
 time = output.result.solution.phase(1).time.';
 
-[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot);
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
 
 % =========================================================================
 
