@@ -157,8 +157,8 @@ alt0   = 35000;
 rad0   = alt0+auxdata.Re;
 altf   = 500;   
 radf   = altf+auxdata.Re;
-lon0   = 0;
-lonf = 0;
+lon0   = deg2rad(145);
+lonf = deg2rad(145);
 lat0   = -0.1346;
 % lat0   = -0.18;
 
@@ -215,14 +215,14 @@ bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax,
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax, mFuelMax, throttleMax];
 
-bounds.phase.finalstate.lower = [radMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-30), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
-bounds.phase.finalstate.upper = [100+auxdata.Re, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
+bounds.phase.finalstate.lower = [radMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
+bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
 %  bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), aziMin, aoaMin, bankMin, mFuelMin];
 % bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), aziMax, aoaMax, bankMax, mFuelMin];
 
-bounds.phase.control.lower = [deg2rad(-1), deg2rad(-5), -1];
-bounds.phase.control.upper = [deg2rad(1), deg2rad(5), 1];
+bounds.phase.control.lower = [deg2rad(-.5), deg2rad(-5), -1];
+bounds.phase.control.upper = [deg2rad(.5), deg2rad(5), 1];
 
 bounds.phase.path.lower = 0;
 bounds.phase.path.upper = 50000;
@@ -247,7 +247,7 @@ bounds.phase.path.upper = 50000;
 % % guess.phase.control = [aoaGuess];
 % guess.phase.time    = tGuess;
 
-tGuess              = [0; 500];
+tGuess              = [0; 1200];
 radGuess            = [rad0; radf];
 lonGuess            = [lon0; lon0+10*pi/180];
 latGuess            = [lat0; lat0+10*pi/180];
