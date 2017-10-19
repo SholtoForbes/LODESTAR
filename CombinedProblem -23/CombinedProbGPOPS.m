@@ -253,7 +253,7 @@ end
 
 %%  Guess =================================================================
 
-guess.phase(1).state(:,1)   = [30000,30000];
+guess.phase(1).state(:,1)   = [22000,25000];
 guess.phase(1).state(:,2)   = Stage2.Guess.v.';
 guess.phase(1).state(:,3)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,4) 	= Stage2.Guess.mFuel.';
@@ -298,7 +298,7 @@ tfMin = 0;            tfMax = 3000;
 altMin = alt0;  altMax = 84000;
 lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
-speedMin = 10;        speedMax = 8000;
+speedMin = 2000;        speedMax = 8000;
 fpaMin =deg2rad(-5);  fpaMax =  deg2rad(30);
 aziMin = -180*pi/180; aziMax =  180*pi/180;
 aoaMin = 0;  aoaMax = deg2rad(20);

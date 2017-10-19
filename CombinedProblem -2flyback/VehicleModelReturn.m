@@ -58,8 +58,13 @@ P0 = ppval(interp.P0_spline, alt);
 
 %% Aerodynamics
 % interpolate coefficients
+if ThirdStage == 1
 Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha));
+else
+Cd = auxdata.interp.Cd_spline2(mach,rad2deg(alpha));
+Cl = auxdata.interp.Cl_spline2(mach,rad2deg(alpha));   
+end
 
 %%%% Compute the drag and lift:
 
@@ -76,7 +81,7 @@ L = 0.5*Cl.*A.*rho.*v.^2;
 %   end  
 % end
 Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
-Fueldt(M<5.1) = 0;
+Fueldt(M<5.0) = 0;
 
 Fueldt = Fueldt.*throttle;
 

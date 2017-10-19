@@ -32,11 +32,6 @@ run TrajectoryConfig50kPa.m
 auxdata.Stage3 = Stage3;
 auxdata.Stage2 = Stage2;
 
-
-%%
-auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
-
-auxdata.A = 62.77; %m^2
 %%
 % Copy the current setting to archive
 % This saves the entire problem file every time the program is run. 
@@ -111,37 +106,6 @@ auxdata.interp.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),com
 clear liftarray % liftarray can be very large, clear from memory
 
 
-%% Return Aero
-aero = importdata('SPARTANaero.txt');
-
-interp.Cl_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-interp.Cd_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
-
-
-[MList2,AOAList2] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
-% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-
-Cl_Grid2 = [];
-Cd_Grid2 = [];
-
-for i = 1:numel(MList2)
-    M_temp2 = MList2(i);
-    AoA_temp2 = AOAList2(i);
-    
-    Cl_temp2 = interp.Cl_scattered2(M_temp2,AoA_temp2);
-    Cd_temp2 = interp.Cd_scattered2(M_temp2,AoA_temp2);
-    
-    I = cell(1, ndims(MList2)); 
-    [I{:}] = ind2sub(size(MList2),i);
-    
-    Cl_Grid2(I{(1)},I{(2)}) = Cl_temp2;
-    Cd_Grid2(I{(1)},I{(2)}) = Cd_temp2;
-
-end
-
-auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
-auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
 
 
 
@@ -245,28 +209,24 @@ PayloadData = PayloadDataInterp(VGrid,gammaGrid,vGrid);
 auxdata.PayloadGrid = griddedInterpolant(VGrid,gammaGrid,vGrid,PayloadData,'spline','linear');
 
 %% Import Bounds %%========================================================
-lonMin = -pi;         lonMax = -lonMin;
-latMin = -70*pi/180;  latMax = -latMin;
-lat0 = -0.264;
-lon0 = deg2rad(145);
-aoaMin = 0;  aoaMax = 9*pi/180;
-bankMin1 = -1*pi/180; bankMax1 =   20*pi/180;
+
 
 % Primal Bounds
-bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
-bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
+bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.mFuel(1), Stage2.Bounds.gammadot(1), Stage2.Bounds.zeta(1)];
+bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.mFuel(2), Stage2.Bounds.gammadot(2), Stage2.Bounds.zeta(2)];
 
 % Initial States
-bounds.phase(1).initialstate.lower = [Stage2.Bounds.Alt(1),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Initial.mFuel] ;
-bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Initial.mFuel];
+bounds.phase(1).initialstate.lower = [Stage2.Bounds.Alt(1), Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Initial.mFuel, Stage2.Bounds.gammadot(1), Stage2.Bounds.zeta(1)] ;
+bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2), Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Initial.mFuel, Stage2.Bounds.gammadot(2), Stage2.Bounds.zeta(2)];
 
 % End States
-bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, bankMin1, Stage2.End.mFuel];
-bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, bankMax1, Stage2.Initial.mFuel];
+bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.mFuel, Stage2.Bounds.gammadot(1), Stage2.End.Zeta];
+bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.mFuel, Stage2.Bounds.gammadot(2), Stage2.End.Zeta];
 
 % Control Bounds
-bounds.phase(1).control.lower = [deg2rad(-.5), deg2rad(-5)];
-bounds.phase(1).control.upper = [deg2rad(.5), deg2rad(5)];
+bounds.phase(1).control.lower = Stage2.Bounds.control(1);
+bounds.phase(1).control.upper = Stage2.Bounds.control(2); 
+
 % Time Bounds
 
 bounds.phase(1).initialtime.lower = 0;
@@ -277,8 +237,8 @@ bounds.phase(1).finaltime.upper = Stage2.Bounds.time(2);
 %% Define Path Constraints
 % This limits the dynamic pressure.
 if const == 1 || const == 14 || const == 15
-    bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [50000];
+    bounds.phase(1).path.lower = [0, 0];
+    bounds.phase(1).path.upper = [50000 ,9];
 elseif const == 12
     bounds.phase(1).path.lower = [0 ,0];
     bounds.phase(1).path.upper = [55000 ,9];
@@ -293,84 +253,102 @@ end
 
 %%  Guess =================================================================
 
-guess.phase(1).state(:,1)   = [22000;25000];
-guess.phase(1).state(:,2)   = [0;0];
-guess.phase(1).state(:,3)   = [-0.269;-0.13];
-guess.phase(1).state(:,4)   = Stage2.Guess.v.';
-guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
+guess.phase(1).state(:,1)   = [22000,30000];
+guess.phase(1).state(:,2)   = Stage2.Guess.v.';
+guess.phase(1).state(:,3)   = Stage2.Guess.gamma.';
+guess.phase(1).state(:,4) 	= Stage2.Guess.mFuel.';
+guess.phase(1).state(:,5)   = Stage2.Guess.gammadot.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
-guess.phase(1).state(:,7)   = [8*pi/180; 8*pi/180];
-guess.phase(1).state(:,8)   = [0;0];
-guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 200];
-
-guess.phase(1).control      = [[0;0],[0;0]];
-guess.phase(1).time          = [0;650];
+guess.phase(1).control      = Stage2.Guess.control.';
+guess.phase(1).time          = Stage2.Guess.time.';
 
 % Tire stages together
-bounds.eventgroup(1).lower = [zeros(1,10)];
-bounds.eventgroup(1).upper = [zeros(1,10)]; 
+bounds.eventgroup(1).lower = [0, 0, 0, 0];
+bounds.eventgroup(1).upper = [0, 0, 0, 0]; 
 
-%% Flyback
-tfMin = 0;            tfMax = 5000;
-altMin = 10;  altMax = 70000;
-speedMin = 10;        speedMax = 5000;
-fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
-aziMin = 60*pi/180; aziMax =  360*pi/180;
-mFuelMin = 0; mFuelMax = Stage2.Initial.mFuel-100;
-bankMin2 = -1*pi/180; bankMax2 =   80*pi/180
+%% THIRDSTAGE
+auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
 
-lonf = deg2rad(145);
-latf   = -0.269;
+auxdata.Aero = dlmread('AeroCoeffs.txt');
+Aero = auxdata.Aero;
+auxdata.Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
+auxdata.Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
+auxdata.CP_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,7));
+auxdata.CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
+auxdata.Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
+auxdata.ThirdStagem = 3300;
+auxdata.phi0 = -0.13;
+auxdata.xi0 = 0;
+auxdata.zeta0 = 1.78;
+%-------------------------------------------------------------------%
+%----------------------- Boundary Conditions -----------------------%
+%-------------------------------------------------------------------%
+t0     = 0;
+alt0   = 32000;   
+altf   = 84000;   
+radf   = altf+auxdata.Re;
+speed0 = 2800;
+speedf = 7000;
+fpa0   = deg2rad(2); 
+fpaf   = 0;
+%-------------------------------------------------------------------%
+%----------------------- Limits on Variables -----------------------%
+%-------------------------------------------------------------------%
+tfMin = 0;            tfMax = 3000;
+altMin = alt0;  altMax = 84000;
+lonMin = -pi;         lonMax = -lonMin;
+latMin = -70*pi/180;  latMax = -latMin;
+speedMin = 10;        speedMax = 8000;
+fpaMin =deg2rad(-5);  fpaMax =  deg2rad(30);
+aziMin = -180*pi/180; aziMax =  180*pi/180;
+aoaMin = 0;  aoaMax = deg2rad(20);
 
-throttleMin = 0; throttleMax = 1;
+aoadotMin = -deg2rad(1);
+aoadotMax = deg2rad(1);
 
-bounds.phase(2).initialtime.lower = 0;
-bounds.phase(2).initialtime.upper = 3000;
-bounds.phase(2).finaltime.lower = 400;
-bounds.phase(2).finaltime.upper = 4000;
-bounds.phase(2).initialstate.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin2, mFuelMin, throttleMin];
-bounds.phase(2).initialstate.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
+bounds.phase(2).initialtime.lower = t0;
+bounds.phase(2).initialtime.upper = tfMax;
+bounds.phase(2).finaltime.lower = tfMin;
+bounds.phase(2).finaltime.upper = tfMax;
 
-bounds.phase(2).state.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin2, mFuelMin, throttleMin];
-bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
+bounds.phase(2).initialstate.lower = [altMin, speedMin, fpaMin, auxdata.ThirdStagem, aoaMin];
+bounds.phase(2).initialstate.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, aoaMax];
 
-% bounds.phase(2).finalstate.lower = [altMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-% bounds.phase(2).finalstate.upper = [200+auxdata.Re, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).state.lower = [altMin,speedMin, fpaMin, 0, aoaMin];
+bounds.phase(2).state.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, aoaMax];
 
-bounds.phase(2).finalstate.lower = [altMin, lonf-1, latf-1, speedMin, deg2rad(-80), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [200000+auxdata.Re, lonf+1, latf+1, speedMax, deg2rad(80), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.lower = [altMin, speedMin, 0, 0, 0];
+bounds.phase(2).finalstate.upper = [altMax, speedMax, fpaMax, auxdata.ThirdStagem, 0];
 
-bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-5), -1];
-bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(5), 1];
+bounds.phase(2).control.lower = [aoadotMin];
+bounds.phase(2).control.upper = [aoadotMax];
 
-bounds.phase(2).path.lower = 0;
-bounds.phase(2).path.upper = 50000;
+bounds.phase(2).path.lower = [-deg2rad(8), -inf];
+bounds.phase(2).path.upper = [deg2rad(8), 0];
 
-tGuess              = [650; 1800];
-altGuess            = [30000; 10];
-lonGuess            = [lon0; lon0+1*pi/180];
-latGuess            = [lat0; lat0-1*pi/180];
-speedGuess          = [3000; 10];
-fpaGuess            = [0; 0];
-aziGuess            = [deg2rad(97); deg2rad(270)];
-aoaGuess            = [8*pi/180; 8*pi/180];
-bankGuess           = [60*pi/180; 60*pi/180];
-% mFuelGuess          = [mFuelMax; mFuelMin];
-mFuelGuess          = [200; mFuelMin];
-guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
-guess.phase(2).control = [[0;0],[0;0],[0;0]];
-% guess.phase.control = [aoaGuess];
+bounds.eventgroup(2).lower = 100000;
+bounds.eventgroup(2).upper = 566000;
+
+%-------------------------------------------------------------------------%
+%---------------------- Provide Guess of Solution ------------------------%
+%-------------------------------------------------------------------------%
+tGuess              = [0; 250];
+altGuess            = [alt0; 80000];
+speedGuess          = [speed0; speedf];
+fpaGuess            = [fpa0; rad2deg(10)];
+mGuess              = [3300; 2000];
+aoaGuess            = [deg2rad(5); deg2rad(20)];
+guess.phase(2).state   = [altGuess, speedGuess, fpaGuess, mGuess, aoaGuess];
+guess.phase(2).control = [0;0];
 guess.phase(2).time    = tGuess;
-
-
 %%
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 % mesh.method       = 'hp-LiuRao-Legendre';
 mesh.maxiterations = 4;
-mesh.colpointsmin = 3;
-mesh.colpointsmax = 50;
+mesh.colpointsmin = 5;
+mesh.colpointsmax = 30;
 mesh.tolerance    = 1e-5;
 
 
@@ -407,54 +385,18 @@ EndTime = datestr(now,30) % Display the ending time
 
 % =========================================================================
 % Assign the primal variables
-alt = output.result.solution.phase(1).state(:,1).';
-alt2 = output.result.solution.phase(2).state(:,1).';
-lon = output.result.solution.phase(1).state(:,2).';
-lon2 = output.result.solution.phase(2).state(:,2).';
-lat = output.result.solution.phase(1).state(:,3).';
-lat2 = output.result.solution.phase(2).state(:,3).';
-v = output.result.solution.phase(1).state(:,4).'; 
-v2 = output.result.solution.phase(2).state(:,4).'; 
-gamma = output.result.solution.phase(1).state(:,5).'; 
-gamma2 = output.result.solution.phase(2).state(:,5).'; 
+V = output.result.solution.phase(1).state(:,1).';
+v = output.result.solution.phase(1).state(:,2).'; 
+gamma = output.result.solution.phase(1).state(:,3).'; 
+mfuel = output.result.solution.phase(1).state(:,4).'; 
+gammadot = output.result.solution.phase(1).state(:,5).';
 zeta = output.result.solution.phase(1).state(:,6).';
-zeta2 = output.result.solution.phase(2).state(:,6).';
-Alpha = output.result.solution.phase(1).state(:,7).';
-eta = output.result.solution.phase(1).state(:,8).';
-mFuel = output.result.solution.phase(1).state(:,9).'; 
-mFuel2 = output.result.solution.phase(2).state(:,9).'; 
-
-figure(201)
-subplot(9,1,1)
-hold on
-plot(time,alt)
-plot(time2,alt2)
-subplot(9,1,2)
-hold on
-plot(time,v)
-plot(time2,v2)
-subplot(9,1,3)
-hold on
-plot(time,lon)
-plot(time2,lon2)
-subplot(9,1,4)
-hold on
-plot(time,lat)
-plot(time2,lat2)
-subplot(9,1,5)
-hold on
-plot(time,v)
-plot(time2,v2)
-subplot(9,1,6)
-hold on
-plot(time,gamma)
-plot(time2,gamma2)
 
 omegadot  = output.result.solution.phase(1).control.'; 
 
 time = output.result.solution.phase(1).time.';
-time2 = output.result.solution.phase(2).time.';
 
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
 
 % =========================================================================
 
@@ -475,7 +417,7 @@ ThirdStagePayloadMass = 0;
 %          OUTPUT             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nodes = length(alt)
+nodes = length(V)
 
 eq = Engine.eq;
 Thrust = Engine.Thrust;
@@ -508,12 +450,12 @@ figure(201)
 
 subplot(5,5,[1,10])
 hold on
-plot(H, alt)
+plot(H, V)
 % plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Trajectory (m)')
 
 dim = [.7 .52 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mFuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 
 subplot(5,5,11)
@@ -545,7 +487,7 @@ title('Drag Force')
 
 subplot(5,5,16)
 hold on
-plot(time, mFuel + 8755.1 - 994)
+plot(time, mfuel + 8755.1 - 994)
 title('Vehicle Mass (kg)')
 
 
@@ -603,7 +545,7 @@ figure(202)
 sp1 = subplot(2,6,[1,6]);
 ax1 = gca; % current axes
 hold on
-plot(H/1000, alt/1000,'Color','k')
+plot(H/1000, V/1000,'Color','k')
 
 title('Trajectory')
 xlabel('Earth Normal Distance Flown (km)')
@@ -612,20 +554,20 @@ ylabel('Vertical Position (km)')
 for i = 1:floor(time(end)/30)
     [j,k] = min(abs(time-30*i));
     str = strcat(num2str(round(time(k))), 's');
-    text(H(k)/1000,alt(k)/1000,str,'VerticalAlignment','top', 'FontSize', 10);
+    text(H(k)/1000,V(k)/1000,str,'VerticalAlignment','top', 'FontSize', 10);
     
-    plot(H(k)/1000, alt(k)/1000, '+', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+    plot(H(k)/1000, V(k)/1000, '+', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 end
 
-plot(H(end)/1000, alt(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 
-text(H(end)/1000,alt(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
+text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mFuel(1) - mFuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mfuel(1) - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]/1000; %makes a small sample portion of an arbitrary third stage trajectory for example
-thirdstageexample_V = [0+alt(end) (alt(end)-alt(end - 1))+alt(end) 20*((alt(end)-alt(end -1)))+alt(end) 40*((alt(end)-alt(end -1)))+alt(end) 60*((alt(end)-alt(end -1)))+alt(end) 80*((alt(end)-alt(end -1)))+alt(end)]/1000;
+thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)]/1000;
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on
@@ -790,10 +732,10 @@ v_F = cumtrapz(time,a);
 v_F = v_F + v(1);
 
 V_F = cumtrapz(time,v_F.*sin(gamma_F));
-V_F = V_F + alt(1);
+V_F = V_F + V(1);
 
 mfuel_F = cumtrapz(time,-Fueldt);
-mfuel_F = mfuel_F + mFuel(1);
+mfuel_F = mfuel_F + mfuel(1);
 
 figure(206)
 
@@ -804,9 +746,9 @@ title('Forward Simulation Comparison');
 subplot(5,1,2)
 plot(time,v_F,time,v);
 subplot(5,1,3)
-plot(time,V_F,time,alt);
+plot(time,V_F,time,V);
 subplot(5,1,4)
-plot(time,mfuel_F,time,mFuel);
+plot(time,mfuel_F,time,mfuel);
 subplot(5,1,4)
 plot(time,gammadot_F,time,gammadot);
 
@@ -817,14 +759,14 @@ if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
     CADAC_Alpha = interp1(CADAC_DATA(:,2),CADAC_DATA(:,4),M(1:68)); % 1:68 gives mach numbers that align, may need to change this
     CADAC_V = interp1(CADAC_DATA(:,2),CADAC_DATA(:,11),M(1:68));
-    MeanError_V = sum(abs(CADAC_V - alt(1:68))./alt(1:68).*t_diff(1:68))/time(end)
+    MeanError_V = sum(abs(CADAC_V - V(1:68))./V(1:68).*t_diff(1:68))/time(end)
     MeanError_Alpha = sum(abs(CADAC_Alpha - Alpha(1:68))./Alpha(1:68).*t_diff(1:68))/time(end)
 end
 
 % if PayloadGrid(phi(end),zeta(end),V(end)+10,gamma(end),v(end)) - PayloadGrid(phi(end),zeta(end),V(end),gamma(end),v(end)) < 0
 %     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 % end
-if PayloadGrid(alt(end)+10,gamma(end),v(end)) - PayloadGrid(alt(end),gamma(end),v(end)) < 0
+if PayloadGrid(V(end)+10,gamma(end),v(end)) - PayloadGrid(V(end),gamma(end),v(end)) < 0
     disp('Check Third Stage Payload Matrix, Found Maxima')
 end
 
@@ -839,7 +781,7 @@ end
 % differences result in the forward simulation being slightly different
 % than the actual. This is mostly a check to see if they are close. 
 
-forward0 = [alt(1),phi(1),gamma(1),v(1),zeta(1),Stage2.mStruct+Stage3.mTot+Stage2.mFuel];
+forward0 = [V(1),phi(1),gamma(1),v(1),zeta(1),Stage2.mStruct+Stage3.mTot+Stage2.mFuel];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(time,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,interp),time,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(time,Alpha,f_t),communicator,communicator_trim,interp.Atmosphere,const,auxdata.interp,AlphaInterp(time,lift,f_t),AlphaInterp(time,Fd,f_t),AlphaInterp(time,Thrust,f_t),AlphaInterp(time,flapdeflection,f_t)),time(1:end),forward0);
@@ -848,7 +790,7 @@ figure(212)
 subplot(7,1,[1 2])
 hold on
 plot(f_t(1:end),f_y(:,1));
-plot(time,alt);
+plot(time,V);
 
 subplot(7,1,3)
 hold on
@@ -873,10 +815,10 @@ plot(time,zeta);
 subplot(7,1,7)
 hold on
 plot(f_t(1:end),f_y(:,6));
-plot(time,Stage2.mStruct+Stage3.mTot+mFuel);
+plot(time,Stage2.mStruct+Stage3.mTot+mfuel);
 
 %% plot engine interpolation visualiser
-T0 = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2), alt); 
+T0 = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2), V); 
 T1 = interp.tempgridded(M,Alpha).*T0;
 M1 = interp.M1gridded(M, Alpha);
 
@@ -907,7 +849,7 @@ plot(M1,T1,'r');
 
 % Run First Stage =========================================================
 cd('../FirstStage')
-[FirstStageStates] = FirstStageProblem(alt(1),gamma(1),phi(1),zeta(1),const);
+[FirstStageStates] = FirstStageProblem(V(1),gamma(1),phi(1),zeta(1),const);
 cd('../SecondStage')
 dlmwrite('FirstStage.txt', FirstStageStates);
 copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))

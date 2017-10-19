@@ -6,11 +6,11 @@ alt1  = input.phase(1).state(:,1);
 lon1  = input.phase(1).state(:,2);
 lat1  = input.phase(1).state(:,3);
 v1    = input.phase(1).state(:,4);
-fpa1  = input.phase(1).state(:,5);
-azi1  = input.phase(1).state(:,6);
+gamma1  = input.phase(1).state(:,5);
+zeta1  = input.phase(1).state(:,6);
 
-aoa1  = input.phase(1).state(:,7);
-bank1  = input.phase(1).state(:,8);
+Alpha1  = input.phase(1).state(:,7);
+eta1  = input.phase(1).state(:,8);
 mFuel1  = input.phase(1).state(:,9);
 throttle1  = 1;
 
@@ -26,7 +26,7 @@ time1 = input.phase(1).time;
 
 auxdata = input.auxdata;
 
-[altdot1,londot1,latdot1,fpadot1,vdot1,azidot1, q1, M, Fd, rho,L,Fueldt1,T] = VehicleModelReturn(fpa1, alt1, v1,auxdata,azi1,lat1,lon1,aoa1,bank1,throttle1, mFuel1, 1);
+[altdot1,londot1,latdot1,fpadot1,vdot1,azidot1, q1, M, Fd, rho,L,Fueldt1,T] = VehicleModelReturn(gamma1, alt1, v1,auxdata,zeta1,lat1,lon1,Alpha1,eta1,throttle1, mFuel1, 1);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %

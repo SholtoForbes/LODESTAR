@@ -249,8 +249,8 @@ bounds.phase.path.upper = 50000;
 
 tGuess              = [0; 1200];
 radGuess            = [rad0; radf];
-lonGuess            = [lon0; lon0+10*pi/180];
-latGuess            = [lat0; lat0+10*pi/180];
+lonGuess            = [lon0; lon0-1*pi/180];
+latGuess            = [lat0; lat0+1*pi/180];
 speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
