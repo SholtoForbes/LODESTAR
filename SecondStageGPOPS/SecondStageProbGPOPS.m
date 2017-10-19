@@ -319,7 +319,7 @@ EndTime = datestr(now,30) % Display the ending time
 
 % =========================================================================
 % Assign the primal variables
-V = output.result.solution.phase.state(:,1).';
+alt = output.result.solution.phase.state(:,1).';
 v = output.result.solution.phase.state(:,2).'; 
 gamma = output.result.solution.phase.state(:,3).'; 
 mfuel = output.result.solution.phase.state(:,4).'; 
@@ -330,14 +330,14 @@ omegadot  = output.result.solution.phase.control.';
 
 time = output.result.solution.phase.time.';
 
-[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot,xi] = VehicleModel(time, gamma, V, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot);
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot,xi] = VehicleModel(time, gamma, alt, v, mfuel,auxdata.interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
 
 % =========================================================================
 
 %% Third Stage
 % Optimise third stage trajectory from end point
 
-global phi
+
 
 % cd('../ThirdStage')
 % [ThirdStagePayloadMass,ThirdStageControls,ThirdStageZeta,ThirdStagePhi,ThirdStageAlt,ThirdStagev,ThirdStaget,ThirdStageAlpha,ThirdStagem,ThirdStagegamma,ThirdStageq] = ThirdStageOptm(V(end),gamma(end),v(end), phi(end),zeta(end), 1);
@@ -346,12 +346,22 @@ global phi
 ThirdStagePayloadMass = 0;
 
 
+
+%% Check End Point
+if v(end) < min(ThirdStageData(:,5)) || v(end) > max(ThirdStageData(:,5)) || gamma(end) < min(ThirdStageData(:,4)) || gamma(end) > max(ThirdStageData(:,4)) || alt(end) < min(ThirdStageData(:,3)) || alt(end) > max(ThirdStageData(:,3))
+msgbox('ERROR: OPTIMISATION INVALID. End point outside of third stage matrix.');
+end
+
+if abs(output.result.objective - ThirdStagePayloadMass) > 1;
+msgbox('ERROR: Check end point. Third stage payload mass calculated from optimised trajectory is significantly different from interpolated result.');
+end
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nodes = length(V)
+nodes = length(alt)
 
 eq = Engine.eq;
 Thrust = Engine.Thrust;
@@ -384,7 +394,7 @@ figure(201)
 
 subplot(5,5,[1,10])
 hold on
-plot(H, V)
+plot(H, alt)
 % plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Trajectory (m)')
 
@@ -479,7 +489,7 @@ figure(202)
 sp1 = subplot(2,6,[1,6]);
 ax1 = gca; % current axes
 hold on
-plot(H/1000, V/1000,'Color','k')
+plot(H/1000, alt/1000,'Color','k')
 
 title('Trajectory')
 xlabel('Earth Normal Distance Flown (km)')
@@ -488,20 +498,20 @@ ylabel('Vertical Position (km)')
 for i = 1:floor(time(end)/30)
     [j,k] = min(abs(time-30*i));
     str = strcat(num2str(round(time(k))), 's');
-    text(H(k)/1000,V(k)/1000,str,'VerticalAlignment','top', 'FontSize', 10);
+    text(H(k)/1000,alt(k)/1000,str,'VerticalAlignment','top', 'FontSize', 10);
     
-    plot(H(k)/1000, V(k)/1000, '+', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+    plot(H(k)/1000, alt(k)/1000, '+', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 end
 
-plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+plot(H(end)/1000, alt(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 
-text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
+text(H(end)/1000,alt(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
 annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(mfuel(1) - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]/1000; %makes a small sample portion of an arbitrary third stage trajectory for example
-thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)]/1000;
+thirdstageexample_V = [0+alt(end) (alt(end)-alt(end - 1))+alt(end) 20*((alt(end)-alt(end -1)))+alt(end) 40*((alt(end)-alt(end -1)))+alt(end) 60*((alt(end)-alt(end -1)))+alt(end) 80*((alt(end)-alt(end -1)))+alt(end)]/1000;
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on
@@ -666,7 +676,7 @@ v_F = cumtrapz(time,a);
 v_F = v_F + v(1);
 
 V_F = cumtrapz(time,v_F.*sin(gamma_F));
-V_F = V_F + V(1);
+V_F = V_F + alt(1);
 
 mfuel_F = cumtrapz(time,-Fueldt);
 mfuel_F = mfuel_F + mfuel(1);
@@ -680,7 +690,7 @@ title('Forward Simulation Comparison');
 subplot(5,1,2)
 plot(time,v_F,time,v);
 subplot(5,1,3)
-plot(time,V_F,time,V);
+plot(time,V_F,time,alt);
 subplot(5,1,4)
 plot(time,mfuel_F,time,mfuel);
 subplot(5,1,4)
@@ -693,14 +703,14 @@ if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
     CADAC_Alpha = interp1(CADAC_DATA(:,2),CADAC_DATA(:,4),M(1:68)); % 1:68 gives mach numbers that align, may need to change this
     CADAC_V = interp1(CADAC_DATA(:,2),CADAC_DATA(:,11),M(1:68));
-    MeanError_V = sum(abs(CADAC_V - V(1:68))./V(1:68).*t_diff(1:68))/time(end)
+    MeanError_V = sum(abs(CADAC_V - alt(1:68))./alt(1:68).*t_diff(1:68))/time(end)
     MeanError_Alpha = sum(abs(CADAC_Alpha - Alpha(1:68))./Alpha(1:68).*t_diff(1:68))/time(end)
 end
 
 % if PayloadGrid(phi(end),zeta(end),V(end)+10,gamma(end),v(end)) - PayloadGrid(phi(end),zeta(end),V(end),gamma(end),v(end)) < 0
 %     disp('Check Third Stage Payload Matrix, May Have Found False Maxima')
 % end
-if PayloadGrid(V(end)+10,gamma(end),v(end)) - PayloadGrid(V(end),gamma(end),v(end)) < 0
+if PayloadGrid(alt(end)+10,gamma(end),v(end)) - PayloadGrid(alt(end),gamma(end),v(end)) < 0
     disp('Check Third Stage Payload Matrix, Found Maxima')
 end
 
@@ -715,7 +725,7 @@ end
 % differences result in the forward simulation being slightly different
 % than the actual. This is mostly a check to see if they are close. 
 
-forward0 = [V(1),phi(1),gamma(1),v(1),zeta(1),Stage2.mStruct+Stage3.mTot+Stage2.mFuel];
+forward0 = [alt(1),phi(1),gamma(1),v(1),zeta(1),Stage2.mStruct+Stage3.mTot+Stage2.mFuel];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(time,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,interp),time,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(time,Alpha,f_t),communicator,communicator_trim,interp.Atmosphere,const,auxdata.interp,AlphaInterp(time,lift,f_t),AlphaInterp(time,Fd,f_t),AlphaInterp(time,Thrust,f_t),AlphaInterp(time,flapdeflection,f_t)),time(1:end),forward0);
@@ -724,7 +734,7 @@ figure(212)
 subplot(7,1,[1 2])
 hold on
 plot(f_t(1:end),f_y(:,1));
-plot(time,V);
+plot(time,alt);
 
 subplot(7,1,3)
 hold on
@@ -752,7 +762,7 @@ plot(f_t(1:end),f_y(:,6));
 plot(time,Stage2.mStruct+Stage3.mTot+mfuel);
 
 %% plot engine interpolation visualiser
-T0 = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2), V); 
+T0 = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2), alt); 
 T1 = interp.tempgridded(M,Alpha).*T0;
 M1 = interp.M1gridded(M, Alpha);
 
@@ -783,7 +793,7 @@ plot(M1,T1,'r');
 
 % Run First Stage =========================================================
 cd('../FirstStage')
-[FirstStageStates] = FirstStageProblem(V(1),gamma(1),phi(1),zeta(1),const);
+[FirstStageStates] = FirstStageProblem(alt(1),gamma(1),phi(1),zeta(1),const);
 cd('../SecondStage')
 dlmwrite('FirstStage.txt', FirstStageStates);
 copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))

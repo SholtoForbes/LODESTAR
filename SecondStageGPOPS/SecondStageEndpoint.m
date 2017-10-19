@@ -15,7 +15,7 @@ function output = SecondStageEndpoint(input)
 
 %% Import Data %%==========================================================
 
-VF = input.phase.finalstate(1);
+altF = input.phase.finalstate(1);
 vF = input.phase.finalstate(2); 
 gammaF = input.phase.finalstate(3); 
 % mfuel = input.phase.state(:,4).'; 
@@ -33,9 +33,9 @@ const = input.auxdata.const;
 
 
 if vF > 2850
-    ThirdStagePayloadMass = input.auxdata.PayloadGrid(VF,gammaF,vF);
+    ThirdStagePayloadMass = input.auxdata.PayloadGrid(altF,gammaF,vF);
 else
-    ThirdStagePayloadMass = gaussmf(vF, [300 2850] )*input.auxdata.PayloadGrid(VF,gammaF,2850);
+    ThirdStagePayloadMass = gaussmf(vF, [300 2850] )*input.auxdata.PayloadGrid(altF,gammaF,2850);
 end
 
 % Define Cost =======================================================

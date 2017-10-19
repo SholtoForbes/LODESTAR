@@ -1,8 +1,7 @@
-function phaseout = rlvEntryContinuous(input)
+function phaseout = SecondStageReturnContinuous(input)
 % ---------------------------------------------------%
 % ------ Extract Each Component of the State ------- %
 % ---------------------------------------------------%
-global rad
 rad  = input.phase.state(:,1);
 lon  = input.phase.state(:,2);
 lat  = input.phase.state(:,3);
@@ -27,7 +26,6 @@ throttledot = input.phase.control(:,3);
 % ------- Compute the Aerodynamic Quantities --------%
 % ---------------------------------------------------%
 
-global time
 time = input.phase(1).time;
 
 auxdata = input.auxdata;

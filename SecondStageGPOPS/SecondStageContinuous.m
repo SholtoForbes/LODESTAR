@@ -8,7 +8,7 @@ function phaseout = SecondStageContinuous(input)
 % This file is calculated after the Cost file in the iterative process 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-V = input.phase.state(:,1).';
+alt = input.phase.state(:,1).';
 v = input.phase.state(:,2).'; 
 gamma = input.phase.state(:,3).'; 
 mfuel = input.phase.state(:,4).'; 
@@ -26,17 +26,17 @@ const = input.auxdata.const;
 
 auxdata = input.auxdata;
 
-[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, V, v, mfuel,interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
+[dfuel, Engine.Fueldt, a, q, M, Vehicle.Fd, Engine.Thrust, Vehicle.flapdeflection, Vehicle.Alpha, rho,Vehicle.lift,zeta,phi,Engine.eq,zetadot] = VehicleModel(time, gamma, alt, v, mfuel,interp,const,gammadot, interp.Atmosphere,zeta,Stage2.mStruct,Stage3.mTot,auxdata);
 
 vdot = a;
 mfueldot = -Engine.Fueldt; 
 %==========================================================================
 
-Vdot = v.*sin(gamma);
+altdot = v.*sin(gamma);
 
 %==========================================================================
 
-phaseout.dynamics = [Vdot.',vdot.', gammadot.', mfueldot.', omegadot.', zetadot.'];
+phaseout.dynamics = [altdot.',vdot.', gammadot.', mfueldot.', omegadot.', zetadot.'];
 
 phaseout.path = [q.',Vehicle.Alpha.'];
 end

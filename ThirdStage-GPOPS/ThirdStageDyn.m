@@ -8,19 +8,7 @@ time1 = cputime;
 
 alt(isnan(alt)) = 40000;
 
-% Atmosphere = dlmread('atmosphere.txt');
-% Aero = dlmread('AeroCoeffs.txt');
-Atmosphere = auxdata.Atmosphere;
-
-% Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
-% 
-% Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
-% 
-% CP_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,7));
-% 
-% CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
-% 
-% Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
+Atmosphere = auxdata.interp.Atmosphere;
 
 Drag_interp = auxdata.Drag_interp;
 
@@ -36,8 +24,8 @@ Max_AoA_interp = auxdata.Max_AoA_interp;
 iteration = 1;
 
 
-rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), alt(1));
-c_init = spline( Atmosphere(:,1),  Atmosphere(:,5), alt(1));
+rho_init = ppval(auxdata.interp.rho_spline, alt(1));
+c_init = ppval(auxdata.interp.c_spline, alt(1));
 
 q_init = 0.5.*rho_init.*v.^2;
 M_init = v./c_init;
@@ -47,7 +35,7 @@ M_init = v./c_init;
 % at 50kPa dynamic pressure, and set the max AoA to match this normal
 % coefficient
 Alt_50 = spline( Atmosphere(:,4),  Atmosphere(:,1), 50000.*2./v(1).^2);
-c_50 = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt_50);
+c_50 = ppval(auxdata.interp.c_spline, Alt_50);
 
 M_50 = v(1)./c_50;
 % M_50 = 2922.8./c_50;% using a constant velocity
@@ -104,24 +92,17 @@ I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 + 161.2*(CG-7)^
 %% Initiate Simulation
 
 
-% p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3)); % calculate pressure using atmospheric data
-% 
-% c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
-% 
-% rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
-
-
 atmo_elem = find(alt<=85000); % Find the elements that are within the atmosphere
 exo_elem = find(alt>85000); % Find the elements that are exoatmospheric
 
 
-rho(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4), alt(atmo_elem));
-c(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,5), alt(atmo_elem));
-p(atmo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3), alt(atmo_elem));
+rho(atmo_elem) = ppval(auxdata.interp.rho_spline, alt(atmo_elem));
+c(atmo_elem) = ppval(auxdata.interp.c_spline, alt(atmo_elem));
+p(atmo_elem) = ppval(auxdata.interp.p_spline, alt(atmo_elem));
 
-rho(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,4),85000).*gaussmf(alt(exo_elem),[100 85000]);
-c(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000);
-p(exo_elem) = spline( Atmosphere(:,1),  Atmosphere(:,3),85000).*gaussmf(alt(exo_elem),[100 85000]);
+rho(exo_elem) = ppval(auxdata.interp.rho_spline,85000).*gaussmf(alt(exo_elem),[100 85000]);
+c(exo_elem) = ppval(auxdata.interp.c_spline, 85000);
+p(exo_elem) = ppval(auxdata.interp.p_spline,85000).*gaussmf(alt(exo_elem),[100 85000]);
 
 rho = rho.';
 c = c.';

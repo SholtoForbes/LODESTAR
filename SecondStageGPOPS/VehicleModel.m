@@ -6,7 +6,7 @@ function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,ze
 A = 62.77; % reference area (m^2)
 
 
-eta = deg2rad(10)*ones(1,length(time)); % Roll angle, positive anti-clockwise
+eta = deg2rad(0)*ones(1,length(time)); % Roll angle, positive anti-clockwise
 
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt

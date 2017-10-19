@@ -7,19 +7,7 @@ if isnan(alt0)
 end
 
 
-% alt0,gamma0,v0, phi0, xi0, zeta0, m0
-% Atmosphere = dlmread('atmosphere.txt');
-% Aero = dlmread('AeroCoeffs.txt');
-% 
-% Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
-% 
-% Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
-% 
-% CP_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,7));
-% 
-% CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
-
-Atmosphere = auxdata.Atmosphere;
+% Atmosphere = auxdata.Atmosphere;
 Drag_interp = auxdata.Drag_interp;
 
 Lift_interp = auxdata.Lift_interp;
@@ -82,11 +70,6 @@ mEng = 52; %Kestrel
 %% Initiate Simulation
 exocond = false;
 
-p_spline = spline( Atmosphere(:,1),  Atmosphere(:,3)); % calculate pressure using atmospheric data
-
-c_spline = spline( Atmosphere(:,1),  Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
-
-rho_spline = spline( Atmosphere(:,1),  Atmosphere(:,4)); % Calculate density using atmospheric data
 
 Alpha = 0;
 % m = m-mHS
@@ -98,11 +81,11 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
 
 
 
-    p(i) = ppval(p_spline, Alt(i));
+    p(i) = ppval(auxdata.interp.p_spline, Alt(i));
     
     if Alt(i) < 85000
-        c(i) = ppval(c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
-        rho(i) = ppval(rho_spline, Alt(i)); % Calculate density using atmospheric data
+        c(i) = ppval(auxdata.interp.c_spline,  Alt(i)); % Calculate speed of sound using atmospheric data
+        rho(i) = ppval(auxdata.interp.rho_spline, Alt(i)); % Calculate density using atmospheric data
         q(i) = 1/2*rho(i)*v(i)^2;
         
     else
@@ -110,32 +93,22 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
             m = m-mHS; % RELEASE HEAT SHIELD
         end
         
-        c(i) = ppval(c_spline, 85000);
+        c(i) = ppval(auxdata.interp.c_spline, 85000);
         rho(i) = 0;
         q(i) = 0;
         exocond = true;
     end
+
+    T = 0;
     
-    
-
-
-        T = 0;
-
- 
-
     M(i) = v(i)/c(i);
 
     CD(i) = Drag_interp(M(i),rad2deg(Alpha));
     
     CL(i) = Lift_interp(M(i),rad2deg(Alpha));
-    
-%     CN(i) = CN_interp(M(i),rad2deg(Alpha));
-%     
-%     cP(i) = CP_interp(M(i),rad2deg(Alpha));
 
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i); % Aerodynamic lift
-%     N(i) = 1/2*rho(i)*(v(i)^2)*A*CN(i);
     
     
     %%

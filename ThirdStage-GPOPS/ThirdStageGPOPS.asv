@@ -1,0 +1,184 @@
+% function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0);
+
+alt0 = 35000;
+gamma0 = 0;
+v0 = 2900;
+phi0 = 0;
+zeta0 = 0;
+
+
+%-------------------------------------------------------------------------%
+%------------------ Provide Auxiliary Data for Problem -------------------%
+%-------------------------------------------------------------------------%
+auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
+
+interp.Atmosphere = dlmread('atmosphere.txt');
+
+auxdata.interp.Atmosphere = interp.Atmosphere;
+
+auxdata.interp.c_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
+
+auxdata.interp.rho_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,4)); % Calculate density using atmospheric data
+
+auxdata.interp.p_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); % Calculate density using atmospheric data
+
+auxdata.interp.T0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2)); 
+
+auxdata.interp.P0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); 
+
+auxdata.Aero = dlmread('AeroCoeffs.txt');
+Aero = auxdata.Aero;
+auxdata.Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
+% 
+auxdata.Lift_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,6));
+
+auxdata.CP_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,7));
+
+auxdata.CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
+
+auxdata.Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
+
+auxdata.ThirdStagem = 3300;
+
+auxdata.phi0 = phi0;
+auxdata.xi0 = 0;
+auxdata.zeta0 = zeta0;
+%-------------------------------------------------------------------%
+%----------------------- Boundary Conditions -----------------------%
+%-------------------------------------------------------------------%
+t0     = 0;
+altf   = 84000;   
+radf   = altf+auxdata.Re;
+v0 = 2900;
+vf = 7000;
+gammaf   = 0;
+
+%-------------------------------------------------------------------%
+%----------------------- Limits on Variables -----------------------%
+%-------------------------------------------------------------------%
+tfMin = 0;            tfMax = 3000;
+altMin = alt0;  altMax = 84000;
+lonMin = -pi;         lonMax = -lonMin;
+latMin = -70*pi/180;  latMax = -latMin;
+vMin = 10;        vMax = 8000;
+gammaMin =deg2rad(-5);  gammaMax =  deg2rad(30);
+aziMin = -180*pi/180; aziMax =  180*pi/180;
+aoaMin = 0;  aoaMax = deg2rad(20);
+
+aoadotMin = -deg2rad(1);
+aoadotMax = deg2rad(1);
+
+%-------------------------------------------------------------------%
+%--------------- Set Up Problem Using Data Provided Above ----------%
+%-------------------------------------------------------------------%
+bounds.phase.initialtime.lower = t0;
+bounds.phase.initialtime.upper = t0;
+bounds.phase.finaltime.lower = tfMin;
+bounds.phase.finaltime.upper = tfMax;
+
+
+bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin];
+bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax];
+
+bounds.phase.state.lower = [altMin,vMin, gammaMin, 0, aoaMin];
+bounds.phase.state.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, aoaMax];
+
+bounds.phase.finalstate.lower = [altMin, vMin, 0, 0, 0];
+bounds.phase.finalstate.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, 0];
+
+bounds.phase.control.lower = [aoadotMin];
+bounds.phase.control.upper = [aoadotMax];
+
+bounds.phase.path.lower = [-deg2rad(7), -inf];
+bounds.phase.path.upper = [deg2rad(7), 0];
+
+bounds.eventgroup.lower = 100000;
+bounds.eventgroup.upper = 566000;
+
+%-------------------------------------------------------------------------%
+%---------------------- Provide Guess of Solution ------------------------%
+%-------------------------------------------------------------------------%
+tGuess              = [0; 250];
+altGuess            = [alt0; 80000];
+vGuess          = [v0; vf];
+gammaGuess            = [gamma0; rad2deg(10)];
+mGuess              = [3300; 2000];
+aoaGuess            = [deg2rad(5); deg2rad(20)];
+guess.phase.state   = [altGuess, vGuess, gammaGuess, mGuess, aoaGuess];
+guess.phase.control = [0;0];
+guess.phase.time    = tGuess;
+
+%-------------------------------------------------------------------------%
+%----------Provide Mesh Refinement Method and Initial Mesh ---------------%
+%-------------------------------------------------------------------------%
+mesh.method       = 'hp-LiuRao-Legendre';
+mesh.maxiterations = 4;
+mesh.colpointsmin = 3;
+mesh.colpointsmax = 30;
+mesh.tolerance    = 1e-4;
+
+%-------------------------------------------------------------------%
+%---------- Configure Setup Using the information provided ---------%
+%-------------------------------------------------------------------%
+setup.name                           = 'Reusable-Launch-Vehicle-Entry-Problem';
+setup.functions.continuous           = @ThirdStageContinuous;
+setup.functions.endpoint             = @ThirdStageEndpoint;
+setup.auxdata                        = auxdata;
+setup.bounds                         = bounds;
+setup.guess                          = guess;
+setup.mesh                           = mesh;
+setup.displaylevel                   = 0;
+setup.nlp.solver                     = 'ipopt';
+setup.nlp.ipoptoptions.linear_solver = 'ma57';
+setup.nlp.ipoptoptions.maxiterations = 500;
+setup.derivatives.supplier           = 'sparseFD';
+setup.derivatives.derivativelevel    = 'second';
+setup.scales.method                  = 'automatic-bounds';
+setup.method                         = 'RPM-Differentiation';
+
+%-------------------------------------------------------------------%
+%------------------- Solve Problem Using GPOPS2 --------------------%
+%-------------------------------------------------------------------%
+
+
+output = gpops2(setup);
+
+
+%%
+solution = output.result.solution;
+
+alt  = solution.phase.state(:,1);
+v    = solution.phase.state(:,2);
+gamma  = solution.phase.state(:,3);
+m    = solution.phase.state(:,4);
+aoa    = solution.phase.state(:,5);
+aoadot       = solution.phase(1).control(:,1);
+
+forward0 = [alt(1),v(1),gamma(1),m(1)];
+
+time = solution.phase(1).time;
+
+% [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModel_forward(f_t, f_y,auxdata,ControlInterp(time,aoa,f_t),ControlInterp(time,aoadot,f_t)),time(1:end),forward0);
+
+[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,gamma,v,m,aoa,time,auxdata,aoadot);
+
+[AltF_actual, vF, Altexo, vexo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt(end),gamma(end),v(end), 0,0, deg2rad(97), m(end), auxdata);
+
+
+% figure(212)
+% hold on
+% plot(f_t(1:end),f_y(:,1));
+% plot(time,alt);
+% 
+% figure(213)
+% hold on
+% plot(f_t(1:end),f_y(:,2));
+% plot(time,v);
+% 
+% 
+% figure(214)
+% hold on
+% plot(f_t(1:end),f_y(:,4));
+% plot(time,m);
+

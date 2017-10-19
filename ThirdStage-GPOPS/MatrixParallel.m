@@ -4,8 +4,8 @@
 clear all
 mat = [];
 
-u = [2825] % velocity range. The routine is parallelised around this velocity list
-% u = [2850:25:2925] % velocity range. The routine is parallelised around this velocity list
+% u = [2825] % velocity range. The routine is parallelised around this velocity list
+u = [2700:25:2875] % velocity range. The routine is parallelised around this velocity list
 
 phi0 = -0.13 % initial latitude, this has very minimal effect
 % zeta0 = 1.69 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
@@ -31,12 +31,12 @@ m = [];
 AoA = [];
 options = cell(1,8);
 
-for i = 1:length(u)
+parfor i = 1:length(u)
 % for i = 1:length(u)
 u(i)
 
 % [mpayload(i), x, zeta, phi,Alt,v,t,Alpha,m,gamma,q,Vec_angle,T,CL,L,AltF(i),vF(i)] = ThirdStageOptm(k,j,u(i), phi0, zeta0, 0);
-
+mpayload(i) = ThirdStageGPOPS(k,j,u(i), phi0, zeta0);
 
 temp_payload(i) = mpayload(i);
 end
