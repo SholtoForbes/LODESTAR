@@ -1,4 +1,4 @@
-function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,gamma,v,m,Alpha,time,auxdata, Alphadot)
+function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D, q] = ThirdStageDyn(alt,gamma,v,m,Alpha,time,auxdata, Alphadot, phi, zeta)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -55,7 +55,7 @@ g = 9.806; %standard gravity
 % Isp = 437; % from Tom Furgusens Thesis %RL10
 
 Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction
-
+% Isp = 317;
 % Isp = 320
 % Isp = 446; %HM7B
 % Isp = 340; %Aestus 2
@@ -76,7 +76,7 @@ mEng = 52; %Kestrel
 % mdot = 9.86977; %Kestrel
 
 mdot = 9.86977.*1.5; %Kestrel Modified
-
+% mdot = 9.86977*1.2;
 % mdot = 14.72
 % mdot = 14.8105; %HM7B
 % mdot = 16.5; %Aestus 2
@@ -85,8 +85,10 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 % Moment of inertia
 % calculated in OneNote, thirdstage, 4 october 2017
 CG = 4.531; % m from end
-I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 + 161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
-
+% I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 +
+% 161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
+% %mass moment of inertia assuming every part is a point mass
+I = 0;
 
 
 %% Initiate Simulation
@@ -115,7 +117,7 @@ AoA_max(atmo_elem) = deg2rad(Max_AoA_interp(M(atmo_elem),CN_50.*50000./q(atmo_el
 
 q(exo_elem) = 0.5.*rho(exo_elem).*v(exo_elem).^2;
 M(exo_elem)  = v(exo_elem) ./c(exo_elem) ;
-AoA_max(exo_elem) = inf; %maximum allowable AoA
+AoA_max(exo_elem) = deg2rad(30); %maximum allowable AoA
 
 q = q.';
 M = M.';
@@ -152,28 +154,14 @@ Vec_angle(L  > T*sin(deg2rad(80)))  = deg2rad(80);
 end
 
 
-phi = auxdata.phi0;
+% phi = auxdata.phi0;
 xi = auxdata.xi0;
-zeta = auxdata.zeta0;
+% zeta = auxdata.zeta0;
 % Vec_angle = Vec_angle.'
 
-rdot = [];
-xidot = [];
-phidot = [];
-gammadot = [];
-vdot = [];
-zetadot = [];
-for i = 1:length(time)
-    if i < length(time)
-        [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(alt(i)+auxdata.Re,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i),Vec_angle(i));
-        phi(i+1) = phi(i) + phidot(i)*(time(i+1)-time(i));
-        xi(i+1) = xi(i) + xidot(i)*(time(i+1)-time(i));
-        zeta(i+1) = zeta(i) + zetadot(i)*(time(i+1)-time(i));
-    elseif i == length(time)
-        [rdot(i),xidot(i),phidot(i),gammadot(i),vdot(i),zetadot(i)] = RotCoordsRocket(alt(i)+auxdata.Re,xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),Alpha(i),Vec_angle(i));
-   
-    end
-end
+
+[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(alt+auxdata.Re,0,phi,gamma,v,zeta,L,D,T,m,Alpha,Vec_angle);
+
 
 end
 

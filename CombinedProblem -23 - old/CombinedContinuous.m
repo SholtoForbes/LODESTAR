@@ -47,6 +47,8 @@ v2    = input.phase(2).state(:,2);
 gamma2  = input.phase(2).state(:,3);
 m2    = input.phase(2).state(:,4);
 Alpha2    = input.phase(2).state(:,5);
+
+
 time2 = input.phase(2).time;
 Alphadot2  = input.phase(2).control(:,1);
 

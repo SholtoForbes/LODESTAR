@@ -265,8 +265,8 @@ bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2
 bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, bankMax1, Stage2.Initial.mFuel];
 
 % Control Bounds
-bounds.phase(1).control.lower = [deg2rad(-.5), deg2rad(-5)];
-bounds.phase(1).control.upper = [deg2rad(.5), deg2rad(5)];
+bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-.1)];
+bounds.phase(1).control.upper = [deg2rad(.1), deg2rad(.1)];
 % Time Bounds
 
 bounds.phase(1).initialtime.lower = 0;
@@ -317,7 +317,7 @@ speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  360*pi/180;
 mFuelMin = 0; mFuelMax = Stage2.Initial.mFuel-100;
-bankMin2 = -1*pi/180; bankMax2 =   80*pi/180
+bankMin2 = -1*pi/180; bankMax2 =   100*pi/180
 
 lonf = deg2rad(145);
 latf   = -0.269;
@@ -334,11 +334,11 @@ bounds.phase(2).initialstate.upper = [altMax, lonMax, latMax, speedMax, fpaMax, 
 bounds.phase(2).state.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin2, mFuelMin, throttleMin];
 bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
 
-% bounds.phase(2).finalstate.lower = [altMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-% bounds.phase(2).finalstate.upper = [200+auxdata.Re, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.lower = [altMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+bounds.phase(2).finalstate.upper = [200, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
-bounds.phase(2).finalstate.lower = [altMin, lonf-1, latf-1, speedMin, deg2rad(-80), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [200000+auxdata.Re, lonf+1, latf+1, speedMax, deg2rad(80), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+% bounds.phase(2).finalstate.lower = [altMin, lonf-.001, latf-.001, speedMin, deg2rad(-80), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+% bounds.phase(2).finalstate.upper = [200000+auxdata.Re, lonf+.001, latf+.001, speedMax, deg2rad(80), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-5), -1];
 bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(5), 1];
@@ -346,15 +346,15 @@ bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(5), 1];
 bounds.phase(2).path.lower = 0;
 bounds.phase(2).path.upper = 50000;
 
-tGuess              = [650; 1800];
-altGuess            = [30000; 10];
+tGuess              = [650; 1500];
+altGuess            = [35000; 100];
 lonGuess            = [lon0; lon0+1*pi/180];
 latGuess            = [lat0; lat0-1*pi/180];
 speedGuess          = [3000; 10];
 fpaGuess            = [0; 0];
 aziGuess            = [deg2rad(97); deg2rad(270)];
 aoaGuess            = [8*pi/180; 8*pi/180];
-bankGuess           = [60*pi/180; 60*pi/180];
+bankGuess           = [60*pi/180; 0*pi/180];
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [200; mFuelMin];
 guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
@@ -368,7 +368,7 @@ guess.phase(2).time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 % mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 4;
+mesh.maxiterations = 5;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 50;
 mesh.tolerance    = 1e-5;
@@ -387,7 +387,7 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-setup.nlp.ipoptoptions.maxiterations = 1000;
+setup.nlp.ipoptoptions.maxiterations = 2000;
 setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
@@ -424,6 +424,11 @@ eta = output.result.solution.phase(1).state(:,8).';
 mFuel = output.result.solution.phase(1).state(:,9).'; 
 mFuel2 = output.result.solution.phase(2).state(:,9).'; 
 
+omegadot  = output.result.solution.phase(1).control.'; 
+
+time = output.result.solution.phase(1).time.';
+time2 = output.result.solution.phase(2).time.';
+
 figure(201)
 subplot(9,1,1)
 hold on
@@ -450,10 +455,6 @@ hold on
 plot(time,gamma)
 plot(time2,gamma2)
 
-omegadot  = output.result.solution.phase(1).control.'; 
-
-time = output.result.solution.phase(1).time.';
-time2 = output.result.solution.phase(2).time.';
 
 
 % =========================================================================

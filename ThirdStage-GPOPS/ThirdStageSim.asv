@@ -21,7 +21,7 @@ function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc
 % if isnan(m0)
 %     m0 = 1000
 % end
-
+alt0,gamma0,v0, phi0, xi0, zeta0, m0
 % Atmosphere = auxdata.Atmosphere;
 Drag_interp = auxdata.Drag_interp;
 

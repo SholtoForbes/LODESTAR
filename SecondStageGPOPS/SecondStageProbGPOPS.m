@@ -213,15 +213,15 @@ auxdata.PayloadGrid = griddedInterpolant(VGrid,gammaGrid,vGrid,PayloadData,'spli
 
 % Primal Bounds
 bounds.phase.state.lower = [Stage2.Bounds.Alt(1), Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.mFuel(1), Stage2.Bounds.gammadot(1), Stage2.Bounds.zeta(1)];
-bounds.phase.state.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.mFuel(2), Stage2.Bounds.gammadot(2), Stage2.Bounds.zeta(2)];
+bounds.phase.state.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.mFuel(2), 0.003, Stage2.Bounds.zeta(2)];
 
 % Initial States
 bounds.phase.initialstate.lower = [Stage2.Bounds.Alt(1), Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Initial.mFuel, Stage2.Bounds.gammadot(1), Stage2.Bounds.zeta(1)] ;
-bounds.phase.initialstate.upper = [Stage2.Bounds.Alt(2), Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Initial.mFuel, Stage2.Bounds.gammadot(2), Stage2.Bounds.zeta(2)];
+bounds.phase.initialstate.upper = [Stage2.Bounds.Alt(2), Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Initial.mFuel, 0.003, Stage2.Bounds.zeta(2)];
 
 % End States
 bounds.phase.finalstate.lower = [Stage2.Bounds.Alt(1), Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.mFuel, Stage2.Bounds.gammadot(1), Stage2.End.Zeta];
-bounds.phase.finalstate.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.mFuel, Stage2.Bounds.gammadot(2), Stage2.End.Zeta];
+bounds.phase.finalstate.upper = [Stage2.Bounds.Alt(2), Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.mFuel, 0.003, Stage2.End.Zeta];
 
 % Control Bounds
 bounds.phase.control.lower = Stage2.Bounds.control(1);

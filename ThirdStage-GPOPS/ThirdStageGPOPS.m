@@ -1,10 +1,10 @@
-function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0);
+% function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0);
 
-% alt0 = 35000;
-% gamma0 = 0;
-% v0 = 2900;
-% phi0 = 0;
-% zeta0 = 0;
+alt0 = 33000;
+gamma0 = deg2rad(5);
+v0 = 2650;
+phi0 = -0.13;
+zeta0 = 1.78
 
 
 %-------------------------------------------------------------------------%
@@ -56,13 +56,12 @@ t0     = 0;
 %-------------------------------------------------------------------%
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
-tfMin = 0;            tfMax = 3000;
-altMin = alt0;  altMax = 84000;
-lonMin = -pi;         lonMax = -lonMin;
-latMin = -70*pi/180;  latMax = -latMin;
+tfMin = 10;            tfMax = 3000;
+altMin = alt0;  altMax = 100000;
+phiMin = -0.2;         phiMax = 0.3;
 vMin = 10;        vMax = 8000;
 gammaMin =deg2rad(-5);  gammaMax =  deg2rad(30);
-aziMin = -180*pi/180; aziMax =  180*pi/180;
+zetaMin = deg2rad(90); zetaMax =  deg2rad(110);
 aoaMin = 0;  aoaMax = deg2rad(20);
 
 aoadotMin = -deg2rad(1);
@@ -77,14 +76,14 @@ bounds.phase.finaltime.lower = tfMin;
 bounds.phase.finaltime.upper = tfMax;
 
 
-bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin];
-bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax];
+bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zeta0];
+bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zeta0];
 
-bounds.phase.state.lower = [altMin,vMin, gammaMin, 0, aoaMin];
-bounds.phase.state.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, aoaMax];
+bounds.phase.state.lower = [altMin,vMin, gammaMin, 0, aoaMin, phiMin, zetaMin];
+bounds.phase.state.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, aoaMax, phiMax, zetaMax];
 
-bounds.phase.finalstate.lower = [altMin, vMin, 0, 0, 0];
-bounds.phase.finalstate.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, 0];
+bounds.phase.finalstate.lower = [altMin, vMin, 0, 0, 0, phiMin, zetaMin];
+bounds.phase.finalstate.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, 0, phiMax, zetaMax];
 
 bounds.phase.control.lower = [aoadotMin];
 bounds.phase.control.upper = [aoadotMax];
@@ -98,13 +97,15 @@ bounds.eventgroup.upper = 566000;
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
 %-------------------------------------------------------------------------%
-tGuess              = [0; 250];
+tGuess              = [0; 150];
 altGuess            = [alt0; 60000];
 vGuess          = [v0; 7000];
 gammaGuess            = [gamma0; rad2deg(10)];
-mGuess              = [3300; 2000];
-aoaGuess            = [deg2rad(10); deg2rad(20)];
-guess.phase.state   = [altGuess, vGuess, gammaGuess, mGuess, aoaGuess];
+mGuess              = [3300; 1400];
+aoaGuess            = [deg2rad(20); deg2rad(20)];
+phiGuess = [phi0;0];
+zetaGuess = [zeta0;zeta0];
+guess.phase.state   = [altGuess, vGuess, gammaGuess, mGuess, aoaGuess, phiGuess, zetaGuess];
 guess.phase.control = [0;0];
 guess.phase.time    = tGuess;
 
@@ -112,10 +113,9 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 4;
-mesh.colpointsmin = 3;
+mesh.maxiterations = 4
 mesh.colpointsmax = 30;
-mesh.tolerance    = 1e-4;
+mesh.tolerance    = 1e-5;
 
 %-------------------------------------------------------------------%
 %---------- Configure Setup Using the information provided ---------%
@@ -152,34 +152,68 @@ v    = solution.phase.state(:,2);
 gamma  = solution.phase.state(:,3);
 m    = solution.phase.state(:,4);
 aoa    = solution.phase.state(:,5);
+phi    = solution.phase.state(:,6);
+zeta    = solution.phase.state(:,7);
 aoadot       = solution.phase(1).control(:,1);
 
-forward0 = [alt(1),v(1),gamma(1),m(1)];
+forward0 = [alt(1),v(1),gamma(1),m(1),phi(1),zeta(1)];
 
 time = solution.phase(1).time;
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModel_forward(f_t, f_y,auxdata,ControlInterp(time,aoa,f_t),ControlInterp(time,aoadot,f_t)),time(1:end),forward0);
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D] = ThirdStageDyn(alt,gamma,v,m,aoa,time,auxdata,aoadot);
-
-[AltF_actual, vF, Altexo, vexo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt(end),gamma(end),v(end), 0,0, deg2rad(97), m(end), auxdata);
+[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D, q] = ThirdStageDyn(alt,gamma,v,m,aoa,time,auxdata,aoadot,phi,zeta);
 
 
+xi(1) = auxdata.xi0;
+for i = 2:length(time)
+    xi(i) = xi(i-1) + xidot(i-1)*(time(i)-time(i-1));
+end
 
-% figure(212)
-% hold on
-% plot(f_t(1:end),f_y(:,1));
-% plot(time,alt);
-% 
-% figure(213)
-% hold on
-% plot(f_t(1:end),f_y(:,2));
-% plot(time,v);
-% 
-% 
-% figure(214)
-% hold on
-% plot(f_t(1:end),f_y(:,4));
-% plot(time,m);
+[AltF_actual, vF, altexo, vexo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt(end),gamma(end),v(end), phi(end),xi(end), zeta(end), m(end), auxdata);
 
+
+
+figure(212)
+hold on
+plot(f_t(1:end),f_y(:,1));
+plot(time,alt);
+
+figure(213)
+hold on
+plot(f_t(1:end),f_y(:,2));
+plot(time,v);
+
+
+%% Plotting
+% if plotflag == 1
+figure(214)
+    addpath('addaxis')
+    hold on
+
+    plot([time; timeexo.'+time(end)], [alt; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
+    plot([time; timeexo.'+time(end)],[q;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+    plot([time; timeexo.'+time(end)],[rad2deg(aoa);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
+    ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
+    
+
+    addaxis([time; timeexo.'+time(end)],[v;vexo.'], [0 7000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
+    addaxisplot([time; timeexo.'+time(end)],[ m;mexo.';mexo(end)],2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
+    addaxislabel(2,'Velocity (m/s), Mass (kg)');
+
+
+    addaxis([time; timeexo.'+time(end)],[rad2deg(Vec_angle);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+    addaxisplot([time; timeexo.'+time(end)], [rad2deg(gamma);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
+    addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
+
+    legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
+    xlabel('Time (s)');
+    xlim([0 timeexo(end)+time(end)])
+    box off
+    % Write data to file
+    dlmwrite('ThirdStageData',[time, alt, v, m,q ,gamma,D ,zeta], ' ')
+
+%     Integrated_Drag = cumtrapz(time(1:end-1),D) ;
+%     Integrated_Drag(end)
+% end

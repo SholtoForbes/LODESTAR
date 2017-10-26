@@ -4,10 +4,11 @@ altf = input.phase.finalstate(1);
 vf = input.phase.finalstate(2);
 gammaf = input.phase.finalstate(3);
 mf = input.phase.finalstate(4);
-
+phif = input.phase.finalstate(6);
+zetaf = input.phase.finalstate(7);
 %%
 
-[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc,T,CL,L,inc_diff]=ThirdStageSim(altf,gammaf,vf, 0, 0,deg2rad(97), mf, input.auxdata);
+[AltF_actual, vF, Alt, v, t, mpayload]=ThirdStageSim(altf,gammaf,vf, phif, 0,zetaf, mf, input.auxdata);
 
 %% cost
 output.objective = -mpayload;
