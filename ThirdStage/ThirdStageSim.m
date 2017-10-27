@@ -131,6 +131,10 @@ v(1) = u;
 zeta(1) = zeta0;
 
 %% Define Vehicle Properties
+
+CG = 4.531; % m from end
+I = 6628; % From Creo
+
 mHS = 130.9; % Heat Shield Mass
 
 % mEng = 100; %RL10
@@ -194,7 +198,11 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
         Alpha(i) = 0;
     end
 
-
+    if i ==1
+      Alphadot(i) = 0;  
+    else
+    Alphadot(i) = (Alpha(i)-Alpha(i-1))/dt;
+    end
 
     p(i) = ppval(p_spline, Alt(i));
     
@@ -298,7 +306,7 @@ while (gamma(i) >= 0 && t(i) < 2000 || t(i) < 150) && Alt(end) > 20000
     
     if T(i) > 0
 %         Vec_angle(i) = asin(2.5287/2.9713*L(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment.
-        Vec_angle(i) = asin((cP(i)*1.1)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
+        Vec_angle(i) = asin((cP(i)*1.1)/2.9554*N(i)/T(i) - Alphadot(i).*I./((CG-1.5).*T(i))); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
 %         Vec_angle(i) = asin((7.5 - 2.9554 + cP(i)*1.05)/2.9554*N(i)/T(i)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths from nose
     else
         Vec_angle(i) = 0;

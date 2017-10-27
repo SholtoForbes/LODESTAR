@@ -1,8 +1,8 @@
 % function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0);
 
-alt0 = 33000;
-gamma0 = deg2rad(5);
-v0 = 2650;
+alt0 = 35000;
+gamma0 = deg2rad(3);
+v0 = 2850;
 phi0 = -0.13;
 zeta0 = 1.78
 
@@ -56,9 +56,9 @@ t0     = 0;
 %-------------------------------------------------------------------%
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
-tfMin = 10;            tfMax = 3000;
+tfMin = 7;            tfMax = 200;
 altMin = alt0;  altMax = 100000;
-phiMin = -0.2;         phiMax = 0.3;
+phiMin = -0.2;         phiMax = 0.1;
 vMin = 10;        vMax = 8000;
 gammaMin =deg2rad(-5);  gammaMax =  deg2rad(30);
 zetaMin = deg2rad(90); zetaMax =  deg2rad(110);
@@ -98,12 +98,12 @@ bounds.eventgroup.upper = 566000;
 %---------------------- Provide Guess of Solution ------------------------%
 %-------------------------------------------------------------------------%
 tGuess              = [0; 150];
-altGuess            = [alt0; 60000];
+altGuess            = [alt0; 90000];
 vGuess          = [v0; 7000];
 gammaGuess            = [gamma0; rad2deg(10)];
-mGuess              = [3300; 1400];
+mGuess              = [3300; 2000];
 aoaGuess            = [deg2rad(20); deg2rad(20)];
-phiGuess = [phi0;0];
+phiGuess = [phi0;-0.05];
 zetaGuess = [zeta0;zeta0];
 guess.phase.state   = [altGuess, vGuess, gammaGuess, mGuess, aoaGuess, phiGuess, zetaGuess];
 guess.phase.control = [0;0];

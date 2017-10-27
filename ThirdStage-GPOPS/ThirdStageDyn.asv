@@ -85,10 +85,11 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 % Moment of inertia
 % calculated in OneNote, thirdstage, 4 october 2017
 CG = 4.531; % m from end
-% I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 +161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
+I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 +
+% 161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
 % %mass moment of inertia assuming every part is a point mass
-% I = 0;
-I = 6628; % From Creo
+I = 0;
+
 
 %% Initiate Simulation
 
