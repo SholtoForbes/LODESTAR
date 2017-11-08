@@ -19,13 +19,13 @@ Drag = scattered.drag(v,V,lift_search);
 Flap_pitchingmoment = scattered.flap_pm(v,V,lift_search);
 
 omegadot = diff(thetadot)./diff(time);
-alphadot = diff(Alpha)./diff(time);
-% I = 150000; % from hand calculation
-% extramoment = [0 (omegadot+alphadot)*I];
+alp0hadot = diff(Alpha)./diff(time);
+I = 267400; % from Creo
+extramoment = [0 (omegadot+alphadot)*I];
 
-% flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment + extramoment);
+flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment + extramoment);
 
-flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment);
+% flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment);
 
 %========================================================
 % 

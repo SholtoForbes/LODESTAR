@@ -1,10 +1,10 @@
-% function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0);
+function mpayload = ThirdStageGPOPS(alt0,gamma0,v0, phi0, zeta0, plotflag)
 
-alt0 = 35000;
-gamma0 = deg2rad(3);
-v0 = 2850;
-phi0 = -0.13;
-zeta0 = 1.78
+% alt0 = 33000;
+% gamma0 = deg2rad(3);
+% v0 = 2850;
+% phi0 = -0.13;
+% zeta0 = 1.78
 
 
 %-------------------------------------------------------------------------%
@@ -57,7 +57,7 @@ t0     = 0;
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
 tfMin = 7;            tfMax = 200;
-altMin = alt0;  altMax = 100000;
+altMin = alt0;  altMax = 84000;
 phiMin = -0.2;         phiMax = 0.1;
 vMin = 10;        vMax = 8000;
 gammaMin =deg2rad(-5);  gammaMax =  deg2rad(30);
@@ -78,6 +78,8 @@ bounds.phase.finaltime.upper = tfMax;
 
 bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zeta0];
 bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zeta0];
+% bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zetaMin];
+% bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zetaMax];
 
 bounds.phase.state.lower = [altMin,vMin, gammaMin, 0, aoaMin, phiMin, zetaMin];
 bounds.phase.state.upper = [altMax, vMax, gammaMax, auxdata.ThirdStagem, aoaMax, phiMax, zetaMax];
@@ -91,15 +93,15 @@ bounds.phase.control.upper = [aoadotMax];
 bounds.phase.path.lower = [-deg2rad(8), -inf];
 bounds.phase.path.upper = [deg2rad(8), 0];
 
-bounds.eventgroup.lower = 100000;
+bounds.eventgroup.lower = 90000;
 bounds.eventgroup.upper = 566000;
 
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
 %-------------------------------------------------------------------------%
 tGuess              = [0; 150];
-altGuess            = [alt0; 90000];
-vGuess          = [v0; 7000];
+altGuess            = [alt0; 60000];
+vGuess          = [v0; 6000];
 gammaGuess            = [gamma0; rad2deg(10)];
 mGuess              = [3300; 2000];
 aoaGuess            = [deg2rad(20); deg2rad(20)];
@@ -113,9 +115,9 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 4
+mesh.maxiterations = 7
 mesh.colpointsmax = 30;
-mesh.tolerance    = 1e-5;
+mesh.tolerance    = 1e-4;
 
 %-------------------------------------------------------------------%
 %---------- Configure Setup Using the information provided ---------%
@@ -175,6 +177,13 @@ end
 
 
 
+
+
+
+%% Plotting
+if plotflag == 1
+figure(214)
+
 figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
@@ -186,8 +195,6 @@ plot(f_t(1:end),f_y(:,2));
 plot(time,v);
 
 
-%% Plotting
-% if plotflag == 1
 figure(214)
     addpath('addaxis')
     hold on
@@ -216,4 +223,4 @@ figure(214)
 
 %     Integrated_Drag = cumtrapz(time(1:end-1),D) ;
 %     Integrated_Drag(end)
-% end
+end

@@ -16,7 +16,7 @@ num_div_mat = [];
 options.Display = 'none';
 options.Algorithm = 'sqp';
 % options.FunValCheck = 'on';
-options.ScaleProblem = 'obj-and-constr'
+% options.ScaleProblem = 'obj-and-constr'
 % options.DiffMinChange = 0.0005;
 % options.TypicalX = x0;
 % options.UseParallel = 1;
@@ -25,7 +25,8 @@ options.ScaleProblem = 'obj-and-constr'
 
 options.TolFun = 1e-4;
 options.TolX = 1e-4;
-options.DiffMinChange = 0.0005;
+options.DiffMinChange = 0.001;
+
 %  options.DiffMinChange = 0.01;
 mpayload = 0;
 x=0;
@@ -77,7 +78,6 @@ num_div = 20+i5;
 % ub = [AoA_max_abs*ones(1,num_div) 2900/10000  240/1000];
 % 
 % x0 = [deg2rad(12)*ones(1,num_div)+deg2rad(i4) 2425/10000+i3*25/10000 220/1000];
-
 
  lb = [deg2rad(0)*ones(1,num_div) 1300/10000  70/1000];
 ub = [AoA_max_abs*ones(1,num_div) 2200/10000  130/1000];
@@ -155,11 +155,13 @@ x(end)
 
 mpayload
 zeta(end)
-figure(301)
-set(gcf,'position',[300 300 1300 700])
+
 
 %% Plotting
 if plotflag == 1
+    figure(301)
+set(gcf,'position',[300 300 1300 700])
+    
     addpath('addaxis')
     hold on
 

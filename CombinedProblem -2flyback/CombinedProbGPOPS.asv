@@ -457,10 +457,6 @@ subplot(9,1,6)
 hold on
 plot(time,gamma)
 plot(time2,gamma2)
-subplot(9,1,7)
-hold on
-plot(time,ones(1,length(time)))
-plot(time2,throttle2)
 
 
 
@@ -535,9 +531,9 @@ title('Velocity (m/s)')
 % plot(time, M)
 % title('Mach no')
 
-% subplot(5,5,13)
-% plot(time, q)
-% title('Dynamic Pressure (pa)')
+subplot(5,5,13)
+plot(time, q)
+title('Dynamic Pressure (pa)')
 
 subplot(5,5,14)
 hold on
@@ -593,15 +589,15 @@ title('Angle of Attack (deg)')
 % plot(time,Hamiltonian);
 % title('Hamiltonian')
 
-% subplot(5,5,24)
-% hold on
-% plot(time, rad2deg(gammadot))
-% title('Trajectory Angle Change Rate (Deg/s)')
-% 
-% subplot(5,5,25)
-% hold on
-% plot(time, rad2deg(omegadot))
-% title('Omegadot Control (Deg/s2)')
+subplot(5,5,24)
+hold on
+plot(time, rad2deg(gammadot))
+title('Trajectory Angle Change Rate (Deg/s)')
+
+subplot(5,5,25)
+hold on
+plot(time, rad2deg(omegadot))
+title('Omegadot Control (Deg/s2)')
 
 
 dim = [.8 .0 .2 .2];

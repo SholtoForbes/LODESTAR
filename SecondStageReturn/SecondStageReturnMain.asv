@@ -49,16 +49,14 @@ end
 
 auxdata.interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
 auxdata.interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
-auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','nearest');
+auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','linear');
 
 %Take input of aero
 flapaero = importdata('SPARTAN_Flaps.txt');
 
-auxdata.interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
-auxdata.interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
-auxdata.interp.flap_momentdef_scattered = scatteredInterpolant(aero(:,1),aero(:,5),aero(:,2), 'linear', 'nearest');
-
-
+interp.flapCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,3));
+interp.flapCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,4));
+interp.flapCm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
 
 % Produce Atmosphere Data
 auxdata.Atmosphere = dlmread('atmosphere.txt');
@@ -228,8 +226,8 @@ bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax,
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax, mFuelMax, throttleMax];
 
-bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
-bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
+bounds.phase.finalstate.lower = [radMin, lonf-0.001, latf-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
+bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.001, latf+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
 %  bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), aziMin, aoaMin, bankMin, mFuelMin];
 % bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), aziMax, aoaMax, bankMax, mFuelMin];
@@ -280,10 +278,10 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 7;
-mesh.colpointsmin = 5;
-mesh.colpointsmax = 30;
-mesh.tolerance    = 1e-4;
+mesh.maxiterations = 3;
+mesh.colpointsmin = 3;
+mesh.colpointsmax = 20;
+mesh.tolerance    = 1e-6;
 
 
 %-------------------------------------------------------------------%
