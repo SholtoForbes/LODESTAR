@@ -6,13 +6,8 @@
 %close all
 clear all
 clc
-
-% cft2m = 0.3048;
-% cft2km = cft2m/1000;
-% cslug2kg = 14.5939029;
-
-
-mstruct = 4910.5 - 132.8 + 179.41; % mass of everything but fuel from dawids work
+addpath('..\')
+addpath('..\SecondStage\EngineData')
 
 %% Inputs ============================================
 %Take input of aero
@@ -61,8 +56,8 @@ auxdata.interp.flap_momentdef_scattered = scatteredInterpolant(aero(:,1),aero(:,
 
 
 % Produce Atmosphere Data
-auxdata.Atmosphere = dlmread('atmosphere.txt');
-
+Atmosphere = dlmread('atmosphere.txt');
+auxdata.Atmosphere = Atmosphere; 
 auxdata.interp.c_spline = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
 
 auxdata.interp.rho_spline = spline( auxdata.Atmosphere(:,1),  auxdata.Atmosphere(:,4)); % Calculate density using atmospheric data
@@ -115,7 +110,7 @@ end
 
 auxdata.equivalence = scatteredInterpolant(eq_data(:,1),eq_data(:,2),eq_data(:,4), 'linear');
 grid.eq_eng = auxdata.equivalence(grid.Mgrid_eng,grid.T_eng);
-auxdata.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
+auxdata.interp.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
 
 
 %% Load the interpolated Isp data
@@ -138,7 +133,7 @@ for i = 1:30 % must match engineint.m
     end
 end
 
-auxdata.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','spline');
+auxdata.interp.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Isp_eng,'spline','spline');
 
 %% Shock Data
 % Import conical shock data and create interpolation splines 
@@ -147,12 +142,18 @@ shockdata = dlmread('ShockMat');
 M1_Grid = reshape(shockdata(:,3),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
 pres_Grid = reshape(shockdata(:,4),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
 temp_Grid = reshape(shockdata(:,5),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
-auxdata.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
-auxdata.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
-auxdata.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
+auxdata.interp.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
+auxdata.interp.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
+auxdata.interp.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
 
 
+%% Import Vehicle and trajectory Config Data %%============================
+addpath('../')
+run VehicleConfig.m
+run TrajectoryConfig50kPa.m
 
+auxdata.Stage3 = Stage3;
+auxdata.Stage2 = Stage2;
 
 %=============================================== 
 
@@ -160,8 +161,8 @@ auxdata.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linea
 %------------------ Provide Auxiliary Data for Problem -------------------%
 %-------------------------------------------------------------------------%
 auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
-auxdata.mass = mstruct;               % Vehicle Mass (kg)
-auxdata.A = 62.77; %m^2
+% auxdata.mass = mstruct;               % Vehicle Mass (kg)
+% auxdata.A = 62.77; %m^2
 %-------------------------------------------------------------------%
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%

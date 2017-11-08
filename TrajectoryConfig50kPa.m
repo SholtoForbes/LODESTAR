@@ -68,7 +68,7 @@ Stage2.Bounds.q         = [0, 50000]; % Dynamic Pressure Bounds, pa
 Stage2.Bounds.AoA       = [0, 9]; % Angle of Attack Bounds, deg
 
 % Initial Guesses %--------------------------------------------------------
-Stage2.Guess.Alt        = [interp1(interp.Atmosphere(:,4),interp.Atmosphere(:,1),2*50000/Stage2.Initial.v^2)-100, 33500]; % Altitude Guess, m
+Stage2.Guess.Alt        = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/Stage2.Initial.v^2)-100, 33500]; % Altitude Guess, m
 Stage2.Guess.v          = [Stage2.Initial.v, 2900]; % Velocity Guess, m/s
 Stage2.Guess.gamma      = [0.0, deg2rad(4.5)]; % Trajectory Angle guess, rad
 Stage2.Guess.mFuel      = [Stage2.mFuel, 0]; % Fuel Mass Guess, kg

@@ -4,7 +4,7 @@ interp = auxdata.interp;
 % =======================================================
 % Vehicle Model
 % =======================================================
-A = auxdata.A; % reference area (m^2)
+A = auxdata.Stage2.Aref; % reference area (m^2)
 
 % eta = .0*ones(1,length(time)); % Roll angle
 
@@ -17,7 +17,7 @@ g = 9.81;
 
 alt = r - auxdata.Re;
 
-m = auxdata.mass+mFuel;
+m = auxdata.Stage2.mStruct+mFuel;
 
 
 
@@ -83,7 +83,7 @@ L = 0.5*(Cl_noflaps+flap_Cl).*A.*rho.*v.^2;
 
 %% Thrust 
 
-[Isp,Fueldt,eq] = RESTM12int(M, alpha, auxdata,T0,P0);
+[Isp,Fueldt,eq] = RESTint(M, alpha, auxdata,T0,P0);
 
 % for i = 1:length(r)
 %   if q(i) < 20000

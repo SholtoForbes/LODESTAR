@@ -1,0 +1,18 @@
+Third Stage - Kestrel
+
+Lnose = 3m, Centrebody = 4.5m, Engine = 2m. Note, some room has been left for the kestrel to go into the body slightly (about 0.5m)
+This fits within the centrebody of the SPARTAN with a little room to spare. 
+
+Area = 0.866
+
+Total Mass = 3500kg - sized iteratively, any larger than this cannot sustain >0 trajectory angle
+
+Engine Mass = 52kg
+
+Heat Shield Mass = 125kG (phenolic cork body, C-C Cone and Tungsten nose)
+
+mass flow rate = 9.8 kg/s
+
+Isp = 317s (vacuum)
+
+Exit Pressure, 1.4 kPa, calculated using Rocket Propulsion Analysis
