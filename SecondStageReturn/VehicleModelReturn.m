@@ -1,5 +1,6 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel)
-
+function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Cm_noflaps] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel)
+% function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,flapdeflection)
+% 
 interp = auxdata.interp;
 % =======================================================
 % Vehicle Model
@@ -62,24 +63,46 @@ Cd_noflaps = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 Cl_noflaps = auxdata.interp.Cl_spline(mach,rad2deg(alpha));
 Cm_noflaps = auxdata.interp.Cm_spline(mach,rad2deg(alpha));
 
-Cd_AoA0 = auxdata.interp.Cd_spline(mach,0*ones(length(mach),1));
-Cl_AoA0 = auxdata.interp.Cl_spline(mach,0*ones(length(mach),1));
-Cm_AoA0 = auxdata.interp.Cm_spline(mach,0*ones(length(mach),1));
+% Cd_AoA0 = auxdata.interp.Cd_spline(mach,0*ones(length(mach),1));
+% Cl_AoA0 = auxdata.interp.Cl_spline(mach,0*ones(length(mach),1));
+% Cm_AoA0 = auxdata.interp.Cm_spline(mach,0*ones(length(mach),1));
+% % 
+% % Cl_AoA0_withflaps = interp.flap_momentCl_scattered(mach,-(Cm_noflaps-Cm_AoA0));
+% % Cd_AoA0_withflaps = interp.flap_momentCd_scattered(mach,-(Cm_noflaps-Cm_AoA0)) ;
+% 
+% Flap_deflection = interp.flap_momentdef_scattered(mach,-(Cm_noflaps-Cm_AoA0)) ;
+% 
+% if Flap_deflection_linear > 20 
+%    Cl_AoA0_withflaps = interp.flap_Cl_scattered(mach,20);
+%  Cd_AoA0_withflaps = interp.flap_Cd_scattered(mach,20); 
+% elseif Flap_deflection_linear < -20 
+%     Cl_AoA0_withflaps = interp.flap_Cl_scattered(mach,-20);
+%  Cd_AoA0_withflaps = interp.flap_Cd_scattered(mach,-20); 
+% else
+% Cl_AoA0_withflaps = polyvaln(auxdata.interp.Cl_poly,[mach,-(Cm_noflaps-Cm_AoA0)]);
+% Cd_AoA0_withflaps = polyvaln(auxdata.interp.Cd_poly,[mach,-(Cm_noflaps-Cm_AoA0)]);
+% end
+    
 
-Cl_AoA0_withflaps = interp.flap_momentCl_scattered(mach,-(Cm_noflaps-Cm_AoA0));
-Cd_AoA0_withflaps = interp.flap_momentCd_scattered(mach,-(Cm_noflaps-Cm_AoA0)) ;
-Flap_deflection = interp.flap_momentdef_scattered(mach,-(Cm_noflaps-Cm_AoA0)) ;
+% Flap_deflection = polyvaln(auxdata.interp.flapdeflection_poly,[mach,-(Cm_noflaps-Cm_AoA0)]);
 
-flap_Cl = Cl_AoA0_withflaps - Cl_AoA0;
-flap_Cd = Cd_AoA0_withflaps - Cd_AoA0;
+% Cl_AoA0_withflaps = interp.flap_Cl_scattered(mach,flapdeflection);
+% Cd_AoA0_withflaps = interp.flap_Cd_scattered(mach,flapdeflection);
+% Cm_AoA0_withflaps = interp.flap_Cm_scattered(mach,flapdeflection);
+
+% flap_Cl = Cl_AoA0_withflaps - Cl_AoA0;
+% flap_Cd = Cd_AoA0_withflaps - Cd_AoA0;
+% flap_Cm = Cm_AoA0_withflaps - Cm_AoA0;
+
+% trim_constraint = flap_Cm - Cm_noflaps;
 
 %%%% Compute the drag and lift:
 
-D = 0.5*(Cd_noflaps+flap_Cd).*A.*rho.*v.^2;
-L = 0.5*(Cl_noflaps+flap_Cl).*A.*rho.*v.^2;
+% D = 0.5*(Cd_noflaps+flap_Cd).*A.*rho.*v.^2;
+% L = 0.5*(Cl_noflaps+flap_Cl).*A.*rho.*v.^2;
 
-% D = 0.5*(Cd_noflaps).*A.*rho.*v.^2;
-% L = 0.5*(Cl_noflaps).*A.*rho.*v.^2;
+D = 0.5*(Cd_noflaps).*A.*rho.*v.^2;
+L = 0.5*(Cl_noflaps).*A.*rho.*v.^2;
 
 %% Thrust 
 

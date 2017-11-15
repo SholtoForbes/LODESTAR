@@ -21,6 +21,6 @@ mFuel0 = input.phase.initialstate(9);
 % altf = input.phase.finalstate(2);
 % cost
 % output.objective = 1000*(latf+0.1)^2;
-% output.objective = latf;
+output.objective = latf;
 % output.objective = -vf;
-output.objective = mFuel0;
+% output.objective = mFuel0;

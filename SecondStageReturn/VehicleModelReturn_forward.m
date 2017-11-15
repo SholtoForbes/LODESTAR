@@ -1,4 +1,4 @@
-function ydot = VehicleModelReturn_forward(f_t, f_y,auxdata,alpha,eta,throttle)
+function ydot = VehicleModelReturn_forward(f_t, f_y,auxdata,alpha,eta,throttle,flapdeflection)
 
 r = f_y(1)+auxdata.Re;
 gamma = f_y(2);

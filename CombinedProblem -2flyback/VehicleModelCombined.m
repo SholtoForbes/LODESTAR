@@ -1,4 +1,4 @@
-function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombinedAscent(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,ThirdStage)
+function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,ThirdStage)
 
 interp = auxdata.interp;
 % =======================================================
@@ -43,8 +43,13 @@ P0 = ppval(interp.P0_spline, alt);
 %% Aerodynamics
 % interpolate coefficients
 
-Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
-Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha));   
+if ThirdStage == 1
+Cd = auxdata.interp.Cd_spline1(mach,rad2deg(alpha));
+Cl = auxdata.interp.Cl_spline1(mach,rad2deg(alpha));
+else
+Cd = auxdata.interp.Cd_spline2(mach,rad2deg(alpha));
+Cl = auxdata.interp.Cl_spline2(mach,rad2deg(alpha));   
+end
 
 %%%% Compute the drag and lift:
 

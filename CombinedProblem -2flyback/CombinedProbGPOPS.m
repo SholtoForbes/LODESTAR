@@ -12,8 +12,8 @@ addpath('..\SecondStage\EngineData')
 addpath('..\SecondStage\SecondStageAscent')
 addpath('..\SecondStageReturn')
 %% Atmosphere Data %%======================================================
-interp.Atmosphere = dlmread('atmosphere.txt');
-
+Atmosphere = dlmread('atmosphere.txt');
+interp.Atmosphere = Atmosphere;
 auxdata.interp.Atmosphere = interp.Atmosphere;
 
 auxdata.interp.c_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
@@ -66,6 +66,25 @@ auxdata.A = 62.77; %m^2
 
 const = 1
 auxdata.const = const;
+%% Aerodynamic Data - Communicator %%======================================
+% Take inputs of aerodynamic communicator matrices, these should be .txt files 
+% This is used for forward simulation. 
+communicator = importdata('communicator.txt');
+communicator_trim = importdata('communicator_trim.txt');
+
+auxdata.interp.flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+auxdata.interp.flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+auxdata.interp.flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+
+[MList,AOAList] = ndgrid(unique(communicator(:,1)),unique(communicator(:,2)));
+Cl_Grid = reshape(communicator(:,3),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+Cd_Grid = reshape(communicator(:,4),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+pitchingmoment_Grid = reshape(communicator(:,11),[length(unique(communicator(:,2))),length(unique(communicator(:,1)))]).';
+
+auxdata.interp.Cl_spline1 = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+auxdata.interp.Cd_spline1 = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
+auxdata.interp.pitchingmoment_spline1 = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
+
 %% Aerodynamic Data 
 %%
 aero = importdata('SPARTANaero.txt');
@@ -96,8 +115,8 @@ for i = 1:numel(MList2)
 
 end
 
-auxdata.interp.Cl_spline = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
-auxdata.interp.Cd_spline = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
+auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
+auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
 
 
 

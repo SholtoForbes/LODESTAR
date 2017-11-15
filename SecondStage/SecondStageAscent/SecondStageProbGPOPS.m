@@ -12,8 +12,8 @@ addpath('..\..\')
 addpath('..\EngineData')
 
 %% Atmosphere Data %%======================================================
-interp.Atmosphere = dlmread('atmosphere.txt');
-
+Atmosphere = dlmread('atmosphere.txt');
+interp.Atmosphere = Atmosphere ;
 auxdata.interp.Atmosphere = interp.Atmosphere;
 
 
@@ -106,9 +106,6 @@ auxdata.interp.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator
 auxdata.interp.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
 
 clear liftarray % liftarray can be very large, clear from memory
-
-
-
 
 
 %% Conical Shock Data %%===================================================

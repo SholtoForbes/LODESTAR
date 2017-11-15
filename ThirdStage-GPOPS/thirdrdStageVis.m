@@ -24,7 +24,7 @@ ylabel(c,'Payload Mass, kg')
 
 
 
-[VGrid,thetaGrid,vGrid] = ndgrid(33000:500:35000,[deg2rad(2) :deg2rad(.5): deg2rad(4)],[2600:50:2750]);
+[VGrid,thetaGrid,vGrid] = ndgrid(33000:500:35000,[deg2rad(2) :deg2rad(.5): deg2rad(4)],[2575:25:2925]);
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6));
 PayloadData = PayloadDataInterp(VGrid,thetaGrid,vGrid);
@@ -37,7 +37,7 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
  figure(200)
 
 colormap(gray)
-C = contourf(rad2deg(thetaGrid(:,:,2)),VGrid(:,:,2)/1000,PayloadData(:,:,2),20,'LineWidth',0.)
+C = contourf(rad2deg(thetaGrid(:,:,2)),VGrid(:,:,2)/1000,PayloadData(:,:,3),20,'LineWidth',0.)
 % C = contourf(rad2deg(meshAngle(:,:,2)),meshAlt(:,:,2)/1000,meshPayload(:,:,3),12)
 % C = contourf(rad2deg(meshAngle),meshAlt/1000,meshPayload,13)
 
