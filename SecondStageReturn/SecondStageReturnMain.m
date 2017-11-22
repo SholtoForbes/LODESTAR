@@ -9,6 +9,10 @@ clc
 addpath('..\')
 addpath('..\SecondStage\EngineData')
 
+
+
+auxdata.const = 4 % 1 normal, 2 10% increased Cd, 3 10% decreased Cd, 4 10% increased Isp
+
 %% Inputs ============================================
 
 
@@ -96,19 +100,19 @@ for i = 1:numel(MList)
     I = cell(1, ndims(MList)); 
     [I{:}] = ind2sub(size(MList),i);
     
-    Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
-    Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
-    Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
+%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
+%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
+%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
 
     flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+%     
+    Cl_Grid_noflap(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid_noflap(I{(1)},I{(2)}) = Cd_temp;
+    Cm_Grid_noflap(I{(1)},I{(2)}) = Cm_temp;
     
-    Cl_Grid_test(I{(1)},I{(2)}) = Cl_temp;
-    Cd_Grid_test(I{(1)},I{(2)}) = Cd_temp;
-    Cm_Grid_test(I{(1)},I{(2)}) = Cm_temp;
-    
-%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
-%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
-%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
+    Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
+    Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
 end
 
 auxdata.interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
@@ -229,29 +233,29 @@ auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%
 t0     = 0;
-alt0   = 35000;   
+alt0   = 34500;   
 rad0   = alt0+auxdata.Re;
 altf   = 500;   
 radf   = altf+auxdata.Re;
 
 
-% i=1
-% for lon0 = deg2rad(144):deg2rad(.25):deg2rad(147)
-%     for lat0 = deg2rad(-10):deg2rad(.25):deg2rad(-7.5)
+i=1
+% for lon0 = deg2rad(144):deg2rad(.5):deg2rad(147)
+%     for lat0 = deg2rad(-10):deg2rad(.5):deg2rad(-7.5)
+%         for j = 1:4
         
-        
-  lon0   =   2.552;    
-% lon0   = deg2rad(145);%ref
+%   lon0   =   2.552;    
+lon0   = deg2rad(145);%ref
 lonf = deg2rad(145);
-lat0 = -0.1571;
-% lat0   = -0.135;%ref
+% lat0 = -0.1571;
+lat0   = -0.135;%ref
 latf   = -0.269;
 
-speed0 = +2872.88;
+speed0 = +2878;
 % speed0 = 1000;
 
 speedf = 100;
-fpa0   = 3*pi/180; 
+fpa0   = 2.9*pi/180; 
 fpaf   = 0*pi/180;
 azi0   = +102*pi/180; 
 % azi0   = +180*pi/180; 
@@ -267,10 +271,10 @@ latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  360*pi/180;
-mFuelMin = 0; mFuelMax = 500;
+mFuelMin = 0; mFuelMax = 300;
 
 aoaMin = 0;  aoaMax = 10*pi/180;
-bankMin = -1*pi/180; bankMax =   80*pi/180;
+bankMin = -1*pi/180; bankMax =   90*pi/180;
 throttleMin = 0; throttleMax = 1;
 
 %-------------------------------------------------------------------%
@@ -299,13 +303,15 @@ bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax,
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
 bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax, mFuelMax, throttleMax];
 
-% bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
-% bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
+bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
+bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
+% bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-60), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
+% bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(60), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
-% bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-10), deg2rad(260), aoaMin, bankMin, mFuelMin, throttleMin];
+% bounds.phase.finalstate.lower = [radMin,lonf-0.002, latMin, speedMin, deg2rad(-10), deg2rad(260), aoaMin, bankMin, mFuelMin, throttleMin];
 % bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(30), deg2rad(280), aoaMax, bankMax, mFuelMin, throttleMax];
-bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-10), deg2rad(270), aoaMin, bankMin, mFuelMin, throttleMin];
-bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(30), deg2rad(280), aoaMax, bankMax, mFuelMin, throttleMax];
+% bounds.phase.finalstate.lower = [radMin, lonf-0.002, latMin, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
+% bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latMax, speedMax, deg2rad(60),  aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
 bounds.phase.control.lower = [deg2rad(-.5), deg2rad(-5), -1];
 bounds.phase.control.upper = [deg2rad(.5), deg2rad(5), 1];
@@ -342,8 +348,21 @@ latGuess            = [lat0; lat0+0.1*pi/180];
 speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
-aoaGuess            = [5*pi/180; 5*pi/180];
-bankGuess           = [70*pi/180; 30*pi/180];
+
+if auxdata.const ==1
+aoaGuess            = [6*pi/180; 6*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180];
+elseif auxdata.const == 2
+    aoaGuess            = [5*pi/180; 5*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180];
+elseif auxdata.const == 3
+     aoaGuess            = [6*pi/180; 6*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180]; 
+elseif auxdata.const == 4
+     aoaGuess            = [3*pi/180; 3*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180];  
+end
+
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [200; mFuelMin];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
@@ -380,7 +399,11 @@ setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
+if auxdata.const == 3
+   setup.nlp.ipoptoptions.maxiterations = 400; 
+else
 setup.nlp.ipoptoptions.maxiterations = 300;
+end
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
 %-------------------------------------------------------------------%
@@ -403,11 +426,13 @@ throttle  = solution.phase.state(:,10);
 
 lonlist(i) = lon0;
 latlist(i) = lat0;
+jlist(i) = j;
 
 mFuelList(i) = mFuel(1)
 
 
-% i = i+1
+i = i+1
+%         end
 %     end
 % end
 

@@ -5,7 +5,7 @@ clear all
 mat = [];
 
 % u = [2825] % velocity range. The routine is parallelised around this velocity list
-u = [2575:50:2725] % velocity range. The routine is parallelised around this velocity list
+u = [2575:25:2725] % velocity range. The routine is parallelised around this velocity list
 
 phi0 = -0.13 % initial latitude, this has very minimal effect
 % zeta0 = 1.69 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)

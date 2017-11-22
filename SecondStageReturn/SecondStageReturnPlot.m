@@ -1,3 +1,41 @@
+
+% Plot Cart Solution
+addpath('.\axlabel')
+
+% figure(401)
+% surf(MList,AOAList,Cl_Grid_noflap,'facecolor','interp')
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% zlabel('Cl')
+% view(-20,30)
+% align_axislabel([], gca)
+% 
+% 
+% figure(402)
+% surf(MList,AOAList,Cd_Grid_noflap,'facecolor','interp')
+% view(-20,40)
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% zlabel('Cd')
+% view(-20,30)
+% align_axislabel([], gca)
+
+figure(401)
+contourf(MList,AOAList,Cl_Grid_noflap,20,'LineWidth',0.)
+xlabel('Mach no.')
+ylabel('Angle of Attack (deg)')
+
+c = colorbar;
+c.Label.String = 'Lift Coefficient';
+
+
+figure(402)
+contourf(MList,AOAList,Cd_Grid_noflap,20,'LineWidth',0.)
+xlabel('Mach no.')
+ylabel('Angle of Attack (deg)')
+c = colorbar;
+c.Label.String = 'Drag Coefficient';
+
 %------------------------------%
 % Extract Solution from Output %
 %------------------------------%

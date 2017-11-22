@@ -63,6 +63,12 @@ Cd_noflaps = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 Cl_noflaps = auxdata.interp.Cl_spline(mach,rad2deg(alpha));
 Cm_noflaps = auxdata.interp.Cm_spline(mach,rad2deg(alpha));
 
+if auxdata.const ==2
+    Cd_noflaps = Cd_noflaps*1.1;
+end
+if auxdata.const ==3
+    Cd_noflaps = Cd_noflaps*0.9;
+end
 % Cd_AoA0 = auxdata.interp.Cd_spline(mach,0*ones(length(mach),1));
 % Cl_AoA0 = auxdata.interp.Cl_spline(mach,0*ones(length(mach),1));
 % Cm_AoA0 = auxdata.interp.Cm_spline(mach,0*ones(length(mach),1));
@@ -108,6 +114,9 @@ L = 0.5*(Cl_noflaps).*A.*rho.*v.^2;
 
 [Isp,Fueldt,eq] = RESTint(M, alpha, auxdata,T0,P0);
 
+if auxdata.const == 4
+Isp = Isp*1.1;
+end
 % for i = 1:length(r)
 %   if q(i) < 20000
 %         Isp(i) = Isp(i)*gaussmf(q(i),[1000,20000]);

@@ -87,39 +87,95 @@ auxdata.interp.pitchingmoment_spline1 = griddedInterpolant(MList,AOAList,pitchin
 
 %% Aerodynamic Data 
 %%
+% aero = importdata('SPARTANaero.txt');
+% 
+% interp.Cl_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
+% interp.Cd_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+% 
+% 
+% [MList2,AOAList2] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
+% % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+% % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+% 
+% Cl_Grid2 = [];
+% Cd_Grid2 = [];
+% 
+% for i = 1:numel(MList2)
+%     M_temp2 = MList2(i);
+%     AoA_temp2 = AOAList2(i);
+%     
+%     Cl_temp2 = interp.Cl_scattered2(M_temp2,AoA_temp2);
+%     Cd_temp2 = interp.Cd_scattered2(M_temp2,AoA_temp2);
+%     
+%     I = cell(1, ndims(MList2)); 
+%     [I{:}] = ind2sub(size(MList2),i);
+%     
+%     Cl_Grid2(I{(1)},I{(2)}) = Cl_temp2;
+%     Cd_Grid2(I{(1)},I{(2)}) = Cd_temp2;
+% 
+% end
+% 
+% auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
+% auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
+flapaero = importdata('SPARTAN_Flaps.txt');
+
+interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
+interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
+interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
+
 aero = importdata('SPARTANaero.txt');
 
-interp.Cl_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-interp.Cd_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
+interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
+interp.Cm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
 
-
-[MList2,AOAList2] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
+[MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
 % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 
-Cl_Grid2 = [];
-Cd_Grid2 = [];
+Cl_Grid = [];
+Cd_Grid = [];
+Cm_Grid = [];
+flap_Grid = [];
 
-for i = 1:numel(MList2)
-    M_temp2 = MList2(i);
-    AoA_temp2 = AOAList2(i);
+for i = 1:numel(MList)
+    M_temp = MList(i);
+    AoA_temp = AOAList(i);
     
-    Cl_temp2 = interp.Cl_scattered2(M_temp2,AoA_temp2);
-    Cd_temp2 = interp.Cd_scattered2(M_temp2,AoA_temp2);
+    Cl_temp = interp.Cl_scattered(M_temp,AoA_temp);
+    Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
+    Cm_temp = interp.Cm_scattered(M_temp,AoA_temp);
     
-    I = cell(1, ndims(MList2)); 
-    [I{:}] = ind2sub(size(MList2),i);
+    Cd_temp_AoA0 = interp.Cd_scattered(M_temp,0);
+    Cl_temp_AoA0 = interp.Cl_scattered(M_temp,0);
+    Cm_temp_AoA0 = interp.Cm_scattered(M_temp,0);
     
-    Cl_Grid2(I{(1)},I{(2)}) = Cl_temp2;
-    Cd_Grid2(I{(1)},I{(2)}) = Cd_temp2;
+    Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0));
+    Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+    
+    flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
+    flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
+    
+    I = cell(1, ndims(MList)); 
+    [I{:}] = ind2sub(size(MList),i);
+    
+    Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
+    Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
+    Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
 
+    flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+    
+    Cl_Grid_test(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid_test(I{(1)},I{(2)}) = Cd_temp;
+    Cm_Grid_test(I{(1)},I{(2)}) = Cm_temp;
+    
+%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
+%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
+%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
 end
-
-auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
-auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
-
-
-
+auxdata.interp.Cl_spline2 = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
+auxdata.interp.Cd_spline2 = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
+auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','nearest');
 %% Conical Shock Data %%===================================================
 % Import conical shock data and create interpolation splines 
 shockdata = dlmread('ShockMat');
@@ -225,7 +281,7 @@ latMin = -70*pi/180;  latMax = -latMin;
 lat0 = -0.264;
 lon0 = deg2rad(145);
 aoaMin = 0;  aoaMax = 9*pi/180;
-bankMin1 = -1*pi/180; bankMax1 =   20*pi/180;
+bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
 
 % Primal Bounds
 bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
@@ -328,8 +384,8 @@ latGuess            = [lat0; lat0-1*pi/180];
 speedGuess          = [3000; 10];
 fpaGuess            = [0; 0];
 aziGuess            = [deg2rad(97); deg2rad(270)];
-aoaGuess            = [8*pi/180; 8*pi/180];
-bankGuess           = [60*pi/180; 0*pi/180];
+aoaGuess            = [6*pi/180; 6*pi/180];
+bankGuess           = [80*pi/180; 80*pi/180];
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [200; mFuelMin];
 guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
@@ -362,7 +418,7 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-setup.nlp.ipoptoptions.maxiterations = 2000;
+setup.nlp.ipoptoptions.maxiterations = 1000;
 setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';

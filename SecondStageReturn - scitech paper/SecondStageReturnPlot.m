@@ -1,3 +1,41 @@
+
+% Plot Cart Solution
+addpath('.\axlabel')
+
+% figure(401)
+% surf(MList,AOAList,Cl_Grid_noflap,'facecolor','interp')
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% zlabel('Cl')
+% view(-20,30)
+% align_axislabel([], gca)
+% 
+% 
+% figure(402)
+% surf(MList,AOAList,Cd_Grid_noflap,'facecolor','interp')
+% view(-20,40)
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% zlabel('Cd')
+% view(-20,30)
+% align_axislabel([], gca)
+
+figure(401)
+contourf(MList,AOAList,Cl_Grid_noflap,20,'LineWidth',0.)
+xlabel('Mach no.')
+ylabel('Angle of Attack (deg)')
+
+c = colorbar;
+c.Label.String = 'Lift Coefficient';
+
+
+figure(402)
+contourf(MList,AOAList,Cd_Grid_noflap,20,'LineWidth',0.)
+xlabel('Mach no.')
+ylabel('Angle of Attack (deg)')
+c = colorbar;
+c.Label.String = 'Drag Coefficient';
+
 %------------------------------%
 % Extract Solution from Output %
 %------------------------------%
@@ -61,7 +99,7 @@ addaxislabel(2,'Velocity (km/s)');
 % addaxis(time,fpa,':','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Trajectory Angle (deg)');
 
-addaxis(time,azimuth,':','color','k', 'linewidth', 1.);
+addaxis(time,azimuth,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Heading Angle (Deg)');
 
 
@@ -82,12 +120,13 @@ addaxislabel(2,'Throttle (%)');
 
 
 
-addaxis(time,bank,':','color','k', 'linewidth', 1.);
+addaxis(time,bank,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
 legend(  'Angle of Attack', 'Throttle' , 'Bank Angle');
 
 
 figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
+hold on
 % subplot(3,1,3)
 plot(time,M,'-','color','k', 'linewidth', 1.);
 ylabel('Mach no.')
@@ -95,7 +134,7 @@ xlabel('time (s)')
 addaxis(time,Isp,'--','color','k', 'linewidth', 1.);
 addaxislabel(2,'Specific Impulse (s)');
 
-addaxis(time,q,':','color','k', 'linewidth', 2.);
+addaxis(time,q,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Dynamic Pressure (kPa)');
 
 % addaxis(time,L./D,':','color','k', 'linewidth', 1.);
@@ -116,10 +155,16 @@ figure(4)
 hold on
 
 geoshow('landareas.shp','FaceColor',[0.5 .8 0.5])
-xlim([min(longitude)-5,max(longitude)+5]);
-ylim([min(latitude)-5,max(latitude)+5]);
+xlim([min(longitude)-3,max(longitude)+3]);
+ylim([min(latitude)-3,max(latitude)+3]);
 
 plot(longitude,latitude,'-', 'color','k', 'linewidth', 1.5);
+
+txt1 = '2nd \rightarrow 3rd Stage Separation';
+text(longitude(1)-0.5,latitude(1)-0.3,txt1)
+
+txt2 = '2nd Stage Landing';
+text(longitude(end)+0.1,latitude(end),txt2)
 
 print -depsc2 rlvEntryLonLat.eps
 print -dpng rlvEntryLonLat.png
