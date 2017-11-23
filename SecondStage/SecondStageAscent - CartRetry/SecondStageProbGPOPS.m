@@ -116,17 +116,25 @@ auxdata.const = const;
 % 
 % auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
 % auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
-% flapaero = importdata('SPARTAN_Flaps.txt');
-% 
-% interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
-% interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
-% interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
 
-aero = importdata('SPARTANaero-EngineOn.txt');
+
+flapaero = importdata('SPARTAN_Flaps-15-4mCG.txt');
+% 
+interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest'); % interpolation by moments
+interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
+interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
+
+aero = importdata('SPARTANaero-EngineOn-15-4mCG.txt');
+
+aero_engineoff = importdata('SPARTANaero-15-4mCG.txt');
 
 interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
 interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
 interp.Cm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
+
+interp.Cl_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,3));
+interp.Cd_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,4));
+interp.Cm_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,5));
 
 [MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
 % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
@@ -145,15 +153,15 @@ for i = 1:numel(MList)
     Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
     Cm_temp = interp.Cm_scattered(M_temp,AoA_temp);
 %     
-%     Cd_temp_AoA0 = interp.Cd_scattered(M_temp,0);
-%     Cl_temp_AoA0 = interp.Cl_scattered(M_temp,0);
-%     Cm_temp_AoA0 = interp.Cm_scattered(M_temp,0);
+    Cd_temp_AoA0 = interp.Cd_engineoff(M_temp,0); % compute coefficients wqith engine off for comparison with flaps condition
+    Cl_temp_AoA0 = interp.Cl_engineoff(M_temp,0);
+    Cm_temp_AoA0 = interp.Cm_engineoff(M_temp,0);
 %     
-%     Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0));
-%     Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
-%     
-%     flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
-%     flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
+    Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,(-Cm_temp+Cm_temp_AoA0));
+    Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,(-Cm_temp+Cm_temp_AoA0)) ;
+    
+    flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
+    flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
 %     
     I = cell(1, ndims(MList)); 
     [I{:}] = ind2sub(size(MList),i);
@@ -280,23 +288,23 @@ latMin = -70*pi/180;  latMax = -latMin;
 lat0 = -0.264;
 lon0 = deg2rad(145);
 aoaMin = 0;  aoaMax = 9*pi/180;
-bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
+% bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
 
 % Primal Bounds
-bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
-bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
+bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, Stage2.Bounds.mFuel(1)];
+bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, Stage2.Bounds.mFuel(2)];
 
 % Initial States
-bounds.phase(1).initialstate.lower = [Stage2.Bounds.Alt(1),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Initial.mFuel] ;
-bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Initial.mFuel];
+bounds.phase(1).initialstate.lower = [Stage2.Bounds.Alt(1),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, Stage2.Initial.mFuel] ;
+bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, Stage2.Initial.mFuel];
 
 % End States
-bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, bankMin1, Stage2.End.mFuel];
-bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, bankMax1, Stage2.Initial.mFuel];
+bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, Stage2.End.mFuel];
+bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, Stage2.Initial.mFuel];
 
 % Control Bounds
-bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-.1)];
-bounds.phase(1).control.upper = [deg2rad(.1), deg2rad(.1)];
+bounds.phase(1).control.lower = [deg2rad(-.1)];
+bounds.phase(1).control.upper = [deg2rad(.1)];
 % Time Bounds
 
 bounds.phase(1).initialtime.lower = 0;
@@ -330,10 +338,9 @@ guess.phase(1).state(:,4)   = Stage2.Guess.v.';
 guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
 guess.phase(1).state(:,7)   = [8*pi/180; 8*pi/180];
-guess.phase(1).state(:,8)   = [0;0];
-guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 200];
+guess.phase(1).state(:,8) 	= [Stage2.Initial.mFuel, 200];
 
-guess.phase(1).control      = [[0;0],[0;0]];
+guess.phase(1).control      = [[0;0]];
 guess.phase(1).time          = [0;650];
 
 % Tire stages together
@@ -393,8 +400,8 @@ v = output.result.solution.phase(1).state(:,4).';
 gamma = output.result.solution.phase(1).state(:,5).'; 
 zeta = output.result.solution.phase(1).state(:,6).';
 Alpha = output.result.solution.phase(1).state(:,7).';
-eta = output.result.solution.phase(1).state(:,8).';
-mFuel = output.result.solution.phase(1).state(:,9).'; 
+% eta = output.result.solution.phase(1).state(:,8).';
+mFuel = output.result.solution.phase(1).state(:,8).'; 
 
 omegadot  = output.result.solution.phase(1).control.'; 
 

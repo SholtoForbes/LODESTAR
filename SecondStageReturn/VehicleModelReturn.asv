@@ -73,9 +73,7 @@ end
 if auxdata.const ==6
     Cl_noflaps = Cl_noflaps*1.1;
 end
-if auxdata.const ==7
-    Cl_noflaps = Cl_noflaps*0.9;
-end
+
 % Cd_AoA0 = auxdata.interp.Cd_spline(mach,0*ones(length(mach),1));
 % Cl_AoA0 = auxdata.interp.Cl_spline(mach,0*ones(length(mach),1));
 % Cm_AoA0 = auxdata.interp.Cm_spline(mach,0*ones(length(mach),1));

@@ -11,7 +11,7 @@ addpath('..\SecondStage\EngineData')
 
 
 
-auxdata.const = 4 % 1 normal, 2 10% increased Cd, 3 10% decreased Cd, 4 10% increased Isp
+auxdata.const = 6 % 1 normal, 2 10% increased Cd, 3 10% decreased Cd, 4 10% increased Isp, 5: 10% decreased Isp, 6:10% increased Cl, 7:10% decreased Cl, 8:10% increased range, 9:10%decreased range
 
 %% Inputs ============================================
 
@@ -251,6 +251,13 @@ lonf = deg2rad(145);
 lat0   = -0.135;%ref
 latf   = -0.269;
 
+if auxdata.const ==8
+    latf = latf + (latf-lat0)*0.1;
+end
+if auxdata.const ==9
+    latf = latf - (latf-lat0)*0.1;
+end
+
 speed0 = +2878;
 % speed0 = 1000;
 
@@ -359,10 +366,25 @@ elseif auxdata.const == 3
      aoaGuess            = [6*pi/180; 6*pi/180];
 bankGuess           = [89*pi/180; 0*pi/180]; 
 elseif auxdata.const == 4
-     aoaGuess            = [3*pi/180; 3*pi/180];
+     aoaGuess            = [6*pi/180; 3*pi/180];
 bankGuess           = [89*pi/180; 0*pi/180];  
-end
 
+elseif auxdata.const == 5
+     aoaGuess            = [6*pi/180; 3*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180];  
+elseif auxdata.const == 6
+     aoaGuess            = [4*pi/180; 4*pi/180];
+bankGuess           = [89*pi/180; 50*pi/180];
+elseif auxdata.const == 7
+     aoaGuess            = [5*pi/180; 5*pi/180];
+bankGuess           = [89*pi/180; 50*pi/180];
+elseif auxdata.const == 8
+     aoaGuess            = [3*pi/180; 3*pi/180];
+bankGuess           = [89*pi/180; 0*pi/180];
+elseif auxdata.const == 9
+     aoaGuess            = [5*pi/180; 5*pi/180];
+bankGuess           = [89*pi/180; 89*pi/180];
+end
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [200; mFuelMin];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
@@ -374,7 +396,11 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 6;
+% if auxdata.const == 9 
+% mesh.maxiterations = 8;
+% else
+    mesh.maxiterations = 6;
+%     end
 mesh.colpointsmin = 2;
 mesh.colpointsmax = 15;
 mesh.tolerance    = 1e-5;
@@ -399,8 +425,10 @@ setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
-if auxdata.const == 3
+if auxdata.const == 3 || auxdata.const == 6 || auxdata.const == 7 || auxdata.const == 9 
    setup.nlp.ipoptoptions.maxiterations = 400; 
+% elseif auxdata.const == 9 
+%     setup.nlp.ipoptoptions.maxiterations = 350; 
 else
 setup.nlp.ipoptoptions.maxiterations = 300;
 end
@@ -478,3 +506,5 @@ figure(215)
 hold on
 plot(f_t(1:end),f_y(:,7));
 plot(t,mFuel);
+
+save('Solution.mat','solution')

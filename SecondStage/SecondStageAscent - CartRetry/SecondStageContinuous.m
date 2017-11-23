@@ -10,12 +10,13 @@ gamma1  = input.phase(1).state(:,5);
 zeta1  = input.phase(1).state(:,6);
 
 Alpha1  = input.phase(1).state(:,7);
-eta1  = input.phase(1).state(:,8);
-mFuel1  = input.phase(1).state(:,9);
+% eta1  = input.phase(1).state(:,8);
+mFuel1  = input.phase(1).state(:,8);
 throttle1  = 1;
+eta1 = 0;
 
 aoadot1  = input.phase(1).control(:,1);
-bankdot1 = input.phase(1).control(:,2);
+% bankdot1 = input.phase(1).control(:,2);
 
 % bank = 0*ones(length(aoa),1);
 % ---------------------------------------------------%
@@ -32,7 +33,7 @@ auxdata = input.auxdata;
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
 % ---------------------------------------------------%
 
-phaseout(1).dynamics  = [altdot1, londot1, latdot1, vdot1, fpadot1, azidot1, aoadot1, bankdot1, -Fueldt1];
+phaseout(1).dynamics  = [altdot1, londot1, latdot1, vdot1, fpadot1, azidot1, aoadot1, -Fueldt1];
 phaseout(1).path = q1;
 
 

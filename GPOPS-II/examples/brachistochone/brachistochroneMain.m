@@ -18,10 +18,10 @@ auxdata.g = 10;
 t0 = 0; 
 tfmin = 0; tfmax = 10;
 x0 = 0; y0 = 0; v0 = 0;
-xf = 2; yf = 2;
+xf = 1; yf = -1;
 xmin = 0; xmax = 10;
-ymin = 0; ymax = 10;
-vmin = -50; vmax = 50;
+ymin = -10; ymax = 0;
+vmin = 0; vmax = 50;
 umin = -pi/2; umax = pi/2;
 
 %-------------------------------------------------------------------------%
@@ -45,14 +45,14 @@ bounds.phase.control.upper = umax;
 %-------------------------------------------------------------------------%
 guess.phase.time    = [t0; tfmax]; 
 guess.phase.state   = [[x0; xf],[y0; yf],[v0; v0]];
-guess.phase.control = [0; pi/2];
+guess.phase.control = [-pi/2; 0];
 
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-PattersonRao';
 mesh.tolerance    = 1e-6;
-mesh.maxiterations = 45;
+mesh.maxiterations = 4;
 mesh.colpointsmin = 4;
 mesh.colpointsmax = 10;
 
@@ -76,3 +76,8 @@ setup.method                      = 'RPM-Differentiation';
 %-------------------------------------------------------------------------%
 output   = gpops2(setup);
 solution = output.result.solution;
+
+x=solution.phase.state(:,1);
+y=solution.phase.state(:,2);
+u=solution.phase.control(:,1);
+plot(x,y)

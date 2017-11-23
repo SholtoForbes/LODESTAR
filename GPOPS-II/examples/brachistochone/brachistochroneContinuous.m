@@ -10,9 +10,9 @@ x                 = input.phase.state(:,1);
 y                 = input.phase.state(:,2);
 v                 = input.phase.state(:,3);
 u                 = input.phase.control;
-xdot              = v.*sin(u);
-ydot              = v.*cos(u);
-vdot              = g*cos(u);
+xdot              = v.*cos(u);
+ydot              = v.*sin(u);
+vdot              = -g*sin(u);
 phaseout.dynamics = [xdot, ydot, vdot];
 
 %---------------------------------------------%
