@@ -1,9 +1,16 @@
 function [rdot,xidot,phidot,gammadot,vdot,zetadot,total_lift] = RotCoordsReturn(r,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta)
 % Determination of motion in rotating coordinates
+% r radius from centre of Earth (m)
 %xi  Longitude (rad)
 %phi  Latitude (rad)
 %gamma  Flight Path Angle (rad)
 %zeta  Heading Angle (rad)
+% alpha Angle of Attack (deg)
+% eta ROll Angle (rad)
+% L Lift (N)
+% D Drag (N)
+% m Mass (kg)
+
 
 alpha = deg2rad(alpha);
 

@@ -1,0 +1,8 @@
+1. BASELINE
+Kestrel
+1.1m diameter
+52kg engine mass
+mdot 9.86977.*1.5, mass flow rate increased by 50%
+Isp 317.*0.98, Isp reduced due to flow rate increase
+CG 4.531m, from hand calc and CREO
+I 6628 from CREO

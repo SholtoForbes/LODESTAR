@@ -7,62 +7,9 @@
 clear all
 clc
 addpath('..\')
-addpath('..\EngineData')
-
-
-
-auxdata.const = 1 % 1 normal, 2 10% increased Cd, 3 10% decreased Cd, 4 10% increased Isp, 5: 10% decreased Isp, 6:10% increased Cl, 7:10% decreased Cl, 8:10% increased range
+addpath('..\SecondStage\EngineData')
 
 %% Inputs ============================================
-
-
-%Take input of aero
-flapaero = importdata('SPARTAN_Flaps.txt');
-
-interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
-interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
-interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
-% 
-% auxdata.interp.Cl_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,3),3);
-% auxdata.interp.Cd_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,4),3);
-% auxdata.interp.flapdeflection_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,2),4);
-% 
-% auxdata.interp.flap_Cl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,3), 'linear', 'nearest');
-% auxdata.interp.flap_Cd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,4), 'linear', 'nearest');
-% auxdata.interp.flap_Cm_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,5), 'linear', 'nearest');
-% 
-% 
-% [flapMList,flapdefList] = ndgrid(unique(flapaero(:,1)),unique(flapaero(:,2)));
-% % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% 
-% flap_Cl_Grid = [];
-% flap_Cd_Grid = [];
-% flap_Cm_Grid = [];
-% 
-% for i = 1:numel(flapMList)
-%     M_temp = flapMList(i);
-%     flapdef_temp = flapdefList(i);
-%     
-%     Cl_temp = auxdata.interp.flap_Cl_scattered(M_temp,flapdef_temp);
-%     Cd_temp = auxdata.interp.flap_Cd_scattered(M_temp,flapdef_temp);
-%     Cm_temp = auxdata.interp.flap_Cm_scattered(M_temp,flapdef_temp);
-%     
-%     I = cell(1, ndims(flapMList)); 
-%     [I{:}] = ind2sub(size(flapMList),i);
-%     
-%     flap_Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
-%     flap_Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
-%     flap_Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-% 
-% end
-% 
-% auxdata.interp.flap_Cl_spline = griddedInterpolant(flapMList,flapdefList,flap_Cl_Grid,'spline','linear');
-% auxdata.interp.flap_Cd_spline = griddedInterpolant(flapMList,flapdefList,flap_Cd_Grid,'spline','linear');
-% auxdata.interp.flap_Cm_spline = griddedInterpolant(flapMList,flapdefList,flap_Cm_Grid,'spline','nearest');
-
-
-
 %Take input of aero
 aero = importdata('SPARTANaero.txt');
 
@@ -77,7 +24,6 @@ interp.Cm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
 Cl_Grid = [];
 Cd_Grid = [];
 Cm_Grid = [];
-flap_Grid = [];
 
 for i = 1:numel(MList)
     M_temp = MList(i);
@@ -87,37 +33,25 @@ for i = 1:numel(MList)
     Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
     Cm_temp = interp.Cm_scattered(M_temp,AoA_temp);
     
-    Cd_temp_AoA0 = interp.Cd_scattered(M_temp,0);
-    Cl_temp_AoA0 = interp.Cl_scattered(M_temp,0);
-    Cm_temp_AoA0 = interp.Cm_scattered(M_temp,0);
-    
-    Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0));
-    Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
-    
-    flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
-    flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
-    
     I = cell(1, ndims(MList)); 
     [I{:}] = ind2sub(size(MList),i);
-    
-%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
-%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
-%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-
-    flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
-%     
-    Cl_Grid_noflap(I{(1)},I{(2)}) = Cl_temp;
-    Cd_Grid_noflap(I{(1)},I{(2)}) = Cd_temp;
-    Cm_Grid_noflap(I{(1)},I{(2)}) = Cm_temp;
     
     Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
     Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
+
 end
 
 auxdata.interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
 auxdata.interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
 auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','nearest');
+
+%Take input of aero
+flapaero = importdata('SPARTAN_Flaps.txt');
+
+auxdata.interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
+auxdata.interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
+auxdata.interp.flap_momentdef_scattered = scatteredInterpolant(aero(:,1),aero(:,5),aero(:,2), 'linear', 'nearest');
 
 
 
@@ -204,13 +138,13 @@ auxdata.interp.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Is
 %% Shock Data
 % Import conical shock data and create interpolation splines 
 shockdata = dlmread('ShockMat');
-[MList2,AOAList2] = ndgrid(unique(shockdata(:,1)),unique(shockdata(:,2)));
+[MList,AOAList] = ndgrid(unique(shockdata(:,1)),unique(shockdata(:,2)));
 M1_Grid = reshape(shockdata(:,3),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
 pres_Grid = reshape(shockdata(:,4),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
 temp_Grid = reshape(shockdata(:,5),[length(unique(shockdata(:,2))),length(unique(shockdata(:,1)))]).';
-auxdata.interp.M1gridded = griddedInterpolant(MList2,AOAList2,M1_Grid,'spline','linear');
-auxdata.interp.presgridded = griddedInterpolant(MList2,AOAList2,pres_Grid,'spline','linear');
-auxdata.interp.tempgridded = griddedInterpolant(MList2,AOAList2,temp_Grid,'spline','linear');
+auxdata.interp.M1gridded = griddedInterpolant(MList,AOAList,M1_Grid,'spline','linear');
+auxdata.interp.presgridded = griddedInterpolant(MList,AOAList,pres_Grid,'spline','linear');
+auxdata.interp.tempgridded = griddedInterpolant(MList,AOAList,temp_Grid,'spline','linear');
 
 
 %% Import Vehicle and trajectory Config Data %%============================
@@ -233,38 +167,23 @@ auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%
 t0     = 0;
-alt0   = 34500;   
+alt0   = 35000;   
 rad0   = alt0+auxdata.Re;
 altf   = 500;   
 radf   = altf+auxdata.Re;
-
-
-i=1
-% for lon0 = deg2rad(144):deg2rad(.5):deg2rad(147)
-%     for lat0 = deg2rad(-10):deg2rad(.5):deg2rad(-7.5)
-%         for j = 1:4
-        
-%   lon0   =   2.552;    
-lon0   = deg2rad(145);%ref
+lon0   = deg2rad(145);
 lonf = deg2rad(145);
-% lat0 = -0.1571;
-lat0   = -0.135;%ref
+lat0   = -0.1346;
+% lat0   = -0.18;
+
 latf   = -0.269;
-
-if auxdata.const ==8
-    latf = latf + (latf-lat0)*0.1;
-end
-if auxdata.const ==9
-    latf = latf - (latf-lat0)*0.1;
-end
-
-speed0 = +2878;
+speed0 = +2872.88;
 % speed0 = 1000;
 
 speedf = 100;
-fpa0   = 2.9*pi/180; 
+fpa0   = 3*pi/180; 
 fpaf   = 0*pi/180;
-azi0   = +102*pi/180; 
+azi0   = +90*pi/180; 
 % azi0   = +180*pi/180; 
 azif   = 270*pi/180;
 
@@ -278,10 +197,10 @@ latMin = -70*pi/180;  latMax = -latMin;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  360*pi/180;
-mFuelMin = 0; mFuelMax = 300;
+mFuelMin = 0; mFuelMax = 500;
 
 aoaMin = 0;  aoaMax = 10*pi/180;
-bankMin = -1*pi/180; bankMax =   90*pi/180;
+bankMin = -1*pi/180; bankMax =   80*pi/180;
 throttleMin = 0; throttleMax = 1;
 
 %-------------------------------------------------------------------%
@@ -312,13 +231,9 @@ bounds.phase.state.upper = [radMax, lonMax, latMax, speedMax, fpaMax, aziMax, ao
 
 bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
 bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
-% bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-60), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
-% bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(60), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
-% bounds.phase.finalstate.lower = [radMin,lonf-0.002, latMin, speedMin, deg2rad(-10), deg2rad(260), aoaMin, bankMin, mFuelMin, throttleMin];
-% bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(30), deg2rad(280), aoaMax, bankMax, mFuelMin, throttleMax];
-% bounds.phase.finalstate.lower = [radMin, lonf-0.002, latMin, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
-% bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latMax, speedMax, deg2rad(60),  aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
+%  bounds.phase.finalstate.lower = [radMin, lonMin, latMin, speedMin, deg2rad(-5), aziMin, aoaMin, bankMin, mFuelMin];
+% bounds.phase.finalstate.upper = [radMax, lonMax, latMax, speedMax, deg2rad(5), aziMax, aoaMax, bankMax, mFuelMin];
 
 bounds.phase.control.lower = [deg2rad(-.5), deg2rad(-5), -1];
 bounds.phase.control.upper = [deg2rad(.5), deg2rad(5), 1];
@@ -329,8 +244,6 @@ bounds.phase.path.upper = 50000;
 % bounds.phase.path.lower = [0, 0];
 % bounds.phase.path.upper = [50000, 0];
 
-% bounds.phase.path.lower = [0, -15];
-% bounds.phase.path.upper = [50000, 15];
 %-------------------------------------------------------------------------%
 %---------------------- Provide Guess of Solution ------------------------%
 %-------------------------------------------------------------------------%
@@ -348,52 +261,17 @@ bounds.phase.path.upper = 50000;
 % % guess.phase.control = [aoaGuess];
 % guess.phase.time    = tGuess;
 
-tGuess              = [0; 1000];
+tGuess              = [0; 1200];
 radGuess            = [rad0; radf];
-lonGuess            = [lon0; lon0-.1*pi/180];
-
-if auxdata.const == 4
-latGuess            = [lat0; lat0];
-else
-latGuess            = [lat0; lat0+0.1*pi/180];
-end
-
+lonGuess            = [lon0; lon0-1*pi/180];
+latGuess            = [lat0; lat0+1*pi/180];
 speedGuess          = [speed0; speedf];
 fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
-
-if auxdata.const ==1
-aoaGuess            = [6*pi/180; 6*pi/180];
-bankGuess           = [89*pi/180; 0*pi/180];
-elseif auxdata.const == 2
-
-    aoaGuess            = [3*pi/180; 3*pi/180];
-bankGuess           = [89*pi/180; 89*pi/180];
-elseif auxdata.const == 3
-     aoaGuess            = [6*pi/180; 6*pi/180];
-bankGuess           = [89*pi/180; 0*pi/180]; 
-elseif auxdata.const == 4
-     aoaGuess            = [7*pi/180; 3*pi/180];
-bankGuess           = [89*pi/180; 89*pi/180];  
-
-elseif auxdata.const == 5
-     aoaGuess            = [8*pi/180; 2*pi/180];
-bankGuess           = [89*pi/180; 89*pi/180];  
-elseif auxdata.const == 6
-     aoaGuess            = [8*pi/180; 2*pi/180];
-bankGuess           = [89*pi/180; 80*pi/180];
-elseif auxdata.const == 7
-     aoaGuess            = [5*pi/180; 2*pi/180];
-bankGuess           = [89*pi/180; 80*pi/180];
-elseif auxdata.const == 8
-     aoaGuess            = [3*pi/180; 3*pi/180];
-bankGuess           = [89*pi/180; 0*pi/180];
-elseif auxdata.const == 9
-     aoaGuess            = [5*pi/180; 5*pi/180];
-bankGuess           = [89*pi/180; 89*pi/180];
-end
+aoaGuess            = [8*pi/180; 8*pi/180];
+bankGuess           = [60*pi/180; 60*pi/180];
 % mFuelGuess          = [mFuelMax; mFuelMin];
-mFuelGuess          = [200; mFuelMin];
+mFuelGuess          = [mFuelMin; mFuelMin];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
 guess.phase.control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
@@ -403,14 +281,10 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-% if auxdata.const == 9 
-% mesh.maxiterations = 8;
-% else
-    mesh.maxiterations = 6;
-%     end
-mesh.colpointsmin = 2;
-mesh.colpointsmax = 15;
-mesh.tolerance    = 1e-5;
+mesh.maxiterations = 7;
+mesh.colpointsmin = 5;
+mesh.colpointsmax = 30;
+mesh.tolerance    = 1e-4;
 
 
 %-------------------------------------------------------------------%
@@ -432,59 +306,22 @@ setup.derivatives.supplier           = 'sparseCD';
 setup.derivatives.derivativelevel    = 'second';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
-if auxdata.const == 3 || auxdata.const == 6 || auxdata.const == 7 || auxdata.const == 9 
-   setup.nlp.ipoptoptions.maxiterations = 400; 
-% elseif auxdata.const == 9 
-%     setup.nlp.ipoptoptions.maxiterations = 350; 
-else
-setup.nlp.ipoptoptions.maxiterations = 300;
-end
+setup.nlp.ipoptoptions.maxiterations = 2000;
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
 %-------------------------------------------------------------------%
 output = gpops2(setup);
 
-
 solution = output.result.solution;
-rad  = solution.phase.state(:,1);
-lon  = solution.phase.state(:,2);
-lat  = solution.phase.state(:,3);
-v    = solution.phase.state(:,4);
-fpa  = solution.phase.state(:,5);
-azi  = solution.phase.state(:,6);
-
 aoa  = solution.phase.state(:,7);
 bank  = solution.phase.state(:,8);
 mFuel  = solution.phase.state(:,9);
 throttle  = solution.phase.state(:,10);
-
-
-lonlist(i) = lon0;
-latlist(i) = lat0;
-jlist(i) = j;
-
-mFuelList(i) = mFuel(1)
-
-
-i = i+1
-%         end
-%     end
-% end
-
-
-
-
-% Flap_deflection  = solution.phase.control(:,4);
-
-% [raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,Flap_deflection);
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,Cm] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
-
-
 t = solution.phase(1).time;
 
 % throttle  = solution.phase.control(:,3);
 
-m = Stage2.mStruct+mFuel;
+m = mstruct+mFuel;
 
 forward0 = [alt0,fpa0,speed0,azi0,lat0,lon0, mFuel(1)];
 
@@ -506,12 +343,10 @@ plot(t,gamma);
 latitude  = solution.phase.state(:,3);
 figure(214)
 hold on
-plot(f_y(:,6),f_y(:,5));
-plot(lon,lat);
+plot(f_t(1:end),f_y(:,5));
+plot(t,latitude);
 
 figure(215)
 hold on
 plot(f_t(1:end),f_y(:,7));
 plot(t,mFuel);
-
-save('Solution.mat','solution')
