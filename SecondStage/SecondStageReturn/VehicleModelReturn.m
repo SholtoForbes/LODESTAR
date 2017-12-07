@@ -59,9 +59,9 @@ P0 = ppval(interp.P0_spline, alt);
 %% Aerodynamics
 % interpolate coefficients
 
-Cd_noflaps = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
-Cl_noflaps = auxdata.interp.Cl_spline(mach,rad2deg(alpha));
-Cm_noflaps = auxdata.interp.Cm_spline(mach,rad2deg(alpha));
+Cd_noflaps = auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha));
+Cl_noflaps = auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha));
+Cm_noflaps = auxdata.interp.Cm_spline_EngineOff(mach,rad2deg(alpha));
 
 if auxdata.const ==2
     Cd_noflaps = Cd_noflaps*1.1;

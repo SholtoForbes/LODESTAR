@@ -43,16 +43,20 @@ P0 = ppval(interp.P0_spline, alt);
 %% Aerodynamics
 % interpolate coefficients
 
-% if ThirdStage == 1
-% Cd = auxdata.interp.Cd_spline1(mach,rad2deg(alpha));
-% Cl = auxdata.interp.Cl_spline1(mach,rad2deg(alpha));
-% else
-% Cd = auxdata.interp.Cd_spline2(mach,rad2deg(alpha));
-% Cl = auxdata.interp.Cl_spline2(mach,rad2deg(alpha));   
-% end
+if ThirdStage == 1
+Cd = auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+Cl = auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));
+else
+% Cd = auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha));
+% Cl = auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha));   
 
-Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
-Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
+Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
+
+end
+
+% Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
+% Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
 %%%% Compute the drag and lift:
 
 D = 0.5*Cd.*A.*rho.*v.^2;

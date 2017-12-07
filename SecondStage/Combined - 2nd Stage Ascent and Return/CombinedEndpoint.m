@@ -9,10 +9,10 @@ const = input.auxdata.const;
 %% THIRD STAGE Payload Matrix %%===========================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
 
-if v1F > 2850
+if v1F > 2575
     ThirdStagePayloadMass = input.auxdata.PayloadGrid(alt1F,gamma1F,v1F);
 else
-    ThirdStagePayloadMass = gaussmf(v1F, [300 2850] )*input.auxdata.PayloadGrid(alt1F,gamma1F,2850);
+    ThirdStagePayloadMass = gaussmf(v1F, [300 2575] )*input.auxdata.PayloadGrid(alt1F,gamma1F,2575);
 end
 
 output.objective = -ThirdStagePayloadMass;

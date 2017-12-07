@@ -35,7 +35,6 @@ Stage1.Bounds.time      = [0 300]; % Time Bounds, s
 % Guesses are adaptively set 
 
 %% Second Stage %%=========================================================
-% DIDO Inputs
 % Initial Conditions %-----------------------------------------------------
 Stage2.Initial.v        = 1520; % Initial Velocity, m/s
 Stage2.Initial.mFuel    = Stage2.mFuel; % Initial Fuel Mass, kg
@@ -47,7 +46,7 @@ Stage2.Initial.xi       = 0; % Initial Longitude, rad
 Stage2.End.mFuel        = 0; % End Fuel Mass, kg
 Stage2.End.Zeta         = 1.78; % End Heading Angle, rad
 
-Stage2.End.gammaOpt     = [deg2rad(2), deg2rad(4)]; % End Trajectory Angle Bounds, rad (for max payload trajectories)
+Stage2.End.gammaOpt     = [deg2rad(2), deg2rad(6)]; % End Trajectory Angle Bounds, rad (for max payload trajectories)
 Stage2.End.gammaConst   = deg2rad(1.5); % End Trajectory Angle Bound, rad (for constant dynamic pressure trajectories)
 
 % Number of Nodes %--------------------------------------------------------
@@ -56,7 +55,7 @@ Stage2.Nodes            = 104;
 % Bounds %-----------------------------------------------------------------
 Stage2.Bounds.Alt       = [20000, 50000]; % Altitude Bounds, m
 Stage2.Bounds.v         = [1500, 3100]; % Velocity Bounds, m/s
-Stage2.Bounds.gamma     = [-0.01, deg2rad(5)]; % Trajectory Angl Bounds, rad
+Stage2.Bounds.gamma     = [-0.01, deg2rad(6)]; % Trajectory Angle Bounds, rad
 Stage2.Bounds.mFuel     = [0, Stage2.mFuel]; % Fuel Mass Bounds, kg
 Stage2.Bounds.gammadot  = [-0.001, 0.002]; % Trajectory Angle Derivative Bounds, rad/s
 Stage2.Bounds.zeta      = [1, 2]; % Heading Angle Bounds, rad
@@ -88,7 +87,6 @@ Stage3.Bounds.Alt       = [100000 400000]; % End Altitude Bounds, m
 Stage3.Bounds.VecAng    = 8; % Maximum Vector Angle, deg
 
 %% Second Stage Return
-% DIDO Inputs
 % Initial Conditions %-----------------------------------------------------
 
 % End Conditions %---------------------------------------------------------
