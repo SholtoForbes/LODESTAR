@@ -422,7 +422,7 @@ bounds.phase(2).path.upper = 50000;
 tGuess              = [650; 1500];
 altGuess            = [35000; 100];
 lonGuess            = [lon0; lon0+1*pi/180];
-latGuess            = [-0.13;-0.13-1*pi/180];
+latGuess            = [lat0; lat0-1*pi/180];
 speedGuess          = [3000; 10];
 fpaGuess            = [0; 0];
 aziGuess            = [deg2rad(97); deg2rad(270)];
@@ -430,7 +430,7 @@ aoaGuess            = [6*pi/180; 6*pi/180];
 bankGuess           = [80*pi/180; 80*pi/180];
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [100; mFuelMin];
-guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0.0;0]];
+guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
 guess.phase(2).control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
 guess.phase(2).time    = tGuess;
@@ -584,8 +584,8 @@ nodes = length(alt)
 
 
 
-[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel, 1);
-[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2, 0);
+[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel, 1);
+[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2, 0);
 
 
 % figure out horizontal motion
@@ -668,10 +668,6 @@ title('Angle of Attack (deg)')
 subplot(5,5,22)
 plot(time, rad2deg(eta))
 title('Bank Angle (deg)')
-
-subplot(5,5,23)
-plot(time, q11)
-title('Dynamic pressure after shock')
 
 % subplot(5,5,22);
 % plot(time, dual.dynamics);

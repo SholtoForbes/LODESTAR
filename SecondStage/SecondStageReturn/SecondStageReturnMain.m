@@ -15,110 +15,131 @@ auxdata.const = 1 % 1 normal, 2 10% increased Cd, 3 10% decreased Cd, 4 10% incr
 
 %% Inputs ============================================
 
-
-%Take input of aero
-flapaero = importdata('SPARTAN_Flaps.txt');
-
-interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
-interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
-interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
-% 
-% auxdata.interp.Cl_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,3),3);
-% auxdata.interp.Cd_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,4),3);
-% auxdata.interp.flapdeflection_poly=polyfitn([flapaero(:,1),flapaero(:,5)],flapaero(:,2),4);
-% 
-% auxdata.interp.flap_Cl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,3), 'linear', 'nearest');
-% auxdata.interp.flap_Cd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,4), 'linear', 'nearest');
-% auxdata.interp.flap_Cm_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,2),flapaero(:,5), 'linear', 'nearest');
-% 
-% 
-% [flapMList,flapdefList] = ndgrid(unique(flapaero(:,1)),unique(flapaero(:,2)));
-% % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% 
-% flap_Cl_Grid = [];
-% flap_Cd_Grid = [];
-% flap_Cm_Grid = [];
-% 
-% for i = 1:numel(flapMList)
-%     M_temp = flapMList(i);
-%     flapdef_temp = flapdefList(i);
-%     
-%     Cl_temp = auxdata.interp.flap_Cl_scattered(M_temp,flapdef_temp);
-%     Cd_temp = auxdata.interp.flap_Cd_scattered(M_temp,flapdef_temp);
-%     Cm_temp = auxdata.interp.flap_Cm_scattered(M_temp,flapdef_temp);
-%     
-%     I = cell(1, ndims(flapMList)); 
-%     [I{:}] = ind2sub(size(flapMList),i);
-%     
-%     flap_Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
-%     flap_Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
-%     flap_Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-% 
-% end
-% 
-% auxdata.interp.flap_Cl_spline = griddedInterpolant(flapMList,flapdefList,flap_Cl_Grid,'spline','linear');
-% auxdata.interp.flap_Cd_spline = griddedInterpolant(flapMList,flapdefList,flap_Cd_Grid,'spline','linear');
-% auxdata.interp.flap_Cm_spline = griddedInterpolant(flapMList,flapdefList,flap_Cm_Grid,'spline','nearest');
+%% Aerodynamic Data - Engine off
 
 
+% flapaero = importdata('SPARTAN_Flaps.txt');
+% 
+% interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest');
+% interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
+% interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
 
-%Take input of aero
-aero = importdata('SPARTANaero.txt');
+aero_EngineOff = importdata('SPARTANaero-14-5mCG.txt');
 
-interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
-interp.Cm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
+interp.Cl_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_EngineOff(:,2),aero_EngineOff(:,3));
+interp.Cd_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_EngineOff(:,2),aero_EngineOff(:,4));
+interp.Cm_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_EngineOff(:,2),aero_EngineOff(:,5));
 
-[MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
+[MList_EngineOff,AOAList_EngineOff] = ndgrid(unique(aero_EngineOff(:,1)),unique(aero_EngineOff(:,2)));
 % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 
-Cl_Grid = [];
-Cd_Grid = [];
-Cm_Grid = [];
+Cl_Grid_EngineOff = [];
+Cd_Grid_EngineOff = [];
+Cm_Grid_EngineOff = [];
 flap_Grid = [];
 
-for i = 1:numel(MList)
-    M_temp = MList(i);
-    AoA_temp = AOAList(i);
+for i = 1:numel(MList_EngineOff)
+    M_temp = MList_EngineOff(i);
+    AoA_temp = AOAList_EngineOff(i);
     
-    Cl_temp = interp.Cl_scattered(M_temp,AoA_temp);
-    Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
-    Cm_temp = interp.Cm_scattered(M_temp,AoA_temp);
+    Cl_temp = interp.Cl_scattered_EngineOff(M_temp,AoA_temp);
+    Cd_temp = interp.Cd_scattered_EngineOff(M_temp,AoA_temp);
+    Cm_temp = interp.Cm_scattered_EngineOff(M_temp,AoA_temp);
     
-    Cd_temp_AoA0 = interp.Cd_scattered(M_temp,0);
-    Cl_temp_AoA0 = interp.Cl_scattered(M_temp,0);
-    Cm_temp_AoA0 = interp.Cm_scattered(M_temp,0);
+    Cd_temp_AoA0 = interp.Cd_scattered_EngineOff(M_temp,0);
+    Cl_temp_AoA0 = interp.Cl_scattered_EngineOff(M_temp,0);
+    Cm_temp_AoA0 = interp.Cm_scattered_EngineOff(M_temp,0);
     
-    Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0));
-    Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+%     Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0));
+%     Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+%     
+%     flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
+%     flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
     
-    flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
-    flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
-    
-    I = cell(1, ndims(MList)); 
-    [I{:}] = ind2sub(size(MList),i);
+    I = cell(1, ndims(MList_EngineOff)); 
+    [I{:}] = ind2sub(size(MList_EngineOff),i);
     
 %     Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
 %     Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
 %     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-
-    flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+% 
+%     flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
 %     
-    Cl_Grid_noflap(I{(1)},I{(2)}) = Cl_temp;
-    Cd_Grid_noflap(I{(1)},I{(2)}) = Cd_temp;
-    Cm_Grid_noflap(I{(1)},I{(2)}) = Cm_temp;
+%     Cl_Grid_test(I{(1)},I{(2)}) = Cl_temp;
+%     Cd_Grid_test(I{(1)},I{(2)}) = Cd_temp;
+%     Cm_Grid_test(I{(1)},I{(2)}) = Cm_temp;
     
-    Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
-    Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
-    Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
+    Cl_Grid_EngineOff(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid_EngineOff(I{(1)},I{(2)}) = Cd_temp;
+    Cm_Grid_EngineOff(I{(1)},I{(2)}) = Cm_temp;
 end
+auxdata.interp.Cl_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,'spline','linear');
+auxdata.interp.Cd_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cd_Grid_EngineOff,'spline','linear');
+auxdata.interp.Cm_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cm_Grid_EngineOff,'spline','nearest');
 
-auxdata.interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
-auxdata.interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
-auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','nearest');
+%% Aerodynamic Data - Engine on 
 
+% flapaero_154 = importdata('SPARTAN_Flaps-15-4mCG.txt');
+% 
+% interp.flap_momentCl_scattered_154 = scatteredInterpolant(flapaero_154(:,1),flapaero_154(:,5),flapaero_154(:,3), 'linear', 'nearest'); % interpolation by moments
+% interp.flap_momentCd_scattered_154 = scatteredInterpolant(flapaero_154(:,1),flapaero_154(:,5),flapaero_154(:,4), 'linear', 'nearest');
+% interp.flap_momentdef_scattered_154 = scatteredInterpolant(flapaero_154(:,1),flapaero_154(:,5),flapaero_154(:,2), 'linear', 'nearest');
+
+aero_EngineOn = importdata('SPARTANaero-EngineOn-15-4mCG.txt');
+
+
+interp.Cl_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,3));
+interp.Cd_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,4));
+interp.Cm_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,5));
+
+[MList_EngineOn,AOAList_EngineOn] = ndgrid(unique(aero_EngineOn(:,1)),unique(aero_EngineOn(:,2)));
+% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+
+Cl_Grid_EngineOn = [];
+Cd_Grid_EngineOn = [];
+Cm_Grid_EngineOn = [];
+flap_Grid = [];
+
+for i = 1:numel(MList_EngineOn)
+    M_temp = MList_EngineOn(i);
+    AoA_temp = AOAList_EngineOn(i);
+    
+    Cl_temp = interp.Cl_scattered_EngineOn(M_temp,AoA_temp);
+    Cd_temp = interp.Cd_scattered_EngineOn(M_temp,AoA_temp);
+    Cm_temp = interp.Cm_scattered_EngineOn(M_temp,AoA_temp);
+    
+    Cd_temp_AoA0 = interp.Cd_scattered_EngineOn(M_temp,0);
+    Cl_temp_AoA0 = interp.Cl_scattered_EngineOn(M_temp,0);
+    Cm_temp_AoA0 = interp.Cm_scattered_EngineOn(M_temp,0);
+    
+%     Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered_154(M_temp,-(Cm_temp-Cm_temp_AoA0));
+%     Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered_154(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+%     
+%     flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
+%     flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
+    
+    I = cell(1, ndims(MList_EngineOn)); 
+    [I{:}] = ind2sub(size(MList_EngineOn),i);
+    
+%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
+%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
+%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
+% 
+%     flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
+%     
+%     Cl_Grid_test(I{(1)},I{(2)}) = Cl_temp;
+%     Cd_Grid_test(I{(1)},I{(2)}) = Cd_temp;
+%     Cm_Grid_test(I{(1)},I{(2)}) = Cm_temp;
+    
+    Cl_Grid_EngineOn(I{(1)},I{(2)}) = Cl_temp;
+    Cd_Grid_EngineOn(I{(1)},I{(2)}) = Cd_temp;
+    Cm_Grid_EngineOn(I{(1)},I{(2)}) = Cm_temp;
+end
+auxdata.interp.Cl_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn,'spline','linear');
+auxdata.interp.Cd_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cd_Grid_EngineOn,'spline','linear');
+auxdata.interp.Cm_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cm_Grid_EngineOn,'spline','nearest');
 
 
 % Produce Atmosphere Data
@@ -477,7 +498,7 @@ i = i+1
 % Flap_deflection  = solution.phase.control(:,4);
 
 % [raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,Flap_deflection);
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,Cm] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
+[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
 
 
 t = solution.phase(1).time;

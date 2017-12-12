@@ -1,10 +1,12 @@
-function [Isp,wf,eq] = RESTint(M, Alpha, auxdata,T0,P0)
+function [Isp,wf,eq,q1] = RESTint(M, Alpha, auxdata,T0,P0)
 % Engine Interpolator for engine data
 
 
 T1 = auxdata.interp.tempgridded(M,Alpha).*T0;
 P1 = auxdata.interp.presgridded(M,Alpha).*P0; % note this is at 50kPa, modified by efficiency
 M1 = auxdata.interp.M1gridded(M, Alpha);
+
+q1 = 0.5.*1.4.*P1.*M1.^2;
 
 Isp = auxdata.interp.IspGridded(M1,T1);
 

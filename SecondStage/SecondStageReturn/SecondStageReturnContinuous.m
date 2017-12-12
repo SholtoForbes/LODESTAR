@@ -31,7 +31,7 @@ time = input.phase(1).time;
 auxdata = input.auxdata;
 
 % [raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,flapdeflection);
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
+[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
@@ -45,7 +45,12 @@ phaseout.dynamics  = [raddot, londot, latdot, vdot, fpadot, azidot, aoadot, bank
 
 % Throttle_Constraint = throttle;
 % Throttle_Constraint(M>5.1) = 0;
+
+
 phaseout.path = q;
+
+
+
 % phaseout.path = [q,trim_constraint];
 % phaseout.path = [q, Throttle_Constraint];
 % phaseout.path = [q, Flap_deflection_linear];

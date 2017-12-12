@@ -21,7 +21,7 @@ addpath('.\axlabel')
 % align_axislabel([], gca)
 
 plotaero = 'no';
-if strcmp(plotaero,'yes')
+if plotaero == 'yes'
 figure(401)
 contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
@@ -47,7 +47,7 @@ c.Label.String = 'L/D';
 shading interp
 
 figure(404)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn,3000,'LineWidth',0.)
+contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 c = colorbar;
@@ -55,15 +55,15 @@ c.Label.String = 'Lift Coefficient';
 
 
 figure(405)
-contourf(MList_EngineOn,AOAList_EngineOn,Cd_Grid_EngineOn,3000,'LineWidth',0.)
+contourf(MList_EngineOff,AOAList_EngineOff,Cd_Grid_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 c = colorbar;
 c.Label.String = 'Drag Coefficient';
 
 
-figure(406)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn./Cd_Grid_EngineOn,3000,'LineWidth',0.)
+figure(403)
+contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff./Cd_Grid_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 c = colorbar;
@@ -106,12 +106,12 @@ rho = ppval(auxdata.interp.rho_spline,altitude); % Calculate density using atmos
 
 q = 0.5 * rho .* (speed .^2); % Calculating Dynamic Pressure
 
-% Cd = auxdata.interp.Cd_spline(M,aoa);
-% Cl = auxdata.interp.Cl_spline(M,aoa);
-% %%%% Compute the drag and lift:
-% A = auxdata.Stage2.Aref; % reference area (m^2)
-% D = 0.5*Cd.*A.*rho.*speed.^2;
-% L = 0.5*Cl.*A.*rho.*speed.^2;
+Cd = auxdata.interp.Cd_spline(M,aoa);
+Cl = auxdata.interp.Cl_spline(M,aoa);
+%%%% Compute the drag and lift:
+A = auxdata.Stage2.Aref; % reference area (m^2)
+D = 0.5*Cd.*A.*rho.*speed.^2;
+L = 0.5*Cl.*A.*rho.*speed.^2;
 %---------------%
 % Plot Solution %
 %---------------%

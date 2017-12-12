@@ -1,4 +1,4 @@
-function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,ThirdStage)
+function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,ThirdStage)
 
 interp = auxdata.interp;
 % =======================================================
@@ -50,9 +50,11 @@ else
 % Cd = auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha));
 % Cl = auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha));   
 
-Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
-Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
+Cd = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+Cl = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
 
+% Cd = throttle.*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+% Cl = throttle.*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));  
 end
 
 % Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
@@ -64,12 +66,16 @@ L = 0.5*Cl.*A.*rho.*v.^2;
 
 %% Thrust 
 
-[Isp,Fueldt,eq] = RESTint(M, alpha, auxdata,T0,P0);
+[Isp,Fueldt,eq,q1] = RESTint(M, alpha, auxdata,T0,P0);
+% 
+% Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
+% Fueldt(M<5.0) = 0;
 
-Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
+Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce ISP to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
 Fueldt(M<5.0) = 0;
 
 Fueldt = Fueldt.*throttle;
+% Fueldt = Fueldt.*gaussmf(throttle,[.05,1]);
 
 T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
 
