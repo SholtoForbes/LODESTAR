@@ -385,7 +385,7 @@ aziGuess            = [azi0; azif];
 
 if auxdata.const ==1
 aoaGuess            = [6*pi/180; 6*pi/180];
-bankGuess           = [89*pi/180; 0*pi/180];
+bankGuess           = [75*pi/180; 0*pi/180];
 elseif auxdata.const == 2
 
     aoaGuess            = [3*pi/180; 3*pi/180];
@@ -414,7 +414,7 @@ elseif auxdata.const == 9
 bankGuess           = [89*pi/180; 89*pi/180];
 end
 % mFuelGuess          = [mFuelMax; mFuelMin];
-mFuelGuess          = [200; mFuelMin];
+mFuelGuess          = [100; mFuelMin];
 guess.phase.state   = [radGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0;0]];
 guess.phase.control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
