@@ -1,4 +1,4 @@
-function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,ThirdStage)
+function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1,flap_deflection] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,ThirdStage)
 
 interp = auxdata.interp;
 % =======================================================
@@ -43,22 +43,36 @@ P0 = ppval(interp.P0_spline, alt);
 %% Aerodynamics
 % interpolate coefficients
 
-if ThirdStage == 1
-Cd = auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
-Cl = auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));
-else
-% Cd = auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha));
-% Cl = auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha));   
-
-Cd = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
-Cl = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
-
-% Cd = throttle.*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
-% Cl = throttle.*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));  
-end
+% if ThirdStage == 1
+% Cd = auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+% Cl = auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));
+% else
+% % Cd = auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha));
+% % Cl = auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha));   
+% 
+% Cd = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+% Cl = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
+% 
+% % Cd = throttle.*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
+% % Cl = throttle.*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));  
+% end
 
 % Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 % Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
+
+
+
+if ThirdStage == 1
+    Cd = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.Cd_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.Cd_spline_EngineOn.noFuel(mach,rad2deg(alpha));
+    Cl = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.Cl_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.Cl_spline_EngineOn.noFuel(mach,rad2deg(alpha));
+    flap_deflection = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.flap_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.flap_spline_EngineOn.noFuel(mach,rad2deg(alpha));
+else   
+    Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
+    Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
+    flap_deflection = (1-throttle).*auxdata.interp.flap_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.flap_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
+end
+
+
 %%%% Compute the drag and lift:
 
 D = 0.5*Cd.*A.*rho.*v.^2;

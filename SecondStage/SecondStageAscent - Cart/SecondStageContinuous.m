@@ -27,7 +27,7 @@ time1 = input.phase(1).time;
 
 auxdata = input.auxdata;
 
-[altdot1,londot1,latdot1,fpadot1,vdot1,azidot1, q1, M, Fd, rho,L,Fueldt1,T] = VehicleModelAscent(gamma1, alt1, v1,auxdata,zeta1,lat1,lon1,Alpha1,eta1,throttle1, mFuel1, 1);
+[altdot1,londot1,latdot1,fpadot1,vdot1,azidot1, q1, M, Fd, rho,L,Fueldt1,T] = VehicleModelAscent(gamma1, alt1, v1,auxdata,zeta1,lat1,lon1,Alpha1,eta1,throttle1, mFuel1,mFuel1(1),mFuel1(end), 1);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %

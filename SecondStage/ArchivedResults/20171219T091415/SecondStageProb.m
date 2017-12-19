@@ -13,21 +13,24 @@ addpath('..\SecondStageAscent - Cart')
 addpath('..\SecondStageReturn')
 addpath('..\')
 
+
 Timestamp = datestr(now,30)
 mkdir('../ArchivedResults', sprintf(Timestamp))
 copyfile('CombinedProbGPOPS.m',sprintf('../ArchivedResults/%s/SecondStageProb.m',Timestamp))
 
 %% Atmosphere Data %%======================================================
-% Fetch atmospheric data and compute interpolation splines.
-
 Atmosphere = dlmread('atmosphere.txt');
 interp.Atmosphere = Atmosphere;
 auxdata.interp.Atmosphere = interp.Atmosphere;
 
 auxdata.interp.c_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,5)); % Calculate speed of sound using atmospheric data
+
 auxdata.interp.rho_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,4)); % Calculate density using atmospheric data
+
 auxdata.interp.p_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); % Calculate density using atmospheric data
+
 auxdata.interp.T0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2)); 
+
 auxdata.interp.P0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); 
 
 %% Import Vehicle and trajectory Config Data %%============================
@@ -41,7 +44,16 @@ auxdata.Stage2 = Stage2;
 
 %%
 auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
+
 auxdata.A = 62.77; %m^2
+%%
+% Copy the current setting to archive
+% This saves the entire problem file every time the program is run. 
+
+% Timestamp = datestr(now,30)
+% mkdir('../ArchivedResults', sprintf(Timestamp))
+% copyfile('SecondStageProb.m',sprintf('../ArchivedResults/%s/SecondStageProb.m',Timestamp))
+% copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',Timestamp))
 
 %%
 % =========================================================================
@@ -53,34 +65,34 @@ auxdata.A = 62.77; %m^2
 % const = 1x: No end constraint, used for optimal trajectory calculation
 % const = 1: 50kPa limit, 12: 55 kPa limit, 13: 45 kPa limit, 14: 50kPa limit & 10% additional drag
 
+% const = 3: Fuel mass is constrained at end point, used for constant
+% dynamic pressure calculation (50kPa constrained)
+% const = 31: simple model for guess calc 
+% 32: Higher velocity
+
+
 const = 1
 auxdata.const = const;
 
 %% Aerodynamic Data
-% Fetch aerodynamic data and compute interpolation splines.
-% Each set of aero corresponds to a different CG. 
 
 addpath ..\CG14.5
-% Full of fuel, with third stage
+% 
 aero_EngineOff.fullFuel = importdata('SPARTANaero14.9122');
 flapaero.fullFuel = importdata('SPARTANaeroFlaps14.9122');
 aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn14.9122');
 
-[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel);
-
-% No fuel, with third stage. NOTE: it is assumed that the CG does not change
-% due to fuel after the end of acceleration phase, so there will still in
-% fact be some fuel left when this is used. 
 aero_EngineOff.noFuel = importdata('SPARTANaero15.3515');
 flapaero.noFuel = importdata('SPARTANaeroFlaps15.3515');
 aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.3515');
 
-[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel);
-
-% No fuel, wihtout third stage
 aero_EngineOff.noThirdStage = importdata('SPARTANaero14.5');
 flapaero.noThirdStage = importdata('SPARTANaeroFlaps14.5');
 aero_EngineOn.noThirdStage = importdata('SPARTANaeroEngineOn14.5');
+
+[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel);
+
+[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel);
 
 [auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff.noThirdStage,aero_EngineOn.noThirdStage,flapaero.noThirdStage);
 
@@ -97,7 +109,7 @@ auxdata.interp.presgridded = griddedInterpolant(MList_EngineOff,AOAList_EngineOn
 auxdata.interp.tempgridded = griddedInterpolant(MList_EngineOff,AOAList_EngineOn,temp_Grid,'spline','linear');
 
 
-%% Equivalence Ratio %%==========================================================
+%% Engine Data %%==========================================================
 % Import engine data
 auxdata.interp.engine_data = dlmread('ENGINEDATA.txt');  % reads four columns; Mach no after conical shock, temp after conical shock, Isp, max equivalence ratio
 engine_data = auxdata.interp.engine_data;
@@ -138,7 +150,7 @@ auxdata.interp.equivalence = scatteredInterpolant(eq_data(:,1),eq_data(:,2),eq_d
 grid.eq_eng = auxdata.interp.equivalence(grid.Mgrid_eng,grid.T_eng);
 auxdata.interp.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
 
-%% Isp data %-----------------------------------------
+% Load the interpolated Isp data %-----------------------------------------
 
 % gridIsp_eng is the spline interpolated data set created by
 % engineint.m and engineinterpolator.exe
@@ -175,7 +187,7 @@ ThirdStageData = dlmread('thirdstageFULL.dat'); %Import Third Stage Data Raw
 ThirdStageData = sortrows(ThirdStageData);
 
 % Interpolate for Missing Third Stage Points %-----------------------------
-% Be careful with this, only remove third stage points if they are very hard to calculate. 
+% Be careful with this. 
 [VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
@@ -207,34 +219,32 @@ bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2
 % Control Bounds
 bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-.1)];
 bounds.phase(1).control.upper = [deg2rad(.1), deg2rad(.1)];
-
 % Time Bounds
+
 bounds.phase(1).initialtime.lower = 0;
 bounds.phase(1).initialtime.upper = 0;
 bounds.phase(1).finaltime.lower = Stage2.Bounds.time(1);
 bounds.phase(1).finaltime.upper = Stage2.Bounds.time(2);
 
 %% Define Path Constraints
-% Path bounds, defined in Continuous function.
-% These limit the dynamic pressure.
+% This limits the dynamic pressure.
 if const == 1 || const == 14 || const == 15
     bounds.phase(1).path.lower = [0];
     bounds.phase(1).path.upper = [50000];
 elseif const == 12
-    bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [55000];
+    bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [55000 ,9];
 elseif const == 13
-    bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [45000];
+    bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [45000, 9];
 elseif const ==3 || const == 32
-        bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [50010];
+        bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [50010, 9];
 end
 
 
 %%  Guess =================================================================
-% Set the initial guess. This can have a significant effect on the final
-% solution, even for a well defined problem. 
+
 guess.phase(1).state(:,1)   = [22000;35000];
 guess.phase(1).state(:,2)   = [0;0];
 guess.phase(1).state(:,3)   = [-0.269;-0.13];
@@ -453,8 +463,8 @@ nodes = length(alt)
 
 
 
-[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11,flapdeflection] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel,mFuel(1),mFuel(end), 1);
-[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12,flapdeflection2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2,0,0, 0);
+[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel, 1);
+[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2, 0);
 
 
 % figure out horizontal motion
@@ -526,9 +536,9 @@ subplot(5,5,19)
 plot(time, IspNet1)
 title('Net Isp')
 
-subplot(5,5,20)
-plot(time, flapdeflection)
-title('Flap Deflection (deg)')
+% subplot(5,5,20)
+% plot(time, flapdeflection)
+% title('Flap Deflection (deg)')
 
 subplot(5,5,21)
 plot(time, rad2deg(Alpha))
@@ -629,7 +639,7 @@ ax3 = gca;
 xlim([min(time) max(time)]);
 line(time, [rad2deg(Alpha(1:end-1)) rad2deg(Alpha(end-1))],'Parent',ax3,'Color','k', 'LineStyle','-')
 
-line(time, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
+% line(time, [flapdeflection(1:end-1) flapdeflection(end-1)],'Parent',ax3,'Color','k', 'LineStyle','--')
 
 
 % line(time, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
@@ -648,7 +658,7 @@ saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondSt
 
 
 
-%% PLOT RETURN
+% PLOT RETURN
 addpath('..\SecondStageReturn\addaxis')
 
 figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
@@ -687,12 +697,9 @@ addaxislabel(2,'Throttle (%)');
 
 
 
-addaxis(time2,rad2deg(eta2),':','color','k', 'linewidth', 1.2);
+addaxis(time2,eta2,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
-
-addaxis(time2,flapdeflection2,'-.','color','k', 'linewidth', 1.2);
-addaxislabel(4,'Flap Deflection (Deg)');
-legend(  'Angle of Attack', 'Throttle' , 'Bank Angle','FlapDeflection');
+legend(  'Angle of Attack', 'Throttle' , 'Bank Angle');
 
 
 figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
@@ -729,7 +736,7 @@ legend(  'Mach no.', 'Isp (potential)', 'q' );
 forward0 = [alt(1),gamma(1),v(1),zeta(1),lat(1),lon(1), mFuel(1)];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time,Alpha,f_t),ControlInterp(time,eta,f_t),1,mFuel(1),mFuel(end)),time(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time,Alpha,f_t),ControlInterp(time,eta,f_t),1),time(1:end),forward0);
 
 figure(212)
 subplot(7,1,[1 2])

@@ -20,56 +20,6 @@ addpath('.\axlabel')
 % view(-20,30)
 % align_axislabel([], gca)
 
-plotaero = 'no';
-if strcmp(plotaero,'yes')
-figure(401)
-contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,5000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'Lift Coefficient';
-
-
-figure(402)
-contourf(MList_EngineOff,AOAList_EngineOff,Cd_Grid_EngineOff,5000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'Drag Coefficient';
-
-
-figure(403)
-contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff./Cd_Grid_EngineOff,5000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'L/D';
-shading interp
-
-figure(404)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn,3000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'Lift Coefficient';
-
-
-figure(405)
-contourf(MList_EngineOn,AOAList_EngineOn,Cd_Grid_EngineOn,3000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'Drag Coefficient';
-
-
-figure(406)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn./Cd_Grid_EngineOn,3000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-c = colorbar;
-c.Label.String = 'L/D';
-shading interp
-end
 %------------------------------%
 % Extract Solution from Output %
 %------------------------------%
@@ -77,16 +27,16 @@ addpath('addaxis')
 
 solution = output.result.solution;
 time = solution.phase(1).time;
-altitude  = (solution.phase(1).state(:,1)-auxdata.Re);
-longitude = solution.phase(1).state(:,2)*180/pi;
-latitude  = solution.phase(1).state(:,3)*180/pi;
-speed     = solution.phase(1).state(:,4);
-fpa       = solution.phase(1).state(:,5)*180/pi;
-azimuth   = solution.phase(1).state(:,6)*180/pi;
-aoa       = solution.phase(1).state(:,7)*180/pi;
-bank      = solution.phase(1).state(:,8)*180/pi;
-mfuel      = solution.phase(1).state(:,9);
-throttle      = solution.phase(1).state(:,10);
+% altitude  = (solution.phase(1).state(:,1)-auxdata.Re);
+% longitude = solution.phase(1).state(:,2)*180/pi;
+% latitude  = solution.phase(1).state(:,3)*180/pi;
+% speed     = solution.phase(1).state(:,4);
+% fpa       = solution.phase(1).state(:,5)*180/pi;
+% azimuth   = solution.phase(1).state(:,6)*180/pi;
+% aoa       = solution.phase(1).state(:,7)*180/pi;
+% bank      = solution.phase(1).state(:,8)*180/pi;
+% mfuel      = solution.phase(1).state(:,9);
+% throttle      = solution.phase(1).state(:,10);
 
 
 
@@ -152,11 +102,12 @@ addaxislabel(2,'Throttle (%)');
 % addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Fuel Mass (kg)');
 
-
-
 addaxis(time,bank,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
-legend(  'Angle of Attack', 'Throttle' , 'Bank Angle');
+
+addaxis(time,flapdeflection,'-.','color','k', 'linewidth', 1.2);
+addaxislabel(4,'Flap Deflection (Deg)');
+legend(  'Angle of Attack', 'Throttle' , 'Bank Angle', 'Flap Deflection');
 
 
 figure('units','normalized','outerposition',[0.1 0.1 .7 .5])

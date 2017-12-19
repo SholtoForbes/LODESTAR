@@ -1,4 +1,4 @@
-function ydot = VehicleModelReturn_forward(f_t, f_y,auxdata,alpha,eta,throttle,flapdeflection)
+function ydot = VehicleModelReturn_forward(f_t, f_y,auxdata,alpha,eta,throttle,mFuelinit,mFuelend)
 
 alt = f_y(1);
 gamma = f_y(2);
@@ -85,7 +85,7 @@ mFuel = f_y(7);
 % 
 % v_H = v.*cos(gamma);
 
-[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelAscent(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,1);
+[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelAscent(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,1);
 
 ydot = [rdot;gammadot;a;zetadot;phidot;xidot;-Fueldt];
 % =========================================================================

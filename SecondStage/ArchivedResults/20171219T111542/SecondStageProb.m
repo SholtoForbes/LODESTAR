@@ -18,8 +18,6 @@ mkdir('../ArchivedResults', sprintf(Timestamp))
 copyfile('CombinedProbGPOPS.m',sprintf('../ArchivedResults/%s/SecondStageProb.m',Timestamp))
 
 %% Atmosphere Data %%======================================================
-% Fetch atmospheric data and compute interpolation splines.
-
 Atmosphere = dlmread('atmosphere.txt');
 interp.Atmosphere = Atmosphere;
 auxdata.interp.Atmosphere = interp.Atmosphere;
@@ -175,7 +173,7 @@ ThirdStageData = dlmread('thirdstageFULL.dat'); %Import Third Stage Data Raw
 ThirdStageData = sortrows(ThirdStageData);
 
 % Interpolate for Missing Third Stage Points %-----------------------------
-% Be careful with this, only remove third stage points if they are very hard to calculate. 
+% Be careful with this. 
 [VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
@@ -207,34 +205,32 @@ bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2
 % Control Bounds
 bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-.1)];
 bounds.phase(1).control.upper = [deg2rad(.1), deg2rad(.1)];
-
 % Time Bounds
+
 bounds.phase(1).initialtime.lower = 0;
 bounds.phase(1).initialtime.upper = 0;
 bounds.phase(1).finaltime.lower = Stage2.Bounds.time(1);
 bounds.phase(1).finaltime.upper = Stage2.Bounds.time(2);
 
 %% Define Path Constraints
-% Path bounds, defined in Continuous function.
-% These limit the dynamic pressure.
+% This limits the dynamic pressure.
 if const == 1 || const == 14 || const == 15
     bounds.phase(1).path.lower = [0];
     bounds.phase(1).path.upper = [50000];
 elseif const == 12
-    bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [55000];
+    bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [55000 ,9];
 elseif const == 13
-    bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [45000];
+    bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [45000, 9];
 elseif const ==3 || const == 32
-        bounds.phase(1).path.lower = [0];
-    bounds.phase(1).path.upper = [50010];
+        bounds.phase(1).path.lower = [0 ,0];
+    bounds.phase(1).path.upper = [50010, 9];
 end
 
 
 %%  Guess =================================================================
-% Set the initial guess. This can have a significant effect on the final
-% solution, even for a well defined problem. 
+
 guess.phase(1).state(:,1)   = [22000;35000];
 guess.phase(1).state(:,2)   = [0;0];
 guess.phase(1).state(:,3)   = [-0.269;-0.13];

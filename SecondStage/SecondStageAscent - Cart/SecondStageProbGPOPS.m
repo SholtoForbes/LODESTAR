@@ -85,105 +85,24 @@ auxdata.const = const;
 % auxdata.interp.pitchingmoment_spline1 = griddedInterpolant(MList,AOAList,pitchingmoment_Grid,'spline','linear');
 
 %% Aerodynamic Data 
-%%
-% aero = importdata('SPARTANaero.txt');
+
+
+addpath ..\CG14.5
 % 
-% interp.Cl_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-% interp.Cd_scattered2 = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
-% 
-% 
-% [MList2,AOAList2] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
-% % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% 
-% Cl_Grid2 = [];
-% Cd_Grid2 = [];
-% 
-% for i = 1:numel(MList2)
-%     M_temp2 = MList2(i);
-%     AoA_temp2 = AOAList2(i);
-%     
-%     Cl_temp2 = interp.Cl_scattered2(M_temp2,AoA_temp2);
-%     Cd_temp2 = interp.Cd_scattered2(M_temp2,AoA_temp2);
-%     
-%     I = cell(1, ndims(MList2)); 
-%     [I{:}] = ind2sub(size(MList2),i);
-%     
-%     Cl_Grid2(I{(1)},I{(2)}) = Cl_temp2;
-%     Cd_Grid2(I{(1)},I{(2)}) = Cd_temp2;
-% 
-% end
-% 
-% auxdata.interp.Cl_spline2 = griddedInterpolant(MList2,AOAList2,Cl_Grid2,'spline','linear');
-% auxdata.interp.Cd_spline2 = griddedInterpolant(MList2,AOAList2,Cd_Grid2,'spline','linear');
+
+aero_EngineOff.fullFuel = importdata('SPARTANaero14.9122');
+flapaero.fullFuel = importdata('SPARTANaeroFlaps14.9122');
+aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn14.9122');
+
+aero_EngineOff.noFuel = importdata('SPARTANaero15.3515');
+flapaero.noFuel = importdata('SPARTANaeroFlaps15.3515');
+aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.3515');
+
+[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel);
+
+[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel);
 
 
-flapaero = importdata('SPARTAN_Flaps-15-4mCG.txt');
-% 
-interp.flap_momentCl_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,3), 'linear', 'nearest'); % interpolation by moments
-interp.flap_momentCd_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,4), 'linear', 'nearest');
-interp.flap_momentdef_scattered = scatteredInterpolant(flapaero(:,1),flapaero(:,5),flapaero(:,2), 'linear', 'nearest');
-
-aero = importdata('SPARTANaero-EngineOn-15-4mCG.txt');
-
-aero_engineoff = importdata('SPARTANaero-15-4mCG.txt');
-
-interp.Cl_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,3));
-interp.Cd_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,4));
-interp.Cm_scattered = scatteredInterpolant(aero(:,1),aero(:,2),aero(:,5));
-
-interp.Cl_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,3));
-interp.Cd_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,4));
-interp.Cm_engineoff = scatteredInterpolant(aero_engineoff(:,1),aero_engineoff(:,2),aero_engineoff(:,5));
-
-[MList,AOAList] = ndgrid(unique(aero(:,1)),unique(aero(:,2)));
-% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-
-Cl_Grid = [];
-Cd_Grid = [];
-Cm_Grid = [];
-flap_Grid = [];
-
-for i = 1:numel(MList)
-    M_temp = MList(i);
-    AoA_temp = AOAList(i);
-    
-    Cl_temp = interp.Cl_scattered(M_temp,AoA_temp);
-    Cd_temp = interp.Cd_scattered(M_temp,AoA_temp);
-    Cm_temp = interp.Cm_scattered(M_temp,AoA_temp);
-%     
-    Cd_temp_AoA0 = interp.Cd_engineoff(M_temp,0); % compute coefficients wqith engine off for comparison with flaps condition
-    Cl_temp_AoA0 = interp.Cl_engineoff(M_temp,0);
-    Cm_temp_AoA0 = interp.Cm_engineoff(M_temp,0);
-%     
-    Cl_AoA0_withflaps_temp = interp.flap_momentCl_scattered(M_temp,(-Cm_temp+Cm_temp_AoA0));
-    Cd_AoA0_withflaps_temp = interp.flap_momentCd_scattered(M_temp,(-Cm_temp+Cm_temp_AoA0)) ;
-    
-    flap_Cl_temp = Cl_AoA0_withflaps_temp - Cl_temp_AoA0;
-    flap_Cd_temp = Cd_AoA0_withflaps_temp - Cd_temp_AoA0;
-%     
-    I = cell(1, ndims(MList)); 
-    [I{:}] = ind2sub(size(MList),i);
-%     
-%     Cl_Grid(I{(1)},I{(2)}) = Cl_temp+flap_Cl_temp;
-%     Cd_Grid(I{(1)},I{(2)}) = Cd_temp+flap_Cd_temp;
-%     Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-% 
-%     flap_Grid(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp-Cm_temp_AoA0)) ;
-%     
-%     Cl_Grid_test(I{(1)},I{(2)}) = Cl_temp;
-%     Cd_Grid_test(I{(1)},I{(2)}) = Cd_temp;
-%     Cm_Grid_test(I{(1)},I{(2)}) = Cm_temp;
-    
-    Cl_Grid(I{(1)},I{(2)}) = Cl_temp;
-    Cd_Grid(I{(1)},I{(2)}) = Cd_temp;
-    Cm_Grid(I{(1)},I{(2)}) = Cm_temp;
-end
-
-auxdata.interp.Cl_spline = griddedInterpolant(MList,AOAList,Cl_Grid,'spline','linear');
-auxdata.interp.Cd_spline = griddedInterpolant(MList,AOAList,Cd_Grid,'spline','linear');
-auxdata.interp.Cm_spline = griddedInterpolant(MList,AOAList,Cm_Grid,'spline','nearest');
 %% Conical Shock Data %%===================================================
 % Import conical shock data and create interpolation splines 
 shockdata = dlmread('ShockMat');
@@ -288,7 +207,7 @@ lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
 lat0 = -0.264;
 lon0 = deg2rad(145);
-aoaMin = 0;  aoaMax = 9*pi/180;
+aoaMin = deg2rad(0);  aoaMax = 9*pi/180;
 % bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
 
 % Primal Bounds
@@ -338,7 +257,7 @@ guess.phase(1).state(:,3)   = [-0.269;-0.13];
 guess.phase(1).state(:,4)   = Stage2.Guess.v.';
 guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
-guess.phase(1).state(:,7)   = [8*pi/180; 8*pi/180];
+guess.phase(1).state(:,7)   = [2*pi/180; 2*pi/180];
 guess.phase(1).state(:,8) 	= [Stage2.Initial.mFuel, 200];
 
 guess.phase(1).control      = [[0;0]];
@@ -446,7 +365,7 @@ global phi
 % cd('../SecondStage')
 ThirdStagePayloadMass = 0;
 
-[~,~,~,~,~,~, q, M, D, rho,L,Fueldt,T,Isp] = VehicleModelAscent(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,0,1,mFuel,1);
+[~,~,~,~,~,~, q, M, D, rho,L,Fueldt,T,Isp,flapdeflection] = VehicleModelAscent(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,0,1,mFuel,mFuel(1),mFuel(end),1);
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -543,9 +462,9 @@ subplot(5,5,19)
 plot(time, IspNet)
 title('Net Isp')
 
-% subplot(5,5,20)
-% plot(time, flapdeflection)
-% title('Flap Deflection (deg)')
+subplot(5,5,20)
+plot(time, flapdeflection)
+title('Flap Deflection (deg)')
 
 subplot(5,5,21)
 plot(time, rad2deg(Alpha))
@@ -616,11 +535,11 @@ xlim([min(time) max(time)]);
 
 line(time, rad2deg(gamma),'Parent',ax2,'Color','k', 'LineStyle','-')
 
-% line(time, M,'Parent',ax2,'Color','k', 'LineStyle','--')
+line(time, M,'Parent',ax2,'Color','k', 'LineStyle','--')
 
 line(time, v./(10^3),'Parent',ax2,'Color','k', 'LineStyle','-.')
 
-% line(time, q./(10^4),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(time, q./(10^4),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 % line(time, heating_rate./(10^5),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
@@ -636,9 +555,9 @@ sp3 = subplot(2,6,[10,12]);
 xlabel('time (s)')
 ax3 = gca;
 xlim([min(time) max(time)]);
-line(time, [Alpha(1:end-1) Alpha(end-1)],'Parent',ax3,'Color','k', 'LineStyle','-')
+line(time, rad2deg(Alpha),'Parent',ax3,'Color','k', 'LineStyle','-')
 
-% line(time, [flapdeflection(1:end-1) flapdeflection(end-1)],'Parent',ax3,'Color','k', 'LineStyle','--')
+line(time, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 
 
 % line(time, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
@@ -673,7 +592,7 @@ end
 forward0 = [alt(1),gamma(1),v(1),zeta(1),lat(1),lon(1), mFuel(1)];
 
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,const,scattered),t,forward0);
-[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time,Alpha,f_t),0,1),time(1:end),forward0);
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time,Alpha,f_t),0,1,mFuel(1),mFuel(end)),time(1:end),forward0);
 
 
 figure(212)
@@ -682,30 +601,25 @@ hold on
 plot(f_t(1:end),f_y(:,1));
 plot(time,alt);
 
-subplot(7,1,3)
-hold on
-plot(f_t(1:end),f_y(:,2));
-plot(time,phi);
-
 subplot(7,1,4)
 hold on
-plot(f_t(1:end),f_y(:,3));
+plot(f_t(1:end),f_y(:,2));
 plot(time,gamma);
 
 subplot(7,1,5)
 hold on
-plot(f_t(1:end),f_y(:,4));
+plot(f_t(1:end),f_y(:,3));
 plot(time,v);
 
 subplot(7,1,6)
 hold on
-plot(f_t(1:end),f_y(:,5));
+plot(f_t(1:end),f_y(:,4));
 plot(time,zeta);
 
 subplot(7,1,7)
 hold on
-plot(f_t(1:end),f_y(:,6));
-plot(time,Stage2.mStruct+Stage3.mTot+mFuel);
+plot(f_t(1:end),f_y(:,7));
+plot(time,mFuel);
 
 %% plot engine interpolation visualiser
 T0 = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2), alt); 
