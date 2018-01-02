@@ -283,8 +283,8 @@ controls = fminunc(@(controls) prepitch(controls,m(1),interp,Throttle,Vehicle,At
 
 h_launch = controls(1)
 t_prepitch = controls(2)
-Isp = 275;
-T = 422581;
+Isp = Vehicle.Isp.SL;
+T = Vehicle.T.SL;
 dm = -T./Isp./9.81;
 m0_prepitch = m(1) - dm*t_prepitch;
 
