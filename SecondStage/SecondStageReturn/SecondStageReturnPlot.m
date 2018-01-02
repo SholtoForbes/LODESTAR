@@ -28,8 +28,8 @@ addpath('addaxis')
 solution = output.result.solution;
 time = solution.phase(1).time;
 % altitude  = (solution.phase(1).state(:,1)-auxdata.Re);
-% longitude = solution.phase(1).state(:,2)*180/pi;
-% latitude  = solution.phase(1).state(:,3)*180/pi;
+% lon = solution.phase(1).state(:,2)*180/pi;
+% lat  = solution.phase(1).state(:,3)*180/pi;
 % speed     = solution.phase(1).state(:,4);
 % fpa       = solution.phase(1).state(:,5)*180/pi;
 % azimuth   = solution.phase(1).state(:,6)*180/pi;
@@ -41,7 +41,7 @@ time = solution.phase(1).time;
 
 
 c = ppval(auxdata.interp.c_spline,altitude); % Calculate speed of sound using atmospheric data
-M = speed./c; % Calculating Mach No (Descaled)
+M = v./c; % Calculating Mach No (Descaled)
 
 T0 = ppval(auxdata.interp.T0_spline, altitude); 
 
@@ -50,11 +50,11 @@ P0 = ppval(auxdata.interp.P0_spline, altitude);
 
 [Isp,Fueldt,eq] = RESTint(M, aoa, auxdata,T0,P0);
 
-Isp(M<5.1)=0;
+Isp(M<5.0)=0;
 
 rho = ppval(auxdata.interp.rho_spline,altitude); % Calculate density using atmospheric data
 
-q = 0.5 * rho .* (speed .^2); % Calculating Dynamic Pressure
+q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
 % Cd = auxdata.interp.Cd_spline(M,aoa);
 % Cl = auxdata.interp.Cl_spline(M,aoa);
@@ -77,13 +77,13 @@ hold on
 % ylim([-30,40]);
 ylabel('altitude(km)');
 xlabel('time (s)');
-addaxis(time,speed/1000,'--','color','k', 'linewidth', 1.);
+addaxis(time,v/1000,'--','color','k', 'linewidth', 1.);
 addaxislabel(2,'Velocity (km/s)');
 
 % addaxis(time,fpa,':','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Trajectory Angle (deg)');
 
-addaxis(time,azimuth,':','color','k', 'linewidth', 1.2);
+addaxis(time,azi,':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Heading Angle (Deg)');
 
 
@@ -92,17 +92,17 @@ legend(  'Altitude', 'Velocity', 'Heading Angle', 'location', 'best');
 figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
 % subplot(3,1,2)
 hold on
-plot(time,aoa,'-','color','k', 'linewidth', 1.);
+plot(time,rad2deg(aoa),'-','color','k', 'linewidth', 1.);
 ylabel('Angle of Attack (deg)');
 xlabel('time (s)')
-throttle(M<5.1)=0;
+throttle(M<5.0)=0;
 addaxis(time,throttle*100,'--','color','k', 'linewidth', 1.);
 addaxislabel(2,'Throttle (%)');
 
 % addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Fuel Mass (kg)');
 
-addaxis(time,bank,':','color','k', 'linewidth', 1.2);
+addaxis(time,rad2deg(bank),':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
 
 addaxis(time,flapdeflection,'-.','color','k', 'linewidth', 1.2);
@@ -140,21 +140,21 @@ figure(4)
 hold on
 
 geoshow('landareas.shp','FaceColor',[0.5 .8 0.5])
-xlim([min(longitude)-3,max(longitude)+3]);
-ylim([min(latitude)-3,max(latitude)+3]);
+xlim([min(lon)-3,max(lon)+3]);
+ylim([min(lat)-3,max(lat)+3]);
 
-plot(longitude,latitude,'-', 'color','k', 'linewidth', 1.5);
+plot(lon,lat,'-', 'color','k', 'linewidth', 1.5);
 
-plot([longitude(end) longitude(1)],[latitude(end) latitude(1)],':', 'color','k', 'linewidth', 1.5);
+plot([lon(end) lon(1)],[lat(end) lat(1)],':', 'color','k', 'linewidth', 1.5);
 
 txt1 = '2nd \rightarrow 3rd Stage Separation';
-text(longitude(1)-0.5,latitude(1)-0.3,txt1)
+text(lon(1)-0.5,lat(1)-0.3,txt1)
 
 txt2 = '2nd Stage Landing';
-text(longitude(end)+0.1,latitude(end),txt2)
+text(lon(end)+0.1,lat(end),txt2)
 
 txt3 = 'Ascent';
-text((longitude(1)+longitude(end))/2+0.1,(latitude(1)+latitude(end))/2,txt3)
+text((lon(1)+lon(end))/2+0.1,(lat(1)+lat(end))/2,txt3)
 
 txt3 = 'Return';
 text(143,-10,txt3)

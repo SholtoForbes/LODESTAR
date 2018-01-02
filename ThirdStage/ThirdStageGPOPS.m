@@ -176,7 +176,7 @@ end
 [AltF_actual, vF, altexo, vexo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt(end),gamma(end),v(end), phi(end),xi(end), zeta(end), m(end), auxdata);
 
 
-
+inc_diff
 
 
 

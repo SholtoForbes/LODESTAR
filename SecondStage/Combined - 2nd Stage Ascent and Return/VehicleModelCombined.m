@@ -60,13 +60,19 @@ P0 = ppval(interp.P0_spline, alt);
 % Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 % Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
 
-
+if ThirdStage == 0
+    throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
+end
 
 if ThirdStage == 1
+    % Interpolate between centre of gravity conditions for FUll and Empty
+    % fuel, as fuel depletes
     Cd = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.Cd_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.Cd_spline_EngineOn.noFuel(mach,rad2deg(alpha));
     Cl = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.Cl_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.Cl_spline_EngineOn.noFuel(mach,rad2deg(alpha));
     flap_deflection = (mFuel-mFuelend)./(mFuelinit-mFuelend).*auxdata.interp.flap_spline_EngineOn.fullFuel(mach,rad2deg(alpha)) + (1-(mFuel-mFuelend)./(mFuelinit-mFuelend)).*auxdata.interp.flap_spline_EngineOn.noFuel(mach,rad2deg(alpha));
-else   
+else  
+    %Interpolate between engine on and engine off cases as throttle is
+    %adjusted
     Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
     Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
     flap_deflection = (1-throttle).*auxdata.interp.flap_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.flap_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
@@ -87,6 +93,7 @@ L = 0.5*Cl.*A.*rho.*v.^2;
 
 Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce ISP to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
 Fueldt(M<5.0) = 0;
+Isp(M<5.0) = 0;
 
 Fueldt = Fueldt.*throttle;
 % Fueldt = Fueldt.*gaussmf(throttle,[.05,1]);

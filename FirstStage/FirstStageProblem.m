@@ -3,13 +3,38 @@ function [states_end] = FirstStageProblem(hf,gammaf,phif,zetaf,const)
 global Throttle
 Throttle = 0.85; % throttle the Merlin engine down by a constant value, to enable easier pitchover
 
+% Aerodynamics File Path
+Aero = dlmread('FirstStageAeroCoeffs.txt');
+
+
+%% Vehicle 
+global Vehicle 
+
+mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
+mEngine = 470; % Mass of Merlin 1C
+mFuel = 0.939*(mRocket-mEngine) + mEngine; % structural mass fraction calculated without engine
+mSpartan = 9819.11;
+
+% Thrust and Isp are modified with altitude through the formula:
+% SL + (101325-P_atm)*Mod
+
+Vehicle.T.SL = 555900; % Thrust from Falcon 1 users guide. 
+Vehicle.T.Mod = 0.5518; % exit area calculated in SCALING.docx
+
+Vehicle.Isp.SL = 275; % linear regression of SL and vacuum Isp. From encyclopaedia astronautica, backed up by falcon 1 users guide
+Vehicle.Isp.Mod = 2.9410e-04;
+
+global SPARTANscale
+SPARTANscale = 1;
+Vehicle.Area = 62.77*SPARTANscale^(2/3); 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % clear all;		
 % clc
 %==============================================================
 % global zeta
 % global phi
-global q_forward
 
 global iterative_V
 iterative_V = [];
@@ -20,22 +45,23 @@ iteration = 1;
 global iterative_V_f
 iterative_V_f = [];
 
-global mach
 %-----------------------------------
 % Define the problem function files:
 %-----------------------------------
 FirstStage.cost 		= 'FirstStageCost';
 FirstStage.dynamics	    = 'FirstStageDynamics';
 FirstStage.events		= 'FirstStageEvents';	
-% MoonLander.path		= 'LanderPath';
-global scattered
 
-addpath TrajOpt-master
+global interp
 
-Aero = dlmread('FirstStageAeroCoeffs.txt');
-scattered.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
-scattered.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
-% scattered.Moment = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
+%% Import Atmosphere
+global Atmosphere
+Atmosphere = dlmread('atmosphere.txt');
+
+%% Calculate Aerodynamic Splines
+
+interp.Lift = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,3));
+interp.Drag = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
 M_list = unique(sort(Aero(:,1))); % create unique list of Mach numbers from engine data
 M_interp = unique(sort(Aero(:,1)));
@@ -44,57 +70,13 @@ AoA_list = unique(sort(Aero(:,2))); % create unique list of angle of attack numb
 AoA_interp = unique(sort(Aero(:,2)));
 
 [grid.M,grid.AoA] =  ndgrid(M_interp,AoA_interp);
-grid.Lift = scattered.Lift(grid.M,grid.AoA);
-grid.Drag = scattered.Drag(grid.M,grid.AoA);
-% grid.Moment = scattered.Moment(grid.M,grid.AoA);
-scattered.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','linear');
-scattered.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
-% scattered.MomentGridded = griddedInterpolant(grid.M,grid.AoA,grid.Moment,'spline','linear');
-
-global SPARTANscale
-
-SPARTANscale = 1;
-
-
-% TARGET ==================================================================
-%target final altitude and trajectory angle
-% global hf
-% hf = 24000; % set final desired altitude
-% hf = 24419; % const 1
-
-% gammaf = 0; % set final desired flight angle
-
-% gammaf =0.0408; % const 1
-% =========================================================================
-
-
-
-mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
-mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*(mRocket-mEngine) + mEngine; % structural mass fraction calculated without engine
-mSpartan = 9819.11;
-
+grid.Lift = interp.Lift(grid.M,grid.AoA);
+grid.Drag = interp.Drag(grid.M,grid.AoA);
+interp.LiftGridded = griddedInterpolant(grid.M,grid.AoA,grid.Lift,'spline','linear');
+interp.DragGridded = griddedInterpolant(grid.M,grid.AoA,grid.Drag,'spline','linear');
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%                        Pre-Pitchover Simulation                         %
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-% h0_prepitch = 0;  %Rocket starts on the ground
-% v0_prepitch = 0;  %Rocket starts stationary
-% m0_prepitch = mTotal;  %Rocket starts full of fuel
-% gamma0_prepitch = deg2rad(90);
-% 
-% phase = 'prepitch';
-% tspan = [0 25]; % time to fly before pitchover (ie. straight up)
-% 
-% y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0];
-% 
-% % this performs a forward simulation before pitchover. The end results of
-% % this are used as initial conditions for the optimiser. 
-% [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered), tspan, y0);  
-
 
 % FOR TESTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %this is a forward simulation for a set amount of time, at a constant AoA
@@ -110,19 +92,18 @@ mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 % postpitch(end,4)
 % 
 
-y = [90 30 0 0 0 0 0] % assume pitchover conditions, will need to back-simulate the necessary pitchover time
+%% Assign Pitchover Conditions
+y = [90 30 0 0 0 0 0] % assume pitchover conditions, launch conditions are back-simulated 
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-global AOAScale
-AOAScale = 1;
 
 %Define initial conditions
 h0 = y(end,1);  
 v0 = y(end,2);  
 m0 = y(end,3);  
 gamma0 = deg2rad(89.9);    % set pitchover amount (start flight angle). This pitchover is 'free' movement, and should be kept small. 
-% gamma0 = deg2rad(89); 
 
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
@@ -142,20 +123,13 @@ if phif > phiU || phif < phiL
     disp('Given latitude outside of bounds')
 end
 
-% if const == 32
-%     mUpp = 30000;
-% else
-% mUpp = 29000;
-% end
-% mUpp = 29000;
+
 gammaLow = deg2rad(-.1);
-% gammaUpp = deg2rad(89.9);
 gammaUpp = gamma0;
 % This sets the control limits, this is second derivative of AoA
-% uLow = [-.001]*AOAScale; % Can do either AoA or thrust
-% uUpp = [.001]*AOAScale; 
-uLow = [-.0005]*AOAScale; % Can do either AoA or thrust
-uUpp = [.0005]*AOAScale; 
+uLow = [-.0005]; % Can do either AoA or thrust
+uUpp = [.0005];
+
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
 %-------------------------------------------
@@ -168,35 +142,15 @@ bounds.upper.time	= [0 tfMax];
 % Note: DO NOT set mfmin to zero because the equations 
 % of motion have a singularity at m = 0.
 
-% bounds.lower.states = [hLow; vLow; mF-1;-0.1;-deg2rad(4)*AOAScale;0];
-% bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(3)*AOAScale;2*pi];
-
-
 % These define the search space of the solution, including maximum AoA limits
-bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5)*AOAScale;0;-0.1;phiL ];
-bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(2)*AOAScale;2*pi; 0.1; phiU];
+bounds.lower.states = [hLow; vLow; mF-1;gammaLow;-deg2rad(5);0;-0.1;phiL ];
+bounds.upper.states = [ hUpp;  vUpp; mUpp;gammaUpp;deg2rad(2);2*pi; 0.1; phiU];
 
 bounds.lower.controls = uLow;
 bounds.upper.controls = uUpp;
-
-% zetaF = deg2rad(97); %Targets a specific heading angle. This is about right to get into a SSO by the end of third stage flight
-% zetaF = 1.6837;
-% phif = -0.2138; % these match second stage
-
 alpha0 = 0; %Set initial angle of attack to 0
 
 
-% Commented out bounds are for different end states
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF];
-% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf; 0];	
-% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; mF; zetaF; hf];	
-% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; hf; 0];	
-% bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF];
-%   bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; 0.0; hf];
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%  bounds.lower.events = [h0; v0; m0; gamma0; alpha0; zetaF; gammaf];
-% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaF; gammaf; 1500; mEmpty+mSpartan; hf; phif];
 if const == 32
     vf = 1596;
 else
@@ -205,7 +159,6 @@ end
 Atmosphere = dlmread('atmosphere.txt');
 
 bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; mEmpty+mSpartan; hf; phif];
-% bounds.lower.events = [h0; v0; gamma0; alpha0; zetaf; gammaf; vf; hf; phif];
 
 bounds.upper.events = bounds.lower.events;
 
@@ -244,39 +197,18 @@ end
   
   
 % Initial Guess ===========================================================   
-t0			= 0;
-% tfGuess 	= 90;			
+t0			= 0;		
 tfGuess 	= 80;
-% slightly educated guess of final time (for the scaled problem!)
-% guess.states(1,:)	= [h0, hf+100]; %24.5 for 45kpa, 23 for 55kpa
+% educated guess of final time (for the scaled problem!)
 
-% if const == 3 || const == 12
-    guess.states(1,:)	= [h0, hf-100];
-% else
-%     guess.states(1,:)	= [h0, hf-500];
-% end
-% guess.states(1,:)	= [hf,hf];
-% guess.states(1,:)	= [h0, interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/vf^2)+100]; %24.5 for 45kpa, 23 for 55kpa
+
+guess.states(1,:)	= [h0, hf-100];
 guess.states(2,:)	= [v0, 1520];
-% guess.states(2,:)	= [v0, 1620];
-% guess.states(2,:)	= [v0, 1550];
-% guess.states(3,:)	= [28000, mF];
-
-
-% if const == 3
-    guess.states(3,:)	= [28000, mF];
-%     else
-%     guess.states(3,:)	= [mTotal, mF];
-% end
-
-% guess.states(3,:)	= [mTotal, mF];
+guess.states(3,:)	= [28000, mF];
 guess.states(4,:)	= [gamma0,gammaf];
-% guess.states(5,:)	= [deg2rad(-1), deg2rad(-2)];
 guess.states(5,:)	= [deg2rad(0), deg2rad(-2)];
 guess.states(6,:)	= [1.63, zetaf];
-
 guess.states(7,:)	= [0, 0];
-
 guess.states(8,:)	= [-0.22, phif];
 
 guess.controls		= [0.0, 0.0];
@@ -335,26 +267,19 @@ tspan = primal.nodes;
 % postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)]; % set mass
 postpitch0_f = [y(end,1) y(end,2) m(1) deg2rad(89.9) phi(1) zeta(1)];
 
-[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,scattered,Throttle), tspan, postpitch0_f);
+[t_postpitch_f, postpitch_f] = ode45(@(t,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t,primal.nodes,zeta),ControlFunction(t,primal.nodes,alpha),phase,interp,Throttle,Vehicle,Atmosphere), tspan, postpitch0_f);
 
 figure(103)
 hold on
 plot(postpitch_f(:,1));
 plot(V);
-% y
-% postpitch_f
-% postpitch_f(end,4)
-
-
-% fuel_left = mFuel - (m(1) - m(end)) % for fixed mass
-
 
 % Iterative Prepitch Determination ========================================
 %This back determines the mass and launch altitude necessary to get to
 %100m, 30m/s at the PS method determined fuel mass
 
 % ntoe that launch altitude does vary, but it should only be slightly
-controls = fminunc(@(controls) prepitch(controls,m(1),scattered,Throttle),[10,6]);
+controls = fminunc(@(controls) prepitch(controls,m(1),interp,Throttle,Vehicle,Atmosphere),[10,6]);
 
 h_launch = controls(1)
 t_prepitch = controls(2)
@@ -362,12 +287,12 @@ Isp = 275;
 T = 422581;
 dm = -T./Isp./9.81;
 m0_prepitch = m(1) - dm*t_prepitch;
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 h0_prepitch = h_launch;  %Rocket starts on the ground
 v0_prepitch = 0;  %Rocket starts stationary
-% m0_prepitch = m0_prepitch;  %Rocket starts full of fuel
 gamma0_prepitch = deg2rad(90);
 
 phase = 'prepitch';
@@ -377,7 +302,7 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0, 0];
 
 % this performs a forward simulation before pitchover. The end results of
 % this are used as initial conditions for the optimiser. 
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered,Throttle), tspan, y0);  
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,interp,Throttle,Vehicle,Atmosphere), tspan, y0);  
 
 
 figure(101);

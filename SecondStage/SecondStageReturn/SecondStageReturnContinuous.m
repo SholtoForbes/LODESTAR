@@ -31,7 +31,7 @@ time = input.phase(1).time;
 auxdata = input.auxdata;
 
 % [raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,flapdeflection);
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
+[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,0);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %

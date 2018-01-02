@@ -5,15 +5,15 @@ clear all
 mat = [];
 
 % u = [2825] % velocity range. The routine is parallelised around this velocity list
-u = [2950:25:2975] % velocity range. The routine is parallelised around this velocity list
+u = [2675:25:2850] % velocity range. The routine is parallelised around this velocity list
 
-phi0 = -0.13 % initial latitude, this has very minimal effect
-% zeta0 = 1.69 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
- zeta0 = 1.78 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
-% for k = [33000:1000:36000] % altitude range
-for k = [33000:500:38000]
+% phi0 = -0.13 % initial latitude, this has very minimal effect
+phi0 = -0.103 % initial latitude, this has very minimal effect
+ zeta0 = 1.79 % initial heading angle, this is the zeta to reach close to 1.704 rad heading angle (SSO)
+
+for k = [34000:500:40000]
 % for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
-for j = [deg2rad(2): deg2rad(.5): deg2rad(6)]
+for j = [deg2rad(3): deg2rad(.5): deg2rad(7)]
 
 temp_guess_no = 1;
 

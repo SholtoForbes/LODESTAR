@@ -158,8 +158,8 @@ i=1
 lon0   = deg2rad(145);%ref
 lonf = deg2rad(145);
 % lat0 = -0.1571;
-lat0   = -0.135;%ref
-latf   = -0.269;
+
+
 
 if auxdata.const ==8
     latf = latf + (latf-lat0)*0.1;
@@ -178,6 +178,8 @@ azi0   = +102*pi/180;
 % azi0   = +180*pi/180; 
 azif   = 270*pi/180;
 
+lat0   = -0.135 - 0.0051*cos(azi0);
+latf   = -0.269 - 0.0051*sin(azi0) ;
 %-------------------------------------------------------------------%
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
@@ -205,9 +207,10 @@ bounds.phase.finaltime.upper = tfMax;
 
 % Initial State Bounds
 % Used for constraining initial states
-bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin, mFuelMin, throttleMin];
-bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax, mFuelMax, throttleMax];
-
+% bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, bankMin, mFuelMin, throttleMin];
+% bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, bankMax, mFuelMax, throttleMax];
+bounds.phase.initialstate.lower = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMin, 0, mFuelMin, throttleMin];
+bounds.phase.initialstate.upper = [rad0, lon0, lat0, speed0, fpa0, azi0, aoaMax, 0, mFuelMax, throttleMax];
 % State Bounds
 % General variable bounds
 bounds.phase.state.lower = [radMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin, mFuelMin, throttleMin];
@@ -219,8 +222,8 @@ bounds.phase.finalstate.lower = [radMin, lonf-0.002, latf-0.002, speedMin, deg2r
 bounds.phase.finalstate.upper = [200+auxdata.Re, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax, mFuelMin, throttleMax];
 
 % Control Bounds
-bounds.phase.control.lower = [deg2rad(-.5), deg2rad(-5), -1];
-bounds.phase.control.upper = [deg2rad(.5), deg2rad(5), 1];
+bounds.phase.control.lower = [deg2rad(-.2), deg2rad(-5), -1];
+bounds.phase.control.upper = [deg2rad(.2), deg2rad(5), 1];
 
 % Path Bounds (The meaning of the path bounds are set in Continuous function)
 bounds.phase.path.lower = 0;
@@ -245,8 +248,8 @@ fpaGuess            = [fpa0; fpaf];
 aziGuess            = [azi0; azif];
 
 if auxdata.const ==1
-    aoaGuess            = [6*pi/180; 6*pi/180];
-    bankGuess           = [75*pi/180; 0*pi/180];
+    aoaGuess            = [5*pi/180; 5*pi/180];
+    bankGuess           = [80*pi/180;80*pi/180];
 elseif auxdata.const == 2
     aoaGuess            = [3*pi/180; 3*pi/180];
     bankGuess           = [89*pi/180; 89*pi/180];
@@ -315,7 +318,7 @@ if auxdata.const == 3 || auxdata.const == 6 || auxdata.const == 7 || auxdata.con
 % elseif auxdata.const == 9 
 %     setup.nlp.ipoptoptions.maxiterations = 350; 
 else
-setup.nlp.ipoptoptions.maxiterations = 300;
+setup.nlp.ipoptoptions.maxiterations = 400;
 end
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
@@ -352,11 +355,10 @@ i = i+1
 
 
 
-% Flap_deflection  = solution.phase.control(:,4);
 
-% [raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,Flap_deflection);
-[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1,flapdeflection] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel);
+[raddot,londot,latdot,fpadot,vdot,azidot, q, M, Fd, rho,L,Fueldt,T,q1,flapdeflection] = VehicleModelReturn(fpa, rad, v,auxdata,azi,lat,lon,aoa,bank,throttle, mFuel,0);
 
+throttle(M<5.0) = 0; % remove nonsense throttle points
 
 t = solution.phase(1).time;
 
@@ -393,3 +395,33 @@ plot(f_t(1:end),f_y(:,7));
 plot(t,mFuel);
 
 save('Solution.mat','solution')
+
+
+%% Check KKT and pontryagins minimum
+% Check that the hamiltonian = 0 (for free end time)
+% Necessary condition
+input_test = output.result.solution;
+input_test.auxdata = auxdata;
+phaseout_test = SecondStageReturnContinuous(input_test);
+lambda = output.result.solution.phase.costate;
+
+for i = 1:length(lambda)-1
+    H(i) = lambda(i+1,:)*phaseout_test.dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
+end
+
+figure(221)
+plot(t(1:end-1),H)
+ylabel('Hamiltonian')
+xlabel('Time (s)')
+% Check Primal Feasibility
+% Check calculated derivatives with the numerical derivative of each
+% porimal, scaled by that primal
+figure(220)
+hold on
+for i = 1:length(output.result.solution.phase.state(1,:))
+plot(t,([diff(output.result.solution.phase.state(:,i))./diff(output.result.solution.phase.time); 0] - phaseout_test.dynamics(:,i))./output.result.solution.phase.state(:,i));
+end
+xlabel('Time (s)')
+ylabel('Derivative Error')
+ylim([-1,1])
+legend('Alt','lon','lat','v','gamma','zeta','aoa','bank','mFuel','throttle')

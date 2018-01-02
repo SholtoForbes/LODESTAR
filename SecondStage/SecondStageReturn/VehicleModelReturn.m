@@ -1,6 +1,5 @@
-function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,q1,flap_deflection] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel)
-% function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,trim_constraint] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,flapdeflection)
-% 
+function [rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,q1,flap_deflection] = VehicleModelReturn(gamma, r, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,forward_flag)
+
 interp = auxdata.interp;
 % =======================================================
 % Vehicle Model
@@ -67,6 +66,8 @@ P0 = ppval(interp.P0_spline, alt);
 % Cd = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cd_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cd_spline_EngineOn(mach,rad2deg(alpha));
 % Cl = (1-gaussmf(throttle,[.05,1])).*auxdata.interp.Cl_spline_EngineOff(mach,rad2deg(alpha)) + gaussmf(throttle,[.05,1]).*auxdata.interp.Cl_spline_EngineOn(mach,rad2deg(alpha));   
 
+throttle(M<5.0) = 0; % remove throttle points below operable range
+
 Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
 Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));   
 flap_deflection = (1-throttle).*auxdata.interp.flap_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.flap_spline_EngineOn.noThirdStage(mach,rad2deg(alpha)); 
@@ -100,8 +101,14 @@ Isp = Isp*0.9;
 end
 
 Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]);
-Fueldt(M<5.1) = 0;
 
+if forward_flag
+    % do nothing
+else
+    % limit engine under Mach 5.1
+    Fueldt(M<5.0) = 0;
+    Isp(M<5.0) = 0;
+end
 
 Fueldt = Fueldt.*throttle;
 % Fueldt = Fueldt.*gaussmf(throttle,[.05,1]);

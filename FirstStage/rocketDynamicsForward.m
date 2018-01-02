@@ -1,11 +1,10 @@
-function [dz] = rocketDynamicsForward(z,zeta,alpha,phase,scattered,Throttle)
+function [dz] = rocketDynamicsForward(z,zeta,alpha,phase,interp,Throttle,Vehicle,Atmosphere)
 global mach
-Atmosphere = dlmread('atmosphere.txt');
+
 h = z(1,:);   %Height
 v = z(2,:);   %Velocity
 m = z(3,:);   %Mass
 gamma = z(4,:);
-% zeta = z(5,:);
 phi = z(5,:);
 
 
@@ -30,35 +29,28 @@ q = 0.5*density.*v.^2;
 SCALE = 1.;
 % SCALE = 1; %this is engine exit area scale
 % Merlin 1C engine 
-% T = 422581*SCALE + (101325 - P_atm)*0.5667*SCALE; %(This whole thing is nearly a Falcon 1 first stage) 
-T = 555900*SCALE + (101325 - P_atm)*0.5518; 
-T = T*Throttle;
-Isp = 275 + (101325 - P_atm)*2.9410e-04;
+
+T = Vehicle.T.SL + (101325 - P_atm)*Vehicle.T.Mod; % Thrust from Falcon 1 users guide. exit area calculated in SCALING.docx
+
+T = T.*Throttle; % Throttle down
+
+Isp = Vehicle.Isp.SL + (101325 - P_atm)*Vehicle.Isp.Mod; % linear regression of SL and vacuum Isp. From encyclopaedia astronautica, backed up by falcon 1 users guide
+
 
 dm = -T./Isp./g*SCALE;
 
 
 mach = v./speedOfSound;
-% Cd = scattered.Drag(mach,rad2deg(alpha));
-% Cl = scattered.Lift(mach,rad2deg(alpha));
-Cd = scattered.DragGridded(mach,rad2deg(alpha));
-Cl = scattered.LiftGridded(mach,rad2deg(alpha));
+
+Cd = interp.DragGridded(mach,rad2deg(alpha));
+Cl = interp.LiftGridded(mach,rad2deg(alpha));
 
 %%%% Compute the drag:
-global SPARTANscale
-Area = 62.77*SPARTANscale^(2/3);  
+
+Area = Vehicle.Area; 
 D = 0.5*Cd.*Area.*density.*v.^2;
 global L
 L = 0.5*Cl.*Area.*density.*v.^2;
-
-
-
-%%%% Complete the calculation:
-
-
-% xi = 0*ones(1,length(h)); 
-% phi = -0.2138*ones(1,length(h));
-% zeta = deg2rad(97)*ones(1,length(h));
 
 
 switch phase
@@ -70,15 +62,12 @@ end
 
 xi = 0; 
 
-
-[dr,dxi,dphi,dgamma,dv,dzeta] = RotCoords(h+rEarth,xi,phi,gamma,v,zeta,L,D,T,m,alpha,phase);
+[dr,dxi,dphi,dgamma,dv,dzeta] = RotCoordsFirst(h+rEarth,xi,phi,gamma,v,zeta,L,D,T,m,alpha,phase);
 
 % dzeta
 if isnan(dgamma)
 dgamma = 0;
 end
-
-
 
 dz = [dr;dv;dm;dgamma;dphi;dzeta];
 

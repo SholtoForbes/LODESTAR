@@ -1,4 +1,4 @@
-function cost = prepitch(controls,m_f,scattered,Throttle)
+function cost = prepitch(controls,m_f,scattered,Throttle,Vehicle,Atmosphere)
 
 % h0_prepitch = 0;  %Rocket starts on the ground
 h0_prepitch = controls(1);
@@ -19,6 +19,6 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0,0];
 
 % this performs a forward simulation before pitchover. The end results of
 % this are used as initial conditions for the optimiser. 
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered,Throttle), tspan, y0);  
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,scattered,Throttle,Vehicle,Atmosphere), tspan, y0);  
 
 cost = (90 - y(end,1))^2 + (30 - y(end,2))^2;

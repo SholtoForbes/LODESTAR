@@ -22,9 +22,18 @@ interp.Cl_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_En
 interp.Cd_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_EngineOff(:,2),aero_EngineOff(:,4));
 interp.Cm_scattered_EngineOff = scatteredInterpolant(aero_EngineOff(:,1),aero_EngineOff(:,2),aero_EngineOff(:,5));
 
-[MList_EngineOff,AOAList_EngineOff] = ndgrid(unique(aero_EngineOff(:,1)),unique(aero_EngineOff(:,2)));
+
+MList_EngineOff = unique(aero_EngineOff(:,1));
+% MList_EngineOff(end+1) = MList_EngineOff(end) + 1; % extrapolate for Mach no slightly
+
+AoAList_engineOff = unique(aero_EngineOff(:,2));
+
+[Mgrid_EngineOff,AOAgrid_EngineOff] = ndgrid(MList_EngineOff,AoAList_engineOff);
+
 % Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
 % Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+
+% 
 
 Cl_Grid_EngineOff = [];
 Cd_Grid_EngineOff = [];
@@ -32,9 +41,9 @@ Cm_Grid_EngineOff = [];
 flap_Grid = [];
 
 
-for i = 1:numel(MList_EngineOff)
-    M_temp = MList_EngineOff(i);
-    AoA_temp = AOAList_EngineOff(i);
+for i = 1:numel(Mgrid_EngineOff)
+    M_temp = Mgrid_EngineOff(i);
+    AoA_temp = AOAgrid_EngineOff(i);
     
     Cl_temp_EngineOff = interp.Cl_scattered_EngineOff(M_temp,AoA_temp); % Determine coefficients without flap deflections. 
     Cd_temp_EngineOff = interp.Cd_scattered_EngineOff(M_temp,AoA_temp);
@@ -55,8 +64,8 @@ for i = 1:numel(MList_EngineOff)
     %
     
   % Create Grids
-    I = cell(1, ndims(MList_EngineOff)); 
-    [I{:}] = ind2sub(size(MList_EngineOff),i);
+    I = cell(1, ndims(Mgrid_EngineOff)); 
+    [I{:}] = ind2sub(size(Mgrid_EngineOff),i);
     
     Cl_Grid_EngineOff(I{(1)},I{(2)}) = Cl_temp_EngineOff+flap_Cl_temp_EngineOff; % Add flap deflection coefficients in. This assumes that flap deflection will have equal effect over the range of Mach no.s.
     Cd_Grid_EngineOff(I{(1)},I{(2)}) = Cd_temp_EngineOff+flap_Cd_temp_EngineOff;
@@ -72,10 +81,11 @@ for i = 1:numel(MList_EngineOff)
 %     Cd_Grid_EngineOff(I{(1)},I{(2)}) = Cd_temp;
 %     Cm_Grid_EngineOff(I{(1)},I{(2)}) = Cm_temp;
 end
-Cl_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,'spline','linear');
-Cd_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cd_Grid_EngineOff,'spline','linear');
-flap_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,flap_Grid_EngineOff,'spline','linear');
-Cm_spline_EngineOff = griddedInterpolant(MList_EngineOff,AOAList_EngineOff,Cm_Grid_EngineOff,'spline','nearest');
+Cl_spline_EngineOff = griddedInterpolant(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_EngineOff,'spline','linear');
+Cd_spline_EngineOff = griddedInterpolant(Mgrid_EngineOff,AOAgrid_EngineOff,Cd_Grid_EngineOff,'spline','linear');
+flap_spline_EngineOff = griddedInterpolant(Mgrid_EngineOff,AOAgrid_EngineOff,flap_Grid_EngineOff,'spline','linear');
+Cm_spline_EngineOff = griddedInterpolant(Mgrid_EngineOff,AOAgrid_EngineOff,Cm_Grid_EngineOff,'spline','linear');
+
 
 %% Aerodynamic Data - Engine on 
 
@@ -84,18 +94,22 @@ interp.Cl_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_Engi
 interp.Cd_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,4));
 interp.Cm_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,5));
 
-[MList_EngineOn,AOAList_EngineOn] = ndgrid(unique(aero_EngineOn(:,1)),unique(aero_EngineOn(:,2)));
-% Cl_Grid = reshape(aero(:,3),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
-% Cd_Grid = reshape(aero(:,4),[length(unique(aero(:,2))),length(unique(aero(:,1)))]).';
+MList_EngineOn = unique(aero_EngineOn(:,1));
+% MList_EngineOn(end+1) = MList_EngineOn(end) + 1; % extrapolate for Mach no slightly
+
+AoAList_engineOn = unique(aero_EngineOn(:,2));
+
+[Mgrid_EngineOn,AOAgrid_EngineOn] = ndgrid(MList_EngineOn,AoAList_engineOn);
+
 
 Cl_Grid_EngineOn = [];
 Cd_Grid_EngineOn = [];
 Cm_Grid_EngineOn = [];
 flap_Grid = [];
 
-for i = 1:numel(MList_EngineOn)
-    M_temp = MList_EngineOn(i);
-    AoA_temp = AOAList_EngineOn(i);
+for i = 1:numel(Mgrid_EngineOn)
+    M_temp = Mgrid_EngineOn(i);
+    AoA_temp = AOAgrid_EngineOn(i);
     
     Cl_temp_EngineOn = interp.Cl_scattered_EngineOn(M_temp,AoA_temp);
     Cd_temp_EngineOn = interp.Cd_scattered_EngineOn(M_temp,AoA_temp);
@@ -114,8 +128,8 @@ for i = 1:numel(MList_EngineOn)
     %
     
     % Create Grids
-    I = cell(1, ndims(MList_EngineOn)); 
-    [I{:}] = ind2sub(size(MList_EngineOn),i);
+    I = cell(1, ndims(Mgrid_EngineOn)); 
+    [I{:}] = ind2sub(size(Mgrid_EngineOn),i);
     
     Cl_Grid_EngineOn(I{(1)},I{(2)}) = Cl_temp_EngineOn+flap_Cl_temp_EngineOn;
     Cd_Grid_EngineOn(I{(1)},I{(2)}) = Cd_temp_EngineOn+flap_Cd_temp_EngineOn;
@@ -131,59 +145,74 @@ for i = 1:numel(MList_EngineOn)
 %     Cd_Grid_EngineOn(I{(1)},I{(2)}) = Cd_temp;
 %     Cm_Grid_EngineOn(I{(1)},I{(2)}) = Cm_temp;
 end
-Cl_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn,'spline','linear');
-Cd_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cd_Grid_EngineOn,'spline','linear');
-flap_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,flap_Grid_EngineOn,'spline','linear');
-Cm_spline_EngineOn = griddedInterpolant(MList_EngineOn,AOAList_EngineOn,Cm_Grid_EngineOn,'spline','nearest');
+Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_EngineOn,'spline','linear');
+Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
+flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
+Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
 
 
 
 plotaero = 'no';
 if strcmp(plotaero,'yes')
 figure(401)
-contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff,5000,'LineWidth',0.)
+contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_test_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('Lift COefficient, No Flaps, Engine Off')
 c = colorbar;
 c.Label.String = 'Lift Coefficient';
 
 
 figure(402)
-contourf(MList_EngineOff,AOAList_EngineOff,Cd_Grid_EngineOff,5000,'LineWidth',0.)
+contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('Drag COefficient, No Flaps, Engine Off')
 c = colorbar;
 c.Label.String = 'Drag Coefficient';
 
 
 figure(403)
-contourf(MList_EngineOff,AOAList_EngineOff,Cl_Grid_EngineOff./Cd_Grid_EngineOff,5000,'LineWidth',0.)
+contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_test_EngineOff./Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('L/D, No Flaps, Engine Off')
 c = colorbar;
 c.Label.String = 'L/D';
 shading interp
 
 figure(404)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn,3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_test_EngineOn,3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('Lift COefficient, No Flaps, Engine On')
 c = colorbar;
 c.Label.String = 'Lift Coefficient';
 
 
 figure(405)
-contourf(MList_EngineOn,AOAList_EngineOn,Cd_Grid_EngineOn,3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_test_EngineOn,3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('Drag Coefficient, No Flaps, Engine On')
 c = colorbar;
 c.Label.String = 'Drag Coefficient';
 
 
 figure(406)
-contourf(MList_EngineOn,AOAList_EngineOn,Cl_Grid_EngineOn./Cd_Grid_EngineOn,3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_test_EngineOn./Cd_Grid_test_EngineOn,3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
+title('L/D, No Flaps, Engine On')
+c = colorbar;
+c.Label.String = 'L/D';
+shading interp
+
+figure(407)
+contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_EngineOff./Cd_Grid_EngineOff,3000,'LineWidth',0.)
+xlabel('Mach no.')
+ylabel('Angle of Attack (deg)')
+title('L/D, Flaps, Engine Off')
 c = colorbar;
 c.Label.String = 'L/D';
 shading interp

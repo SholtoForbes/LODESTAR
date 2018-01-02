@@ -1,23 +1,23 @@
-function xdot = LanderDynamics(primal)
-% Dynamics function for the Moon-Landing Problem 
-%--------------------------------------------------------------
-% Example file for DIDO
-% For DIDO User's Manual
-% I. Michael Ross
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-global CONSTANTS
-global AOAScale
+function xdot = FirstStageDynamics(primal)
+
 global iteration
-global Throttle
 iteration = iteration + 1;
 
-
+global Throttle
+global interp
+global q_forward
+global xi
+global iterative_V
+global iterative_t
+global iterative_V_f
+global Vehicle
+global Atmosphere
 
 h = primal.states(1,:);		
 v = primal.states(2,:);		
 m = primal.states(3,:);	
 gamma = primal.states(4,:);	
-alpha = primal.states(5,:)/AOAScale;	
+alpha = primal.states(5,:);	
 zeta = primal.states(6,:);	
 
 alphadot = primal.states(7,:);
@@ -25,26 +25,15 @@ alphadot = primal.states(7,:);
 phi = primal.states(8,:);	
 
 t = primal.nodes;
-% x = [h; v ;m ;gamma; alpha; zeta];
+
 x = [h; v ;m ;gamma; alpha; zeta; alphadot; phi];
 
-u = primal.controls/AOAScale;
+u = primal.controls;
 phase = 'postpitch';
-global scattered
 
-global q_forward
-global xi
-% global phi
-% [dz,q,phi] = rocketDynamics(x,u,t,phase,scattered);
-[dz,q,xi] = rocketDynamics(x,u,t,phase,scattered,Throttle);
+[dz,q,xi] = rocketDynamics(x,u,t,phase,interp,Throttle,Vehicle,Atmosphere); % Pass primal variables into dynamics simulator
+
 q_forward = q;
-dz(5) = dz(5)*AOAScale;
-
-
-
-global iterative_V
-global iterative_t
-global iterative_V_f
 
 if rem(iteration,5000) == 0
     iterative_V_f(end+1,:) = cumtrapz(t,v.*sin(gamma));
@@ -80,8 +69,5 @@ if rem(iteration,5000) == 0
     
 end
 
-
-
 xdot = dz;
 
-% all done! 
