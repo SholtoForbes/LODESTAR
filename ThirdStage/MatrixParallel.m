@@ -13,7 +13,7 @@ phi0 = -0.103 % initial latitude, this has very minimal effect
 
 for k = [34000:500:40000]
 % for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
-for j = [deg2rad(3): deg2rad(.5): deg2rad(7)]
+for j = [deg2rad(6.5): deg2rad(.5): deg2rad(9)]
 
 temp_guess_no = 1;
 

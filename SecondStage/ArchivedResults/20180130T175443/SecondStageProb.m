@@ -176,7 +176,7 @@ ThirdStageData = sortrows(ThirdStageData);
 
 % Interpolate for Missing Third Stage Points %-----------------------------
 % Be careful with this, only remove third stage points if they are very hard to calculate. 
-[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat. Gamma truncated at 7 deg because third stage gets bad after this
+[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),deg2rad([3:0.5:6]),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat. Gamma truncated at 7 deg because third stage gets bad after this
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
 

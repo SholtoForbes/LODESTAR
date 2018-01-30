@@ -37,7 +37,7 @@ PayloadGrid = griddedInterpolant(VGrid,thetaGrid,vGrid,PayloadData,'spline','lin
  figure(200)
 
 colormap(gray)
-C = contourf(rad2deg(thetaGrid(:,:,2)),VGrid(:,:,2)/1000,PayloadData(:,:,8),20,'LineWidth',0.)
+C = contourf(rad2deg(thetaGrid(:,:,2)),VGrid(:,:,2)/1000,PayloadData(:,:,4),20,'LineWidth',0.)
 % C = contourf(rad2deg(meshAngle(:,:,2)),meshAlt(:,:,2)/1000,meshPayload(:,:,3),12)
 % C = contourf(rad2deg(meshAngle),meshAlt/1000,meshPayload,13)
 

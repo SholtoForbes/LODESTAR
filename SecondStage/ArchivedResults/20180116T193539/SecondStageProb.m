@@ -176,7 +176,7 @@ ThirdStageData = sortrows(ThirdStageData);
 
 % Interpolate for Missing Third Stage Points %-----------------------------
 % Be careful with this, only remove third stage points if they are very hard to calculate. 
-[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat. Gamma truncated at 7 deg because third stage gets bad after this
+[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
 
@@ -193,10 +193,10 @@ aoaMin = 0;  aoaMax = 9*pi/180;
 bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
 
 % Primal Bounds
-% bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
-% bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
-bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), 2, -0.5, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
-bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), 3, 0.5, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
+bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
+bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
+% bounds.phase(1).state.lower = [Stage2.Bounds.Alt(1), 2, -0.5, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
+% bounds.phase(1).state.upper = [Stage2.Bounds.Alt(2), 3, 0.5, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
 
 % Initial States
 bounds.phase(1).initialstate.lower = [Stage2.Bounds.Alt(1),lon0, lat0, Stage2.Initial.v, Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Initial.mFuel] ;
@@ -204,10 +204,10 @@ bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2),lon0, lat0, Stage2.In
 
 % End States
 
-% bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
-% bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
-bounds.phase(1).finalstate.lower = [34000, 2, -0.5, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
-bounds.phase(1).finalstate.upper = [40000, 3, 0.5, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
+bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
+bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
+% bounds.phase(1).finalstate.lower = [30000, 2, -0.5, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
+% bounds.phase(1).finalstate.upper = [40000, 3, 0.5, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
 
 % Control Bounds
 % bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-1)];
@@ -248,7 +248,7 @@ guess.phase(1).state(:,3)   = [-0.269;-0.13];
 guess.phase(1).state(:,4)   = Stage2.Guess.v.';
 guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
-guess.phase(1).state(:,7)   = [2*pi/180; 5*pi/180];
+guess.phase(1).state(:,7)   = [2*pi/180; 2*pi/180];
 guess.phase(1).state(:,8)   = [deg2rad(10);deg2rad(10)];
 guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 100];
 

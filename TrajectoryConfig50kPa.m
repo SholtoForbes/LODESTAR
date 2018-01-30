@@ -46,7 +46,7 @@ Stage2.Initial.xi       = 0; % Initial Longitude, rad
 Stage2.End.mFuel        = 0; % End Fuel Mass, kg
 Stage2.End.Zeta         = 1.78; % End Heading Angle, rad
 
-Stage2.End.gammaOpt     = [deg2rad(2), deg2rad(6)]; % End Trajectory Angle Bounds, rad (for max payload trajectories)
+Stage2.End.gammaOpt     = [deg2rad(3), deg2rad(6)]; % End Trajectory Angle Bounds, rad (for max payload trajectories)
 Stage2.End.gammaConst   = deg2rad(1.5); % End Trajectory Angle Bound, rad (for constant dynamic pressure trajectories)
 
 % Number of Nodes %--------------------------------------------------------
@@ -69,7 +69,7 @@ Stage2.Bounds.AoA       = [0, 9]; % Angle of Attack Bounds, deg
 % Initial Guesses %--------------------------------------------------------
 Stage2.Guess.Alt        = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/Stage2.Initial.v^2)-100, 33500]; % Altitude Guess, m
 Stage2.Guess.v          = [Stage2.Initial.v, 2900]; % Velocity Guess, m/s
-Stage2.Guess.gamma      = [0.0, deg2rad(4.5)]; % Trajectory Angle guess, rad
+Stage2.Guess.gamma      = [0.0, deg2rad(3.1)]; % Trajectory Angle guess, rad
 Stage2.Guess.mFuel      = [Stage2.mFuel, 0]; % Fuel Mass Guess, kg
 Stage2.Guess.gammadot   = [0, 0]; % Trajectory Angle Derivative Guess, rad/s
 Stage2.Guess.zeta       = [1.682, 1.699]; % Heading Angle Guess, rad

@@ -176,7 +176,7 @@ ThirdStageData = sortrows(ThirdStageData);
 
 % Interpolate for Missing Third Stage Points %-----------------------------
 % Be careful with this, only remove third stage points if they are very hard to calculate. 
-[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat. Gamma truncated at 7 deg because third stage gets bad after this
+[VGrid,gammaGrid,vGrid] = ndgrid(unique(ThirdStageData(:,3)),unique(ThirdStageData(:,4)),unique(ThirdStageData(:,5))); % must match the data in thirdstage.dat
 
 PayloadDataInterp = scatteredInterpolant(ThirdStageData(:,3),ThirdStageData(:,4),ThirdStageData(:,5),ThirdStageData(:,6)); % interpolate for missing third stage points
 
@@ -248,7 +248,7 @@ guess.phase(1).state(:,3)   = [-0.269;-0.13];
 guess.phase(1).state(:,4)   = Stage2.Guess.v.';
 guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
-guess.phase(1).state(:,7)   = [2*pi/180; 5*pi/180];
+guess.phase(1).state(:,7)   = [2*pi/180; 6*pi/180];
 guess.phase(1).state(:,8)   = [deg2rad(10);deg2rad(10)];
 guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 100];
 
