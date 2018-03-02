@@ -26,7 +26,11 @@ auxdata.interp.T0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,
 
 auxdata.interp.P0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); 
 
-auxdata.Aero = dlmread('AeroCoeffs.txt');
+% auxdata.Aero = dlmread('AeroCoeffs.txt');
+addpath('./AlternateCoeffs')
+auxdata.Aero = dlmread('aeroCentre1.txt');
+
+
 Aero = auxdata.Aero;
 auxdata.Drag_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,5));
 % 

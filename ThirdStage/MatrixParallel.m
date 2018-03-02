@@ -13,7 +13,7 @@ phi0 = -0.103 % initial latitude, this has very minimal effect
 
 for k = [34000:500:40000]
 % for j = [0 0.0125 0.025 0.0375 0.05] % trajectory angle range
-for j = [deg2rad(6.5): deg2rad(.5): deg2rad(9)]
+for j = [deg2rad(3): deg2rad(.5): deg2rad(6)]
 
 temp_guess_no = 1;
 
@@ -42,8 +42,8 @@ temp_payload(i) = mpayload(i);
 end
 mat = [mat;[phi0*ones(length(u),1),zeta0*ones(length(u),1),k*ones(length(u),1),j*ones(length(u),1),u.',temp_payload.']]
 temp_guess_no = temp_guess_no + 1;
-dlmwrite('thirdstagenew.dat', mat,'delimiter','\t')
+dlmwrite('thirdstagenewD1.dat', mat,'delimiter','\t')
 end
 end
 
-dlmwrite('thirdstagenew.dat', mat,'delimiter','\t')
+dlmwrite('thirdstagenewD1.dat', mat,'delimiter','\t')

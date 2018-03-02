@@ -206,8 +206,8 @@ bounds.phase(1).initialstate.upper = [Stage2.Bounds.Alt(2),lon0, lat0, Stage2.In
 
 % bounds.phase(1).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
 % bounds.phase(1).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
-bounds.phase(1).finalstate.lower = [34000, 2, -0.5, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
-bounds.phase(1).finalstate.upper = [40000, 3, 0.5, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
+bounds.phase(1).finalstate.lower = [34000, 2, -0.5, 2675, Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
+bounds.phase(1).finalstate.upper = [40000, 3, 0.5, 2850, Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
 
 % Control Bounds
 % bounds.phase(1).control.lower = [deg2rad(-.1), deg2rad(-1)];
@@ -242,9 +242,9 @@ end
 %%  Guess =================================================================
 % Set the initial guess. This can have a significant effect on the final
 % solution, even for a well defined problem. 
-guess.phase(1).state(:,1)   = [22000;35000];
-guess.phase(1).state(:,2)   = [0;0];
-guess.phase(1).state(:,3)   = [-0.269;-0.13];
+guess.phase(1).state(:,1)   = [24000;35000];
+guess.phase(1).state(:,2)   = [2.53;2.5368];
+guess.phase(1).state(:,3)   = [-0.269;-0.10];
 guess.phase(1).state(:,4)   = Stage2.Guess.v.';
 guess.phase(1).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(1).state(:,6)   = Stage2.Guess.zeta.';
@@ -292,12 +292,12 @@ bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax,
 % End State Bounds
 % bounds.phase(2).finalstate.lower = [altMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
 % bounds.phase(2).finalstate.upper = [200, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
-bounds.phase(2).finalstate.lower = [altMin, lonMin, latMin, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [200, lonMax, latMax, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+bounds.phase(2).finalstate.upper = [200, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
-bounds.phase(2).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
-bounds.phase(2).control.upper = [deg2rad(.2), deg2rad(5), 1];
+bounds.phase(2).control.lower = [deg2rad(-.3), deg2rad(-5), -1];
+bounds.phase(2).control.upper = [deg2rad(.3), deg2rad(5), 1];
 
 % Path Bounds
 bounds.phase(2).path.lower = 0;
@@ -307,18 +307,18 @@ bounds.eventgroup(2).lower = [-0.001 -0.001]; % Constrain final latitude and lon
 bounds.eventgroup(2).upper = [0.001 0.001]; 
 
 % Guess
-tGuess              = [650; 1500];
+tGuess              = [440; 1500];
 altGuess            = [35000; 100];
-lonGuess            = [lon0; lon0-1*pi/180];
-latGuess            = [-0.13;-0.13-0*pi/180];
+lonGuess            = [lon0; lon0-.1*pi/180];
+latGuess            = [-0.11;-0.10-0*pi/180];
 speedGuess          = [3000; 10];
 fpaGuess            = [0; 0];
 aziGuess            = [deg2rad(97); deg2rad(270)];
-aoaGuess            = [4*pi/180; 5*pi/180];
-bankGuess           = [70*pi/180; 70*pi/180];
+aoaGuess            = [8*pi/180; 5*pi/180];
+bankGuess           = [89*pi/180; 89*pi/180];
 % mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [100; mFuelMin];
-guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0.0;0]];
+guess.phase(2).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0.;0.]];
 guess.phase(2).control = [[0;0],[0;0],[0;0]];
 % guess.phase.control = [aoaGuess];
 guess.phase(2).time    = tGuess;
@@ -348,9 +348,10 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-setup.nlp.ipoptoptions.maxiterations = 1000;
+setup.nlp.ipoptoptions.maxiterations = 2000;
 setup.derivatives.supplier           = 'sparseCD';
-setup.derivatives.derivativelevel    = 'second';
+% setup.derivatives.derivativelevel    = 'second';
+setup.derivatives.derivativelevel    = 'first';
 setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
 % setup.scales.method                  = 'automatic-guessUpdate';
@@ -488,8 +489,8 @@ nodes = length(alt)
 
 
 
-[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11,flapdeflection] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel,mFuel(1),mFuel(end), 1);
-[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12,flapdeflection2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2,0,0, 0);
+[~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11,flapdeflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel,mFuel(1),mFuel(end), 1);
+[~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12,flapdeflection2,heating_rate2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2,0,0, 0);
 
 throttle2(M2<5.0) = 0; % remove nonsense throttle points
 
@@ -664,6 +665,7 @@ xlabel('time (s)')
 ax3 = gca;
 xlim([min(time) max(time)]);
 line(time, [rad2deg(Alpha(1:end-1)) rad2deg(Alpha(end-1))],'Parent',ax3,'Color','k', 'LineStyle','-')
+line(time, [rad2deg(eta(1:end-1)) rad2deg(eta(end-1))],'Parent',ax3,'Color','k', 'LineStyle','-.')
 
 line(time, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 
@@ -674,7 +676,7 @@ line(time, flapdeflection,'Parent',ax3,'Color','k', 'LineStyle','--')
 line(time, IspNet1./(10^2),'Parent',ax3,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
 % g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
-g = legend(ax3, 'AoA (degrees)','Flap Deflection (degrees)', 'Equivalence Ratio x 10', 'Net Isp (s x 10^2)');
+g = legend(ax3, 'AoA (degrees)', 'Bank Angle (degrees)','Flap Deflection (degrees)', 'Net Isp (s x 10^2)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)

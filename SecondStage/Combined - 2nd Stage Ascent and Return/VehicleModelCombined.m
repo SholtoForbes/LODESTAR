@@ -1,4 +1,4 @@
-function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1,flap_deflection] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,ThirdStage)
+function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1,flap_deflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,ThirdStage)
 
 interp = auxdata.interp;
 % =======================================================
@@ -73,8 +73,10 @@ if ThirdStage == 1
 else  
     %Interpolate between engine on and engine off cases as throttle is
     %adjusted
-    Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
-    Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
+%     Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
+%     Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
+Cd = (1-throttle.*gaussmf(throttle,[.5,1])).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*gaussmf(throttle,[.5,1]).*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
+Cl = (1-throttle.*gaussmf(throttle,[.5,1])).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*gaussmf(throttle,[.5,1]).*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
     flap_deflection = (1-throttle).*auxdata.interp.flap_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.flap_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
 end
 
@@ -95,8 +97,8 @@ Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly red
 Fueldt(M<5.0) = 0;
 Isp(M<5.0) = 0;
 
-Fueldt = Fueldt.*throttle;
-% Fueldt = Fueldt.*gaussmf(throttle,[.05,1]);
+% Fueldt = Fueldt.*throttle;
+Fueldt = Fueldt.*throttle.*gaussmf(throttle,[.5,1]);
 
 T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
 
@@ -114,6 +116,18 @@ M = v./c; % Calculating Mach No (Descaled)
 
 
 v_H = v.*cos(gamma);
+
+%%heating---------------------------
+% From Conceptual Shape Optimization of Entry Vehicles, Dirkx & Mooj & NASA
+% lecture
+
+%using hot wall correction
+
+kappa = 1.7415e-4; % cited as sutton-graves, from nasa lecture
+Rn = 0.005; %effective nose radius (m) 
+
+heating_rate = kappa*sqrt(rho./Rn).*v.^3; %W/m^2
+
 
 % =========================================================================
 end
