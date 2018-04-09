@@ -5,7 +5,7 @@ clear all
 mat = [];
 
 % u = [2825] % velocity range. The routine is parallelised around this velocity list
-u = [2675:25:2850] % velocity range. The routine is parallelised around this velocity list
+u = [2725:25:2875] % velocity range. The routine is parallelised around this velocity list
 
 % phi0 = -0.13 % initial latitude, this has very minimal effect
 phi0 = -0.103 % initial latitude, this has very minimal effect

@@ -47,21 +47,46 @@ CN_50 = CN_interp(M_50,10);
 
 
 %Reference area
-% A = 0.866; % diameter of 1.05m
-A = 0.95; % diameter of 1.1m BASELINE
+
+%BASELINE
+% A = 0.95; % diameter of 1.1m BASELINE
+
+% % Diameter 0.9m
+% A = 0.63617;
+
+% Diameter 1m
+A = 0.785;
+
 g = 9.806; %standard gravity
 
 % the Isp influences the optimal burn mass
 % Isp = 437; % from Tom Furgusens Thesis %RL10
 
-Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction. BASELINE
+
+% BASELINE
+% Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction. BASELINE
+
+% % Diameter 0.9m
+% Isp = 317.*0.96; %Kestrel, from Falcon 1 users guide, with efficiency reduction.
+
+% Diameter 1m
+Isp = 317.*0.97; %Kestrel, from Falcon 1 users guide, with efficiency reduction. 
+
+
 % Isp = 317;
 % Isp = 320
 % Isp = 446; %HM7B
 % Isp = 340; %Aestus 2
 
 %% Define Vehicle Properties
-mHS = 130.9; % Heat Shield Mass. BASELINE
+%BASELINE
+% mHS = 130.9; % Heat Shield Mass. BASELINE
+
+% %Diameter 0.9m
+% mHS = 109.3;
+
+%Diameter 1m
+mHS = 120.341;
 
 % mEng = 100; %RL10
 mEng = 52; %Kestrel. BASELINE
@@ -84,11 +109,21 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 
 % Moment of inertia
 % calculated in OneNote, thirdstage, 4 october 2017
-CG = 4.531; % m from end. calculated by hand, but close to the one given from CREO. taken from the end of the rocket. BASELINE 
-% I = 768.7*(CG - 2.869)^2 + 233.2*(CG-4.5)^2 + 1960*(CG-4.9375)^2 +161.2*(CG-7)^2 + 23.7*(CG-3.75)^2 + 89.3*(CG-7)^2 + 12.6*(CG-8.975)^2;
-% %mass moment of inertia assuming every part is a point mass
-% I = 0;
-I = 6628; % From Creo
+
+%BASELINE
+CG = 4.531; % m from end. calculated by hand, but close to the one given from CREO. taken from the end of the rocket. BASELINE, not changed for diameter change (differences are minimal)
+
+% % Diameter 0.9m
+% CG =  5.110-0.7521;
+
+%Baseline
+% I = 6628; % From Creo
+
+% % Diameter 0.9m
+% I = 4864;
+
+% Diameter 1m
+I = 5700;
 
 %% Initiate Simulation
 

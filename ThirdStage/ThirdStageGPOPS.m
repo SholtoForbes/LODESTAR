@@ -42,7 +42,15 @@ auxdata.CN_interp = scatteredInterpolant(Aero(:,1),Aero(:,2),Aero(:,4));
 
 auxdata.Max_AoA_interp = scatteredInterpolant(Aero(:,1),Aero(:,4),Aero(:,2));
 
-auxdata.ThirdStagem = 3300;
+
+% BASELINE
+% auxdata.ThirdStagem = 3300;
+
+% % Diameter 0.9m
+% auxdata.ThirdStagem = 2250.86;
+
+% Diameter 1m
+auxdata.ThirdStagem = 2576.129+52+120.341;
 
 auxdata.phi0 = phi0;
 auxdata.xi0 = 0;

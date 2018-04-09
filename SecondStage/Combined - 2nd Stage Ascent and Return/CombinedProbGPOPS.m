@@ -189,7 +189,7 @@ lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
 lat0 = -0.264;
 lon0 = deg2rad(145);
-aoaMin = 0;  aoaMax = 9*pi/180;
+aoaMin = 0;  aoaMax = 10*pi/180;
 bankMin1 = -1*pi/180; bankMax1 =   50*pi/180;
 
 % Primal Bounds
@@ -331,7 +331,7 @@ guess.phase(2).time    = tGuess;
 % mesh.method       = 'hp-LiuRao-Legendre';
 mesh.maxiterations = 10;
 mesh.colpointsmin = 3;
-mesh.colpointsmax = 100;
+mesh.colpointsmax = 200;
 mesh.tolerance    = 1e-5;
 
 
@@ -348,7 +348,7 @@ setup.mesh                           = mesh;
 setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
-setup.nlp.ipoptoptions.maxiterations = 2000;
+setup.nlp.ipoptoptions.maxiterations = 1100;
 setup.derivatives.supplier           = 'sparseCD';
 % setup.derivatives.derivativelevel    = 'second';
 setup.derivatives.derivativelevel    = 'first';
@@ -431,6 +431,26 @@ figure(230)
 hold on
 plot3(lon,lat,alt)
 plot3(lon2,lat2,alt2)
+
+  
+    figure(2301)
+hold on
+
+axesm('pcarree','Origin',[0 rad2deg(lon0) 0])
+geoshow('landareas.shp','FaceColor',[0.8 .8 0.8])
+% plotm(rad2deg(lat),rad2deg(lon+lon0))
+plotm(rad2deg(lat),rad2deg(lon),'b')
+plotm(rad2deg(lat2),rad2deg(lon2),'r')
+    
+    cities = shaperead('worldcities', 'UseGeoCoords', true);
+lats = extractfield(cities,'Lat');
+lons = extractfield(cities,'Lon');
+geoshow(lats, lons,...
+        'DisplayType', 'point',...
+        'Marker', 'o',...
+        'MarkerEdgeColor', 'r',...
+        'MarkerFaceColor', 'r',...
+        'MarkerSize', 2)
 
 % =========================================================================
 
