@@ -61,7 +61,7 @@ P0 = ppval(interp.P0_spline, alt);
 % Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
 
 if ThirdStage == 0
-    throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
+    throttle(M<5.1) =   0; % remove throttle points below operable range on return flight
 end
 
 if ThirdStage == 1
@@ -75,8 +75,8 @@ else
     %adjusted
 %     Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
 %     Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
-Cd = (1-throttle.*gaussmf(throttle,[.5,1])).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*gaussmf(throttle,[.5,1]).*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
-Cl = (1-throttle.*gaussmf(throttle,[.5,1])).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*gaussmf(throttle,[.5,1]).*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
+Cd = (1-throttle).*auxdata.interp.Cd_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cd_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));
+Cl = (1-throttle).*auxdata.interp.Cl_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.Cl_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
     flap_deflection = (1-throttle).*auxdata.interp.flap_spline_EngineOff.noThirdStage(mach,rad2deg(alpha)) + throttle.*auxdata.interp.flap_spline_EngineOn.noThirdStage(mach,rad2deg(alpha));  
 end
 
@@ -98,9 +98,10 @@ Fueldt(M<5.0) = 0;
 Isp(M<5.0) = 0;
 
 % Fueldt = Fueldt.*throttle;
-Fueldt = Fueldt.*throttle.*gaussmf(throttle,[.5,1]);
+Fueldt = Fueldt.*throttle; % NEED TO CHANGE THIS
 
-T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
+% T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
+T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion
 
 %Rotational Coordinates =================================================
 %=================================================

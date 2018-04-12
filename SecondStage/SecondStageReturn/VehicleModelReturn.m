@@ -106,8 +106,8 @@ if forward_flag
     % do nothing
 else
     % limit engine under Mach 5.1
-    Fueldt(M<5.0) = 0;
-    Isp(M<5.0) = 0;
+    Fueldt(M<5.1) = 0;
+    Isp(M<5.1) = 0;
 end
 
 Fueldt = Fueldt.*throttle;
