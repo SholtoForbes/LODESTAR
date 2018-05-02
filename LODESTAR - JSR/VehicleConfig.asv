@@ -1,0 +1,36 @@
+% Vehicle Config File For LODESTAR
+
+%% First Stage
+
+% Thrust
+
+%% Second Stage
+
+% Structural Mass
+Stage2.mStruct = 4910.5 - 132.8 + 179.41;% kg. Mass of everything but fuel from dawids work.
+
+% Fuel Mass
+Stage2.mFuel = 1562; % kg. Fuel tank mass scaled by surface area to hold 1562kg fuel, see Fuel Tank Sizing.txt
+
+% Reference Area
+Stage2.Aref = 62.77; % m^2
+
+%% Third Stage
+
+% Total Mass
+Stage3.mTot = 3300;
+
+% Specific Impulse
+Stage3.Isp = 317; %Kestrel, from Falcon 1 users guide
+
+% Mass Flow Rate
+
+
+% Efficiency
+Stage3.Eff = 0.98; % efficienc
+
+
+
+A = 0.95; % diameter of 1.1m
+
+%% Second Stage Return

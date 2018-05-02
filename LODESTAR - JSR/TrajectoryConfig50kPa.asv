@@ -1,0 +1,47 @@
+% Optimisation Config
+
+
+%% First Stage
+
+% Initial and End Conditions
+
+% Bounds
+
+% Number of Nodes
+
+% Initial Guesses
+
+%% Second Stage %%=========================================================
+
+% Initial Conditions
+
+
+% Number of Nodes %--------------------------------------------------------
+
+
+% Bounds %--------------------------------------------------------
+% Define the search space of the optimiser. 
+Stage2.bounds.Alt       = [20000 50000]; % Altitude Bounds, m
+Stage2.bounds.v         = [1500 3100]; % Velocity Bounds, m/s
+Stage2.bounds.gamma     = [-0.1 deg2rad(5)]; % Trajectory Angl Bounds, rad
+Stage2.bounds.mFuel     = [0 1562]; % Fuel Mass Bounds, kg
+Stage2.bounds.gammadot  = [-0.001 0.002]; % Trajectory Angle Derivative Bounds, rad/s
+Stage2.bounds.zeta      = [1 2]; % heading a
+Stage2.bounds.control   = [-0.00003 0.0002]; % Trajectory Angle Double-Derivative Bounds
+Stage2.bounds.time      = [100 800];
+
+% Initial Guesses %--------------------------------------------------------
+% Kickstart the optimiser.
+Stage2.Guess.Alt        = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100,33500]; % Altitude Guess, m
+Stage2.Guess.v          = [v0, 2900]; % Velocity Guess, m/s
+Stage2.Guess.gamma      = [0.0,deg2rad(4.5)]; % Trajectory Angle guess, rad
+Stage2.Guess.mFuel      = [mFuelU, 0]; % Fuel Mass Guess, kg
+Stage2.Guess.gammadot   = [0,0]; % Trajectory Angle Derivative Guess, rad/s
+Stage2.Guess.zeta       = [1.682,1.699]; % Heading Angle Guess, rad
+Stage2.Guess.control    = [0,0]; % Trajectory Angle Double-Derivative Guess, rad/s^2
+Stage2.Guess.time       = [t0 ,360]; % Time Guess, s
+
+%% Third Stage
+
+
+%% Second Stage Return
