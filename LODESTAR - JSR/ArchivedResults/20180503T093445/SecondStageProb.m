@@ -47,7 +47,7 @@ copyfile('SecondStageCost.m',sprintf('../ArchivedResults/%s/SecondStageCost.m',T
 % 32: Higher velocity
 
 global const
-const = 3
+const = 14
 
 %% Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -981,10 +981,19 @@ cd('../SecondStage')
 dlmwrite('FirstStage.txt', FirstStageStates);
 copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))
 
-lon1_ = FirstStageStates(9,:)
+t1 = FirstStageStates(1,:);
+v1 = FirstStageStates(3,:);
+r1 = FirstStageStates(2,:) + 6371000;
+phi1 = FirstStageStates(9,:);
+zeta1 = FirstStageStates(7,:);
+gamma1 = FirstStageStates(5,:);
+
+xidot1 = v1.*cos(gamma1).*cos(zeta1)./(r1.*cos(phi1));
+
+xi1 = sum(diff(t1).*diff(xidot1))
 %% Latitude Plot
 figure(250)
-plot(FirstStageStates(9,:))
+plot(FirstStageStates(10,:))
 plot(phi)
 plot(ThirdStagePhi)
 title('Latitude')

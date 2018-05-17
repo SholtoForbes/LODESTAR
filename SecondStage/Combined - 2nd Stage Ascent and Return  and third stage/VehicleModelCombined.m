@@ -83,12 +83,15 @@ end
 
 %%%% Compute the drag and lift:
 
-D = 0.5*Cd.*A.*rho.*v.^2;
+D = 0.5*Cd.*A.*rho.*v.^2*auxdata.dragmod;
 L = 0.5*Cl.*A.*rho.*v.^2;
 
 %% Thrust 
-
-[Isp,Fueldt,eq,q1] = RESTint(M, alpha, auxdata,T0,P0);
+m
+alpha
+T0
+P0
+[Isp,Fueldt,eq,q1] = RESTint(M, rad2deg(alpha), auxdata,T0,P0);
 % 
 % Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
 % Fueldt(M<5.0) = 0;
@@ -100,13 +103,16 @@ Isp(M<5.0) = 0;
 % Fueldt = Fueldt.*throttle;
 Fueldt = Fueldt.*throttle; % NEED TO CHANGE THIS
 
-% T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
-T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion
+% T = Isp.*Fueldt*9.81.*cos(alpha); % Thrust in direction of motion
+T = Isp.*Fueldt*9.81.*cos(alpha).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion
 
 %Rotational Coordinates =================================================
 %=================================================
 
-[altdot,xidot,phidot,gammadot,a,zetadot] = RotCoordsReturn(alt+auxdata.Re,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta);
+
+
+
+[altdot,xidot,phidot,gammadot,a,zetadot] = RotCoords(alt+auxdata.Re,xi,phi,gamma,v,zeta,L,D,T,m,alpha,eta,auxdata.delta);
 
 % Aero Data =============================================================
 

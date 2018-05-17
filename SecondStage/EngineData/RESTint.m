@@ -1,4 +1,4 @@
-function [Isp,wf,eq,q1] = RESTint(M, Alpha, auxdata,T0,P0)
+function [Isp,wf,eq,q1,w] = RESTint(M, Alpha, auxdata,T0,P0)
 % Engine Interpolator for engine data
 
 
