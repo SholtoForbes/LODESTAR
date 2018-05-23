@@ -91,7 +91,7 @@ L = 0.5*(Cl).*A.*rho.*v.^2;
 
 %% Thrust 
 
-[Isp,Fueldt,eq,q1] = RESTint(M, alpha, auxdata,T0,P0);
+[Isp,Fueldt,eq,q1] = RESTint(M, rad2deg(alpha), auxdata,T0,P0);
 
 if auxdata.const == 4
 Isp = Isp*1.1;
@@ -113,7 +113,7 @@ end
 Fueldt = Fueldt.*throttle;
 % Fueldt = Fueldt.*gaussmf(throttle,[.05,1]);
 
-T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
+T = Isp.*Fueldt*9.81.*cos(alpha); % Thrust in direction of motion
 
 % fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 % 

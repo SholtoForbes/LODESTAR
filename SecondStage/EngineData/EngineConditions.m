@@ -59,7 +59,8 @@ T1 = auxdata.interp.tempgridded(M0,Alpha).*T0;
 P1 = auxdata.interp.presgridded(M0,Alpha).*P0; % note this is at 50kPa, modified by efficiency
 M1 = auxdata.interp.M1gridded(M0, Alpha);
 
-
+% M1 = 5.58210
+% T1 = 252.834
 
 Me_interpolator = scatteredInterpolant(engine_data(:,1),engine_data(:,2),engine_data(:,5));
 Pe_interpolator = scatteredInterpolant(engine_data(:,1),engine_data(:,2),engine_data(:,6));
@@ -147,26 +148,25 @@ R = 8.314;
 
 rhoe = Pe/re/Te
 
-% A = 1.44704*4 % Calculated using creo
-
-A = 0.6333*4
-% A = 1.04*4
+A = 0.5586*4
 
 mm = 0.029 % molar mass air
 
 % Tt = Te*(1+(Ge-1)/2*Me^2)
-% Pt = Pe + 0.5*rhoe*(Me*sqrt(Ge*R*Te/mm))^2
+% Pt = Pe + 0.5*rhoe*(Me*sqrt(Ge*re*Te))^2
 % 
-% mdot = A*Pt/sqrt(Tt) * sqrt(Ge/R) * Me * (1+(Ge-1)/2*Me^2)^-((Ge+1)/(2*(Ge-1)))
+% mdot = A*Pt/sqrt(Tt) * sqrt(Ge/(re*mm)) * Me * (1+(Ge-1)/2*Me^2)^-((Ge+1)/(2*(Ge-1)))
 
-mdot = rhoe*A*Me*sqrt(Ge*R*Te/mm)
+ve = Me*sqrt(Ge*re*Te)
+
+mdot = rhoe*A*ve
 
 %% Nondimensionalisation for CART3D
 %%
 %For SurfBC
 
-Pe_ = Pe/Ge/P0
+Pe_ = Pe/1.4/P0
 
 rhoe_ = rhoe/rho0
 
-Ue_ = sqrt(Ge/1.4*(Me*sqrt(Ge*Pe_/rhoe_))^2)  % modified by gamma correction in Aftosmis Skylon Plumes
+Ue_ = sqrt(Ge/1.4*(Me*sqrt(1.4*Pe_/rhoe_))^2)  % modified by gamma correction in Aftosmis Skylon Plumes

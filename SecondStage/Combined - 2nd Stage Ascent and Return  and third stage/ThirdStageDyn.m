@@ -49,13 +49,13 @@ CN_50 = CN_interp(M_50,10);
 %Reference area
 
 %BASELINE
-% A = 0.95; % diameter of 1.1m BASELINE
+A = 0.95; % diameter of 1.1m BASELINE
 
 % % Diameter 0.9m
 % A = 0.63617;
 
 % Diameter 1m
-A = 0.785;
+% A = 0.785;
 
 g = 9.806; %standard gravity
 
@@ -64,13 +64,13 @@ g = 9.806; %standard gravity
 
 
 % BASELINE
-% Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction. BASELINE
+Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction. BASELINE
 
 % % Diameter 0.9m
 % Isp = 317.*0.96; %Kestrel, from Falcon 1 users guide, with efficiency reduction.
 
 % Diameter 1m
-Isp = 317.*0.97; %Kestrel, from Falcon 1 users guide, with efficiency reduction. 
+% Isp = 317.*0.97; %Kestrel, from Falcon 1 users guide, with efficiency reduction. 
 
 
 % Isp = 317;
@@ -80,13 +80,13 @@ Isp = 317.*0.97; %Kestrel, from Falcon 1 users guide, with efficiency reduction.
 
 %% Define Vehicle Properties
 %BASELINE
-% mHS = 130.9; % Heat Shield Mass. BASELINE
+mHS = 130.9; % Heat Shield Mass. BASELINE
 
 % %Diameter 0.9m
 % mHS = 109.3;
 
 %Diameter 1m
-mHS = 120.341;
+% mHS = 120.341;
 
 % mEng = 100; %RL10
 mEng = 52; %Kestrel. BASELINE

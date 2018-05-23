@@ -12,7 +12,7 @@ function [rdot,xidot,phidot,gammadot,vdot,zetadot,total_lift] = RotCoords(r,xi,p
 % m Mass (kg)
 
 
-alpha = deg2rad(alpha);
+% alpha = deg2rad(alpha);
 
 mu_E = 3.986e14; % m^3/s^2 Earth Gravitational Parameter
 omega_E = 7.292115e-5; % s^-1 Earth Rotation Rate

@@ -57,14 +57,14 @@ L = 0.5*Cl.*A.*rho.*v.^2;
 
 %% Thrust 
 
-[Isp,Fueldt,eq] = RESTint(M, alpha, auxdata,T0,P0);
+[Isp,Fueldt,eq] = RESTint(M, rad2deg(alpha), auxdata,T0,P0);
 
 Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
 Fueldt(M<5.0) = 0;
 
 Fueldt = Fueldt.*throttle;
 
-T = Isp.*Fueldt*9.81.*cos(deg2rad(alpha)); % Thrust in direction of motion
+T = Isp.*Fueldt*9.81.*cos(alpha); % Thrust in direction of motion
 
 %Rotational Coordinates =================================================
 %=================================================
