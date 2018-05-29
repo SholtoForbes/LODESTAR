@@ -1048,7 +1048,12 @@ c.Label.String = 'P1/P0';
 
 
 
-
+%% Latitude Plot
+figure(250)
+plot(FirstStageStates(:,9))
+plot(phi)
+plot(ThirdStagePhi)
+title('Latitude')
 
 
 %% ThirdStage
@@ -1088,20 +1093,20 @@ inc_diff
 
 % Plotting
 % if plotflag == 1
-figure(314)
+figure(214)
 
-figure(312)
+figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(time3,alt3);
 
-figure(313)
+figure(213)
 hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
 
 
-figure(314)
+figure(214)
     addpath('addaxis')
     hold on
 
@@ -1136,12 +1141,7 @@ addpath('../../FirstStage')
 % cd('../SecondStage/Combined - 2nd Stage Ascent and Return')
 dlmwrite('FirstStage.txt', FirstStageStates);
 copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))
-% Latitude Plot
-figure(250)
-plot(FirstStageStates(:,9))
-plot(phi)
-plot(ThirdStagePhi)
-title('Latitude')
+
 %% SAVE FIGS
 saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
 saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);

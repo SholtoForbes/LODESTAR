@@ -70,9 +70,9 @@ auxdata.const = const;
 
 addpath ..\CG15.1255
 % Full of fuel, with third stage
-aero_EngineOff.fullFuel = importdata('SPARTANaero15.228');
-flapaero.fullFuel = importdata('SPARTANaeroFlaps15.228');
-aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn15.228');
+aero_EngineOff.fullFuel = importdata('SPARTANaero14.9122');
+flapaero.fullFuel = importdata('SPARTANaeroFlaps14.9122');
+aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn14.9122');
 
 [auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel);
 
@@ -80,16 +80,16 @@ aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn15.228');
 % NOTE: it is assumed that the CG does not change
 % due to fuel after the end of acceleration phase, so there will still be some fuel left when this is used. 
 
-aero_EngineOff.noFuel = importdata('SPARTANaero15.727');
-flapaero.noFuel = importdata('SPARTANaeroFlaps15.727');
-aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.727');
+aero_EngineOff.noFuel = importdata('SPARTANaero15.3515');
+flapaero.noFuel = importdata('SPARTANaeroFlaps15.3515');
+aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.3515');
 
 [auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel);
 
 % Flyback, without third stage. Fuel variation not used for flyback.
-aero_EngineOff.noThirdStage = importdata('SPARTANaero15.1255');
-flapaero.noThirdStage = importdata('SPARTANaeroFlaps15.1255');
-aero_EngineOn.noThirdStage = importdata('SPARTANaeroEngineOn15.1255');
+aero_EngineOff.noThirdStage = importdata('SPARTANaero14.5');
+flapaero.noThirdStage = importdata('SPARTANaeroFlaps14.5');
+aero_EngineOn.noThirdStage = importdata('SPARTANaeroEngineOn14.5');
 
 [auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff.noThirdStage,aero_EngineOn.noThirdStage,flapaero.noThirdStage);
 
@@ -439,7 +439,7 @@ setup.displaylevel                   = 2;
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
 
-setup.nlp.ipoptoptions.maxiterations = 950;
+setup.nlp.ipoptoptions.maxiterations = 900;
 
 setup.derivatives.supplier           = 'sparseCD';
 % setup.derivatives.derivativelevel    = 'second';
@@ -1048,7 +1048,12 @@ c.Label.String = 'P1/P0';
 
 
 
-
+%% Latitude Plot
+figure(250)
+plot(FirstStageStates(:,9))
+plot(phi)
+plot(ThirdStagePhi)
+title('Latitude')
 
 
 %% ThirdStage
@@ -1088,20 +1093,20 @@ inc_diff
 
 % Plotting
 % if plotflag == 1
-figure(314)
+figure(214)
 
-figure(312)
+figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(time3,alt3);
 
-figure(313)
+figure(213)
 hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
 
 
-figure(314)
+figure(214)
     addpath('addaxis')
     hold on
 
@@ -1136,12 +1141,7 @@ addpath('../../FirstStage')
 % cd('../SecondStage/Combined - 2nd Stage Ascent and Return')
 dlmwrite('FirstStage.txt', FirstStageStates);
 copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))
-% Latitude Plot
-figure(250)
-plot(FirstStageStates(:,9))
-plot(phi)
-plot(ThirdStagePhi)
-title('Latitude')
+
 %% SAVE FIGS
 saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
 saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);

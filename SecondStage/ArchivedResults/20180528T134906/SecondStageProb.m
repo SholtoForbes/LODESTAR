@@ -1088,20 +1088,20 @@ inc_diff
 
 % Plotting
 % if plotflag == 1
-figure(314)
+figure(214)
 
-figure(312)
+figure(212)
 hold on
 plot(f_t(1:end),f_y(:,1));
 plot(time3,alt3);
 
-figure(313)
+figure(213)
 hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
 
 
-figure(314)
+figure(214)
     addpath('addaxis')
     hold on
 

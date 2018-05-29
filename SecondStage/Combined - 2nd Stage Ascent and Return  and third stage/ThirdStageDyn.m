@@ -3,6 +3,12 @@ function [rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, 
 % Created by Sholto Forbes-Spyratos
 
 
+mHS = 125.6; % Heat Shield Mass
+mFuel = m - (auxdata.Stage3.mTot - mHS)*0.09 - mHS;
+mFuel_Full = auxdata.Stage3.mTot - (auxdata.Stage3.mTot - mHS)*0.09 - mHS;
+
+L_ThirdStage = 9;
+
 
 time1 = cputime;
 
@@ -111,19 +117,24 @@ mdot = 9.86977.*1.5; %Kestrel Modified
 % calculated in OneNote, thirdstage, 4 october 2017
 
 %BASELINE
-CG = 4.531; % m from end. calculated by hand, but close to the one given from CREO. taken from the end of the rocket. BASELINE, not changed for diameter change (differences are minimal)
+CG_Full = 4.533; %CG Full of fuel. m from end. calculated by hand, but close to the one given from CREO. taken from the end of the rocket. BASELINE, not changed for diameter change (differences are minimal)
+
+CG_Empty = 5.386; % CG no fuel
+
+CG = mFuel/mFuel_Full.*CG_Full + (1-mFuel/mFuel_Full).*CG_Empty;
+
 
 % % Diameter 0.9m
 % CG =  5.110-0.7521;
 
 %Baseline
-% I = 6628; % From Creo
+I = 6628; % From Creo
 
 % % Diameter 0.9m
 % I = 4864;
 
 % Diameter 1m
-I = 5700;
+% I = 5700;
 
 %% Initiate Simulation
 
@@ -177,8 +188,13 @@ T  = Isp.*mdot.*g - p .*A; % Thrust (N)
    
     % Thrust vectoring
 
+% 1.5m is subtracted as the CG is taken from the end of the nozzle, to make
+% the cg ralative to the base of the rocket fuselage, where the thrust
+% force is applied
 
-        Vec_angle  = asin((cP.*1.1)./(CG-1.5).*(N)./T - Alphadot.*I./((CG-1.5).*T)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
+%cP is from nose, negative along body length
+
+        Vec_angle  = asin((L_ThirdStage-CG+(cP.*1.1))./(CG-1.5).*(N)./T - Alphadot.*I./((CG-1.5).*T)); % calculate the thrust vector angle necessary to resist the lift force moment. cP is in ref lengths
 
 
 

@@ -87,21 +87,18 @@ D = 0.5*Cd.*A.*rho.*v.^2*auxdata.dragmod;
 L = 0.5*Cl.*A.*rho.*v.^2;
 
 %% Thrust 
-m
-alpha
-T0
-P0
+
 [Isp,Fueldt,eq,q1] = RESTint(M, rad2deg(alpha), auxdata,T0,P0);
 % 
 % Isp(q<20000) = Isp(q<20000).*gaussmf(q(q<20000),[1000,20000]);
 % Fueldt(M<5.0) = 0;
 
 Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce ISP to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
-Fueldt(M<5.0) = 0;
-Isp(M<5.0) = 0;
+% Fueldt(M<5.0) = 0;
+% Isp(M<5.0) = 0;
 
 % Fueldt = Fueldt.*throttle;
-Fueldt = Fueldt.*throttle; % NEED TO CHANGE THIS
+Fueldt = Fueldt.*throttle; %
 
 % T = Isp.*Fueldt*9.81.*cos(alpha); % Thrust in direction of motion
 T = Isp.*Fueldt*9.81.*cos(alpha).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion

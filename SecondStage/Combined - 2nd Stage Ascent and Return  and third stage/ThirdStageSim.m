@@ -73,7 +73,7 @@ Isp = 317.*0.98; %Kestrel, from Falcon 1 users guide, with efficiency reduction
 % Isp = 340; %Aestus 2
 
 %% Define Vehicle Properties
-mHS = 130.9; % Heat Shield Mass
+mHS = 125.6; % Heat Shield Mass
 
 % mEng = 100; %RL10
 % mEng = 52; %Kestrel

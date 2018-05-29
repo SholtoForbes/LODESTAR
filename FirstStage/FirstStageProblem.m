@@ -19,7 +19,7 @@ mSpartan = 9819.11;
 % SL + (101325-P_atm)*Mod
 
 Vehicle.T.SL = 555900; % Thrust from Falcon 1 users guide. 
-Vehicle.T.Mod = 0.5518; % exit area calculated in SCALING.docx
+Vehicle.T.Mod = 0.5518; % exit area calculated in SIZING.docx
 
 Vehicle.Isp.SL = 275; % linear regression of SL and vacuum Isp. From encyclopaedia astronautica, backed up by falcon 1 users guide
 Vehicle.Isp.Mod = 2.9410e-04;
