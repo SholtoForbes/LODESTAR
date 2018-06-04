@@ -90,16 +90,18 @@ Cm_spline_EngineOff = griddedInterpolant(Mgrid_EngineOff,AOAgrid_EngineOff,Cm_Gr
 %% Aerodynamic Data - Engine on 
 
 
-interp.Cl_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,3));
-interp.Cd_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,4));
-interp.Cm_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,5));
+interp.Cl_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,3),aero_EngineOn(:,4));
+interp.Cd_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,3),aero_EngineOn(:,5));
+interp.Cm_scattered_EngineOn = scatteredInterpolant(aero_EngineOn(:,1),aero_EngineOn(:,2),aero_EngineOn(:,3),aero_EngineOn(:,6));
 
 MList_EngineOn = unique(aero_EngineOn(:,1));
 % MList_EngineOn(end+1) = MList_EngineOn(end) + 1; % extrapolate for Mach no slightly
 
 AoAList_engineOn = unique(aero_EngineOn(:,2));
 
-[Mgrid_EngineOn,AOAgrid_EngineOn] = ndgrid(MList_EngineOn,AoAList_engineOn);
+altList_engineOn = unique(aero_EngineOn(:,2));
+
+[Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn] = ndgrid(MList_EngineOn,AoAList_engineOn,altList_engineOn);
 
 
 Cl_Grid_EngineOn = [];
@@ -110,10 +112,11 @@ flap_Grid = [];
 for i = 1:numel(Mgrid_EngineOn)
     M_temp = Mgrid_EngineOn(i);
     AoA_temp = AOAgrid_EngineOn(i);
+    alt_temp = altgrid_EngineOn(i);
     
-    Cl_temp_EngineOn = interp.Cl_scattered_EngineOn(M_temp,AoA_temp);
-    Cd_temp_EngineOn = interp.Cd_scattered_EngineOn(M_temp,AoA_temp);
-    Cm_temp_EngineOn = interp.Cm_scattered_EngineOn(M_temp,AoA_temp);
+    Cl_temp_EngineOn = interp.Cl_scattered_EngineOn(M_temp,AoA_temp,alt_temp);
+    Cd_temp_EngineOn = interp.Cd_scattered_EngineOn(M_temp,AoA_temp,alt_temp);
+    Cm_temp_EngineOn = interp.Cm_scattered_EngineOn(M_temp,AoA_temp,alt_temp);
     
     %determine Flap Component
     Cd_temp_AoA0 = interp.Cd_scattered_EngineOff(M_temp,0); % engine off case used as reference for flaps (which also have engine off)
@@ -131,24 +134,24 @@ for i = 1:numel(Mgrid_EngineOn)
     I = cell(1, ndims(Mgrid_EngineOn)); 
     [I{:}] = ind2sub(size(Mgrid_EngineOn),i);
     
-    Cl_Grid_EngineOn(I{(1)},I{(2)}) = Cl_temp_EngineOn+flap_Cl_temp_EngineOn;
-    Cd_Grid_EngineOn(I{(1)},I{(2)}) = Cd_temp_EngineOn+flap_Cd_temp_EngineOn;
-    Cm_Grid_EngineOn(I{(1)},I{(2)}) = Cm_temp_EngineOn;
+    Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn+flap_Cl_temp_EngineOn;
+    Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn+flap_Cd_temp_EngineOn;
+    Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
 
-    flap_Grid_EngineOn(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0)) ;
+    flap_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0)) ;
     
-    Cl_Grid_test_EngineOn(I{(1)},I{(2)}) = Cl_temp_EngineOn;
-    Cd_Grid_test_EngineOn(I{(1)},I{(2)}) = Cd_temp_EngineOn;
-    Cm_Grid_test_EngineOn(I{(1)},I{(2)}) = Cm_temp_EngineOn;
+    Cl_Grid_test_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn;
+    Cd_Grid_test_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn;
+    Cm_Grid_test_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
     
 %     Cl_Grid_EngineOn(I{(1)},I{(2)}) = Cl_temp;
 %     Cd_Grid_EngineOn(I{(1)},I{(2)}) = Cd_temp;
 %     Cm_Grid_EngineOn(I{(1)},I{(2)}) = Cm_temp;
 end
-Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_EngineOn,'spline','linear');
-Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
-flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
-Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
+Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cl_Grid_EngineOn,'spline','linear');
+Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
+flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
+Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
 
 
 
