@@ -4,7 +4,7 @@ clear all
 
 M0 = 7;
 Alpha = 4;
-alt = 28.5;
+alt = 30;
 
 Atmosphere = dlmread('atmosphere.txt');
 interp.Atmosphere = Atmosphere;
@@ -17,9 +17,9 @@ T0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,2));
 P0_spline = spline( interp.Atmosphere(:,1),  interp.Atmosphere(:,3)); 
 
 
-T0 = ppval(T0_spline,alt*1000);
-P0 = ppval(P0_spline,alt*1000);
-rho0 = ppval(rho_spline,alt*1000);
+T0 = ppval(T0_spline,alt*1000)
+P0 = ppval(P0_spline,alt*1000)
+rho0 = ppval(rho_spline,alt*1000)
 
 
 
@@ -55,7 +55,7 @@ auxdata.interp.tempgridded = griddedInterpolant(MList_EngineOff,AOAList_EngineOn
 
 
 
-T1 = auxdata.interp.tempgridded(M0,Alpha).*T0;
+T1 = auxdata.interp.tempgridded(M0,Alpha).*T0
 P1 = auxdata.interp.presgridded(M0,Alpha).*P0; % note this is at 50kPa, modified by efficiency
 M1 = auxdata.interp.M1gridded(M0, Alpha);
 
@@ -138,28 +138,29 @@ grid.eq_eng = auxdata.interp.equivalence(grid.Mgrid_eng,grid.T_eng);
 auxdata.interp.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_eng,'linear','linear');
 
 
-[Isp,wf,eq,q1,w] = RESTint(M0, Alpha, auxdata,T0,P0)
+[Isp,wf,eq,q1,w] = RESTint(M0, Alpha, auxdata,T0,P0);
+Isp
 
-T = Isp.*wf*9.81
+T = Isp.*wf*9.81;
 
 
 R = 8.314;
 
 
-rhoe = Pe/re/Te
+rhoe = Pe/re/Te;
 
-A = 0.5586*4
+A = 0.5586*4;
 
-mm = 0.029 % molar mass air
+mm = 0.029; % molar mass air
 
 % Tt = Te*(1+(Ge-1)/2*Me^2)
 % Pt = Pe + 0.5*rhoe*(Me*sqrt(Ge*re*Te))^2
 % 
 % mdot = A*Pt/sqrt(Tt) * sqrt(Ge/(re*mm)) * Me * (1+(Ge-1)/2*Me^2)^-((Ge+1)/(2*(Ge-1)))
 
-ve = Me*sqrt(Ge*re*Te)
+ve = Me*sqrt(Ge*re*Te);
 
-mdot = rhoe*A*ve
+mdot = rhoe*A*ve;
 
 %% Nondimensionalisation for CART3D
 %%

@@ -324,8 +324,8 @@ bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin
 bounds.phase(2).finalstate.upper = [200, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
-bounds.phase(2).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
-bounds.phase(2).control.upper = [deg2rad(.2), deg2rad(5), 1];
+bounds.phase(2).control.lower = [deg2rad(-.3), deg2rad(-5), -1];
+bounds.phase(2).control.upper = [deg2rad(.3), deg2rad(5), 1];
 
 % Path Bounds
 bounds.phase(2).path.lower = 0;
@@ -419,7 +419,7 @@ guess.phase(3).time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 % mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 2;
+mesh.maxiterations = 3;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 200;
 mesh.tolerance    = 1e-5;

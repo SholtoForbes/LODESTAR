@@ -10,7 +10,7 @@ clc
 
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
-auxdata.dragmod = 1. %drag increase test
+auxdata.dragmod = 1.6 %drag increase test
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')
@@ -318,21 +318,21 @@ bounds.phase(2).state.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin,
 bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
 
 % End State Bounds
-% bounds.phase(2).finalstate.lower = [altMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-% bounds.phase(2).finalstate.upper = [200, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
-bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [200, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.lower = [altMin, lon0-0.002, lat0-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+bounds.phase(2).finalstate.upper = [200, lon0+0.002, lat0+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+% bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+% bounds.phase(2).finalstate.upper = [200, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
-bounds.phase(2).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
-bounds.phase(2).control.upper = [deg2rad(.2), deg2rad(5), 1];
+bounds.phase(2).control.lower = [deg2rad(-.3), deg2rad(-5), -1];
+bounds.phase(2).control.upper = [deg2rad(.3), deg2rad(5), 1];
 
 % Path Bounds
 bounds.phase(2).path.lower = 0;
 bounds.phase(2).path.upper = 50000;
 
-bounds.eventgroup(2).lower = [-0.001 -0.001]; % Constrain final latitude and longitude, with variable first stage approximation
-bounds.eventgroup(2).upper = [0.001 0.001]; 
+% bounds.eventgroup(2).lower = [-0.001 -0.001]; % Constrain final latitude and longitude, with variable first stage approximation
+% bounds.eventgroup(2).upper = [0.001 0.001]; 
 
 % Guess
 tGuess              = [440; 1500];
@@ -399,8 +399,8 @@ bounds.phase(3).path.lower = [-deg2rad(8), -inf];
 bounds.phase(3).path.upper = [deg2rad(8), 0];
 
 
-bounds.eventgroup(3).lower = [zeros(1,7) 90000 0];
-bounds.eventgroup(3).upper = [zeros(1,6) 1000 566000 0];
+bounds.eventgroup(2).lower = [zeros(1,7) 90000 0];
+bounds.eventgroup(2).upper = [zeros(1,6) 1000 566000 0];
 
 tGuess              = [0; 150];
 altGuess            = [35000; 60000];

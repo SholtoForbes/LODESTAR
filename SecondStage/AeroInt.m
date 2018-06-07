@@ -99,7 +99,7 @@ MList_EngineOn = unique(aero_EngineOn(:,1));
 
 AoAList_engineOn = unique(aero_EngineOn(:,2));
 
-altList_engineOn = unique(aero_EngineOn(:,2));
+altList_engineOn = unique(aero_EngineOn(:,3));
 
 [Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn] = ndgrid(MList_EngineOn,AoAList_engineOn,altList_engineOn);
 
