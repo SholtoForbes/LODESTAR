@@ -16,7 +16,7 @@ SPARTANscale = 1
 mRocket = 23000; %(kg)  %Total lift-off mass
 % mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
 mFuel = 0.77*mRocket-630;  %(kg)  %mass of the fuel   630 is for the merlin
-mSpartan = 8755.1*SPARTANscale;
+mSpartan = 9819*SPARTANscale;
 
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)

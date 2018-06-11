@@ -10,7 +10,7 @@ clc
 
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
-auxdata.dragmod = 1.6 %drag increase test
+auxdata.dragmod = 1. %drag increase test
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')
@@ -167,40 +167,30 @@ auxdata.interp.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Is
 
 % These aerodynamic datasets have been created in ClicCalcCGVar.m
 
-T_L = -1.327; % Thrust location, average (m), measured from CREO
-
 addpath ..\CG15.1255
 % Full of fuel, with third stage
-
-CG_z = (-0.1974*(4.9571e+03+1562) + 3300*0.547)/(4.9571e+03+1562+3300);
-
 aero_EngineOff.fullFuel = importdata('SPARTANaero15.228');
 flapaero.fullFuel = importdata('SPARTANaeroFlaps15.228');
 aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn15.228');
 
-[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel,auxdata);
 
 % End of acceleration, with third stage. 
 % NOTE: it is assumed that the CG does not change
 % due to fuel after the end of acceleration phase, so there will still be some fuel left when this is used. 
 
-CG_z = (-0.2134*4.9571e+03+ 3300*0.547)/(4.9571e+03+3300);
-
 aero_EngineOff.noFuel = importdata('SPARTANaero15.727');
 flapaero.noFuel = importdata('SPARTANaeroFlaps15.727');
 aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.727');
 
-[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel,auxdata);
 
 % Flyback, without third stage. Fuel variation not used for flyback.
-
-CG_z = -0.2134; % calculated fom CREO
-
 aero_EngineOff.noThirdStage = importdata('SPARTANaero15.1255');
 flapaero.noThirdStage = importdata('SPARTANaeroFlaps15.1255');
 aero_EngineOn.noThirdStage = importdata('SPARTANaeroEngineOn15.1255');
 
-[auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff.noThirdStage,aero_EngineOn.noThirdStage,flapaero.noThirdStage,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff.noThirdStage,aero_EngineOn.noThirdStage,flapaero.noThirdStage,auxdata);
 
 
 %% Import Bounds %%========================================================
