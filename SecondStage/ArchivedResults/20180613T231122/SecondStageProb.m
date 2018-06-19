@@ -10,7 +10,7 @@ clc
 
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
-auxdata.dragmod = 1. %drag increase test
+auxdata.dragmod = 1.6 %drag increase test
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')

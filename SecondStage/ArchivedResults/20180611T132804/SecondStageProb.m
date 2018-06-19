@@ -10,7 +10,7 @@ clc
 
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
-auxdata.dragmod = 1. %drag increase test
+auxdata.dragmod = 1.6 %drag increase test
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')
@@ -283,7 +283,7 @@ tfMin = 0;            tfMax = 5000;
 altMin = 10;  altMax = 70000;
 speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
-aziMin = 60*pi/180; aziMax =  500*pi/180;
+aziMin = 60*pi/180; aziMax =  360*pi/180;
 mFuelMin = 0; mFuelMax = 500;
 bankMin2 = -10*pi/180; bankMax2 =   90*pi/180
 
@@ -311,8 +311,8 @@ bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax,
 % End State Bounds
 % bounds.phase(2).finalstate.lower = [altMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
 % bounds.phase(2).finalstate.upper = [200, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
-bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-20), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [500, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+bounds.phase(2).finalstate.upper = [200, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
 bounds.phase(2).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
@@ -410,9 +410,9 @@ guess.phase(3).time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 % mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 4;
+mesh.maxiterations = 2;
 mesh.colpointsmin = 3;
-mesh.colpointsmax = 300;
+mesh.colpointsmax = 200;
 mesh.tolerance    = 1e-5;
 
 
@@ -786,10 +786,6 @@ set(g, 'Position', rect2)
 
 saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
 
-SecondStageStates = [[time time2]' [alt alt2]' [lon lon2]' [lat lat2]' [v v2]' [gamma gamma2]' [zeta zeta2]' [Alpha Alpha2]' [eta eta2]' [mFuel mFuel2]'];
-dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
-dlmwrite('SecondStageStates',SecondStageStates,'-append','delimiter',' ');
-copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',Timestamp,Timestamp))
 
 
 
@@ -1074,7 +1070,7 @@ for i = 2:length(time3)
     xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
 
 
 inc_diff
@@ -1129,8 +1125,8 @@ addpath('../../FirstStage')
 % run startup.m
 [FirstStageStates] = FirstStageProblem(alt(1),gamma(1),lat(1),zeta(1),const_firststage);
 % cd('../SecondStage/Combined - 2nd Stage Ascent and Return')
-dlmwrite('FirstStageStates', FirstStageStates);
-copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/firststage_%s',Timestamp,Timestamp))
+dlmwrite('FirstStage.txt', FirstStageStates);
+copyfile('FirstStage.txt',sprintf('../ArchivedResults/%s/firststage_%s.txt',Timestamp,Timestamp))
 % Latitude Plot
 figure(250)
 plot(FirstStageStates(:,9))
