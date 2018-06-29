@@ -47,7 +47,7 @@ x03 = input.phase(3).initialstate;
 xf3 = input.phase(3).finalstate;
 
 
-[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc,T,CL,L,inc_diff] = ThirdStageSim(altf3,gammaf3,vf3, phif3, 0,zetaf3, mf3, input.auxdata);
+[AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi,T,CL,L] = ThirdStageSim(altf3,gammaf3,vf3, phif3, 0,zetaf3, mf3, input.auxdata);
 
 output.eventgroup(3).event =[xf1(1)-x03(1) xf1(4)-x03(2) xf1(5)-x03(3) xf1(6)-x03(7) xf1(3)-x03(6) t03-tf1 tf3-t03 AltF_actual inc_diff];
 

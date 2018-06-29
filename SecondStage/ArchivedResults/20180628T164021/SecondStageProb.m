@@ -8,13 +8,15 @@ clear all;
 clc
 
 
+
 auxdata.delta = deg2rad(0) % thrust vector angle test
 auxdata.dragmod = 1. %drag increase test
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')
 addpath('..\EngineData')
+% addpath('..\SecondStageAscent - Cart')
+% addpath('..\SecondStageReturn')
 addpath('..\')
 
 Timestamp = datestr(now,30)
@@ -272,7 +274,7 @@ guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 100];
 guess.phase(1).control      = [[0;0],[0;0]];
 guess.phase(1).time          = [0;650];
 
-% Tie stages together
+% Tire stages together
 bounds.eventgroup(1).lower = [zeros(1,10)];
 bounds.eventgroup(1).upper = [zeros(1,10)]; 
 
@@ -283,7 +285,7 @@ speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  500*pi/180;
 mFuelMin = 0; mFuelMax = 500;
-bankMin2 = -10*pi/180; bankMax2 =   90*pi/180;
+bankMin2 = -10*pi/180; bankMax2 =   90*pi/180
 
 % lonf = deg2rad(145);
 % latf   = -0.269;
@@ -408,7 +410,7 @@ guess.phase(3).time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 % mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 4;
+mesh.maxiterations = 2;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 300;
 mesh.tolerance    = 1e-5;
@@ -443,12 +445,12 @@ setup.derivatives.dependencies      = 'full';
 
 %% Parallel Loop
 
-num_it = 3;
+num_it = 2;
 
 for i = 1:num_it
     
 setup_par(i) = setup;
-setup_par(i).nlp.ipoptoptions.maxiterations = 500 + 10*i;
+setup_par(i).nlp.ipoptoptions.maxiterations = 5 + 1*i;
 
 end
 
@@ -483,7 +485,7 @@ end
 
 [min_error,index] = min(error);
 
-output = output_store{index};
+output = output_store(index);
 
 
 %%
@@ -1114,7 +1116,11 @@ for i = 2:length(time3)
     xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,Texo,CLexo,Lexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+
+
+inc_diff
+
 
 
 % Plotting

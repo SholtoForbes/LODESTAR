@@ -8,13 +8,15 @@ clear all;
 clc
 
 
+
 auxdata.delta = deg2rad(0) % thrust vector angle test
 auxdata.dragmod = 1. %drag increase test
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath('..\..\thirdStage')
 addpath('..\EngineData')
+% addpath('..\SecondStageAscent - Cart')
+% addpath('..\SecondStageReturn')
 addpath('..\')
 
 Timestamp = datestr(now,30)
@@ -272,7 +274,7 @@ guess.phase(1).state(:,9) 	= [Stage2.Initial.mFuel, 100];
 guess.phase(1).control      = [[0;0],[0;0]];
 guess.phase(1).time          = [0;650];
 
-% Tie stages together
+% Tire stages together
 bounds.eventgroup(1).lower = [zeros(1,10)];
 bounds.eventgroup(1).upper = [zeros(1,10)]; 
 
@@ -283,7 +285,7 @@ speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  500*pi/180;
 mFuelMin = 0; mFuelMax = 500;
-bankMin2 = -10*pi/180; bankMax2 =   90*pi/180;
+bankMin2 = -10*pi/180; bankMax2 =   90*pi/180
 
 % lonf = deg2rad(145);
 % latf   = -0.269;
@@ -443,12 +445,12 @@ setup.derivatives.dependencies      = 'full';
 
 %% Parallel Loop
 
-num_it = 3;
+num_it = 2;
 
 for i = 1:num_it
     
 setup_par(i) = setup;
-setup_par(i).nlp.ipoptoptions.maxiterations = 500 + 10*i;
+setup_par(i).nlp.ipoptoptions.maxiterations = 5 + 1*i;
 
 end
 
@@ -475,7 +477,7 @@ throttle2 = output_temp.result.solution.phase(2).state(:,10).';
 forward0 = [alt2(1),gamma2(1),v2(1),zeta2(1),lat2(1),lon2(1), mFuel2(1)];
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time2,Alpha2,f_t),ControlInterp(time2,eta2,f_t),ThrottleInterp(time2,throttle2,f_t)),time2(1):time2(end),forward0);
 
-error(i) = (f_y(end,6) + lon2(end))^2 + (f_y(end,5) + lat2(end))^2;
+error(i) = (f_y(:,6) + lon2)^2 + (f_y(:,5) + lat2)^2;
 
 output_store{i} = output_temp;
 
@@ -483,7 +485,7 @@ end
 
 [min_error,index] = min(error);
 
-output = output_store{index};
+output = output_store(index);
 
 
 %%
@@ -1114,7 +1116,11 @@ for i = 2:length(time3)
     xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,Texo,CLexo,Lexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo, incexo,Texo,CLexo,Lexo,inc_diff] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+
+
+inc_diff
+
 
 
 % Plotting
