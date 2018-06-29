@@ -163,20 +163,28 @@ auxdata.interp.IspGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.Is
 % Calculate the flap deflection necessary for trim.
 % Each set of aero corresponds to a different CG. 
 
+addpath ..\ViscousAero
+
+Viscousaero_EngineOn = importdata('VC3D_viscousCoefficients_ascent.dat');
+Viscousaero_EngineOff = importdata('VC3D_viscousCoefficients_descent.dat');
+
 % These aerodynamic datasets have been created in ClicCalcCGVar.m
 
-T_L = -1.327; % Thrust location, average (m), measured from CREO
+T_L = -1.327; % Thrust location in z, average (m), measured from CREO
 
 addpath ..\CG15.1255
 % Full of fuel, with third stage
 
 CG_z = (-0.1974*(4.9571e+03+1562) + 3300*0.547)/(4.9571e+03+1562+3300);
 
-aero_EngineOff.fullFuel = importdata('SPARTANaero15.228');
-flapaero.fullFuel = importdata('SPARTANaeroFlaps15.228');
-aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn15.228');
+aero1.aero_EngineOff = importdata('SPARTANaero15.228');
+aero1.flapaero = importdata('SPARTANaeroFlaps15.228');
+aero1.aero_EngineOn = importdata('SPARTANaeroEngineOn15.228');
+aero1.aero_Engine = importdata('SPARTANEngine15.228');
+aero1.Viscousaero_EngineOff = Viscousaero_EngineOff;
+aero1.Viscousaero_EngineOn = Viscousaero_EngineOn;
 
-[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero_EngineOff.fullFuel,aero_EngineOn.fullFuel,flapaero.fullFuel,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.fullFuel,auxdata.interp.Cd_spline_EngineOff.fullFuel,auxdata.interp.Cl_spline_EngineOn.fullFuel,auxdata.interp.Cd_spline_EngineOn.fullFuel,auxdata.interp.flap_spline_EngineOff.fullFuel,auxdata.interp.flap_spline_EngineOn.fullFuel] = AeroInt(aero1,auxdata,T_L,CG_z);
 
 % End of acceleration, with third stage. 
 % NOTE: it is assumed that the CG does not change
@@ -184,21 +192,27 @@ aero_EngineOn.fullFuel = importdata('SPARTANaeroEngineOn15.228');
 
 CG_z = (-0.2134*4.9571e+03+ 3300*0.547)/(4.9571e+03+3300);
 
-aero_EngineOff.noFuel = importdata('SPARTANaero15.727');
-flapaero.noFuel = importdata('SPARTANaeroFlaps15.727');
-aero_EngineOn.noFuel = importdata('SPARTANaeroEngineOn15.727');
+aero2.aero_EngineOff = importdata('SPARTANaero15.727');
+aero2.flapaero = importdata('SPARTANaeroFlaps15.727');
+aero2.aero_EngineOn = importdata('SPARTANaeroEngineOn15.727');
+aero2.aero_Engine = importdata('SPARTANEngine15.727');
+aero2.Viscousaero_EngineOff = Viscousaero_EngineOff;
+aero2.Viscousaero_EngineOn = Viscousaero_EngineOn;
 
-[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero_EngineOff.noFuel,aero_EngineOn.noFuel,flapaero.noFuel,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.noFuel,auxdata.interp.Cd_spline_EngineOff.noFuel,auxdata.interp.Cl_spline_EngineOn.noFuel,auxdata.interp.Cd_spline_EngineOn.noFuel,auxdata.interp.flap_spline_EngineOff.noFuel,auxdata.interp.flap_spline_EngineOn.noFuel] = AeroInt(aero2,auxdata,T_L,CG_z);
 
 % Flyback, without third stage. Fuel variation not used for flyback.
 
 CG_z = -0.2134; % calculated fom CREO
 
-aero_EngineOff.noThirdStage = importdata('SPARTANaero15.1255');
-flapaero.noThirdStage = importdata('SPARTANaeroFlaps15.1255');
-aero_EngineOn.noThirdStage = importdata('SPARTANaeroEngineOn15.1255');
+aero3.aero_EngineOff = importdata('SPARTANaero15.1255');
+aero3.flapaero = importdata('SPARTANaeroFlaps15.1255');
+aero3.aero_EngineOn = importdata('SPARTANaeroEngineOn15.1255');
+aero3.aero_EngineOn = importdata('SPARTANEngine15.1255');
+aero3.Viscousaero_EngineOff = Viscousaero_EngineOff;
+aero3.Viscousaero_EngineOn = Viscousaero_EngineOn;
 
-[auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff.noThirdStage,aero_EngineOn.noThirdStage,flapaero.noThirdStage,auxdata,T_L,CG_z);
+[auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero3,auxdata,T_L,CG_z);
 
 
 %% Import Bounds %%========================================================
@@ -824,7 +838,6 @@ g = legend(ax3, 'AoA (degrees)', 'Bank Angle (degrees)','Flap Deflection (degree
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
 
-saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
 
 SecondStageStates = [[time time2]' [alt alt2]' [lon lon2]' [lat lat2]' [v v2]' [gamma gamma2]' [zeta zeta2]' [Alpha Alpha2]' [eta eta2]' [mFuel mFuel2]'];
 dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
@@ -869,8 +882,6 @@ addaxislabel(2,'Throttle (%)');
 
 % addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Fuel Mass (kg)');
-
-
 
 addaxis(time2,rad2deg(eta2),':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
@@ -1106,7 +1117,7 @@ for i = 2:length(time3)
     xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,Texo,CLexo,Lexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,incexo,Texo,CLexo,Lexo,incdiffexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
 
 
 % Plotting
@@ -1150,6 +1161,23 @@ figure(314)
     % Write data to file
     dlmwrite('ThirdStageData',[time3, alt3, v3, m3,q ,gamma3,D ,zeta3], ' ')
 
+    
+%% SAVE FIGS
+
+saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
+saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
+saveas(figure(1),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return1.fig']);    
+saveas(figure(2),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return2.fig']);
+saveas(figure(3),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return3.fig']);
+saveas(figure(221),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Hamiltonian.fig']);
+saveas(figure(220),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Validation.fig']);
+saveas(figure(212),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward1.fig']);
+saveas(figure(213),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward2.fig']);
+saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
+saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
+saveas(figure(2301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'GroundTrack.fig']);
+
+
 %% Run First Stage =========================================================
 const_firststage = 1;
 addpath('../../FirstStage')
@@ -1165,22 +1193,21 @@ plot(FirstStageStates(:,9))
 plot(phi)
 plot(ThirdStagePhi)
 title('Latitude')
-%% SAVE FIGS
-saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
+
 saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);
 %%
 
 % =========================================================================
 % Troubleshooting Procedure
 % =========================================================================
-
 % 1: Check that you have posed your problem correctly ie. it is physically
-% feasible and the bounds allow for a solution
-% 2: Check for NaN values (check derivatives in Dynamics file while running)
-% 3: Check guess, is it reasonable? 
-% 4: Increase number of iterations and collocation points
-% 5: Check for large nonlinearities, eg. atmospheric properties suddenly going to zero or thrust  
-% 6: Try all of the above in various combinations until it works!
+% feasible and the bounds allow for a solution.
+% 2: Check if there is any extrapolations causing bad dynamics. 
+% 3: Check guess, is it reasonable?.
+% 4: Increase number of iterations and collocation points.
+% 5: Check for large nonlinearities, eg. atmospheric properties suddenly going to zero or thrust cutting off. These need to be eliminated or separated into phases.
+% 6: Check for NaN values (check derivatives in Dynamics file while
+% running).
 
 
 

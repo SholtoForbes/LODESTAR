@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi,T,CL,L] = ThirdStageSim(alt0,gamma0,v0, phi0, xi0, zeta0, m0, auxdata)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc,T,CL,L,inc_diff] = ThirdStageSim(alt0,gamma0,v0, phi0, xi0, zeta0, m0, auxdata)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -144,6 +144,9 @@ v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Re
 v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
 
 dvtot = v12 + v23 + v34;
+
+inc = acos((v(end)*cos(zeta(end)) + r(end)*Omega_E*cos(phi(end)))/vexo);  % initial orbit inclination angle
+inc_diff = acos(-((566.89+6371)/12352)^(7/2))-inc;
 
 %as this is happening in a vacuum we can compute whole delta v at once for
 %fuel usage, tsiolkovsky rocket equation. 

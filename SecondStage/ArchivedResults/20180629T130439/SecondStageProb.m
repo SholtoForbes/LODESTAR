@@ -824,7 +824,6 @@ g = legend(ax3, 'AoA (degrees)', 'Bank Angle (degrees)','Flap Deflection (degree
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
 
-saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
 
 SecondStageStates = [[time time2]' [alt alt2]' [lon lon2]' [lat lat2]' [v v2]' [gamma gamma2]' [zeta zeta2]' [Alpha Alpha2]' [eta eta2]' [mFuel mFuel2]'];
 dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
@@ -869,8 +868,6 @@ addaxislabel(2,'Throttle (%)');
 
 % addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Fuel Mass (kg)');
-
-
 
 addaxis(time2,rad2deg(eta2),':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Bank Angle (Deg)');
@@ -1106,7 +1103,7 @@ for i = 2:length(time3)
     xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,Texo,CLexo,Lexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,incexo,Texo,CLexo,Lexo,incdiffexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
 
 
 % Plotting
@@ -1150,6 +1147,23 @@ figure(314)
     % Write data to file
     dlmwrite('ThirdStageData',[time3, alt3, v3, m3,q ,gamma3,D ,zeta3], ' ')
 
+    
+%% SAVE FIGS
+
+saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
+saveas(figure(202),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
+saveas(figure(1),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return1.fig']);    
+saveas(figure(2),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return2.fig']);
+saveas(figure(3),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return3.fig']);
+saveas(figure(221),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Hamiltonian.fig']);
+saveas(figure(220),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Validation.fig']);
+saveas(figure(212),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward1.fig']);
+saveas(figure(213),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward2.fig']);
+saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
+saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
+saveas(figure(2301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'GroundTrack.fig']);
+
+
 %% Run First Stage =========================================================
 const_firststage = 1;
 addpath('../../FirstStage')
@@ -1165,22 +1179,21 @@ plot(FirstStageStates(:,9))
 plot(phi)
 plot(ThirdStagePhi)
 title('Latitude')
-%% SAVE FIGS
-saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
+
 saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);
 %%
 
 % =========================================================================
 % Troubleshooting Procedure
 % =========================================================================
-
 % 1: Check that you have posed your problem correctly ie. it is physically
-% feasible and the bounds allow for a solution
-% 2: Check for NaN values (check derivatives in Dynamics file while running)
-% 3: Check guess, is it reasonable? 
-% 4: Increase number of iterations and collocation points
-% 5: Check for large nonlinearities, eg. atmospheric properties suddenly going to zero or thrust  
-% 6: Try all of the above in various combinations until it works!
+% feasible and the bounds allow for a solution.
+% 2: Check if there is any extrapolations causing bad dynamics. 
+% 3: Check guess, is it reasonable?.
+% 4: Increase number of iterations and collocation points.
+% 5: Check for large nonlinearities, eg. atmospheric properties suddenly going to zero or thrust cutting off. These need to be eliminated or separated into phases.
+% 6: Check for NaN values (check derivatives in Dynamics file while
+% running).
 
 
 

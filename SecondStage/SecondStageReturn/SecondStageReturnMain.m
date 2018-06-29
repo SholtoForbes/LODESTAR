@@ -24,11 +24,17 @@ auxdata.const = 1 % 1 normal
 
 % Fetch aerodynamic data and compute interpolation splines
 
-addpath ..\CG14.5
+% addpath ..\CG14.5
+% % 
+% aero_EngineOff = importdata('SPARTANaero14.5');
+% flapaero = importdata('SPARTANaeroFlaps14.5');
+% aero_EngineOn = importdata('SPARTANaeroEngineOn14.5');
+
+addpath ..\CG15.1255
 % 
-aero_EngineOff = importdata('SPARTANaero14.5');
-flapaero = importdata('SPARTANaeroFlaps14.5');
-aero_EngineOn = importdata('SPARTANaeroEngineOn14.5');
+aero_EngineOff = importdata('SPARTANaero15.1255');
+flapaero = importdata('SPARTANaeroFlaps15.1255');
+aero_EngineOn = importdata('SPARTANaeroEngineOn15.1255');
 
 [auxdata.interp.Cl_spline_EngineOff.noThirdStage,auxdata.interp.Cd_spline_EngineOff.noThirdStage,auxdata.interp.Cl_spline_EngineOn.noThirdStage,auxdata.interp.Cd_spline_EngineOn.noThirdStage,auxdata.interp.flap_spline_EngineOff.noThirdStage,auxdata.interp.flap_spline_EngineOn.noThirdStage] = AeroInt(aero_EngineOff,aero_EngineOn,flapaero);
 
@@ -143,7 +149,7 @@ auxdata.Re   = 6371203.92;                     % Equatorial Radius of Earth (m)
 %----------------------- Boundary Conditions -----------------------%
 %-------------------------------------------------------------------%
 t0     = 0;
-alt0   = 35300;   
+alt0   = 37556;   
 rad0   = alt0+auxdata.Re;
 altf   = 500;   
 radf   = altf+auxdata.Re;
@@ -155,8 +161,8 @@ i=1
 %         for j = 1:4
         
 %   lon0   =   2.552;    
-lon0   = 2.5249;%ref
-lonf = 2.5298;
+lon0   = 2.5368;%ref
+lonf = 2.5307;
 % lat0 = -0.1571;
 
 
@@ -172,14 +178,24 @@ speed0 = 2760;
 % speed0 = 1000;
 
 speedf = 100;
-fpa0   = 0.0808; 
+% fpa0   = 0.0808; 
+% fpaf   = 0*pi/180;
+% azi0   = 1.780; 
+% % azi0   = +180*pi/180; 
+% azif   = 270*pi/180;
+% 
+% lat0   =  -0.1099;
+% latf   = -0.269;
+
+fpa0   = 0.1058; 
 fpaf   = 0*pi/180;
 azi0   = 1.780; 
 % azi0   = +180*pi/180; 
 azif   = 270*pi/180;
 
-lat0   =  -0.1099;
-latf   = -0.269;
+lat0   = -0.1166;
+latf   = -0.2640;
+
 %-------------------------------------------------------------------%
 %----------------------- Limits on Variables -----------------------%
 %-------------------------------------------------------------------%
@@ -288,9 +304,9 @@ guess.phase.time    = tGuess;
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
 mesh.method       = 'hp-LiuRao-Legendre';
-mesh.maxiterations = 6;
+mesh.maxiterations = 4;
 mesh.colpointsmin = 2;
-mesh.colpointsmax = 15;
+mesh.colpointsmax = 300;
 mesh.tolerance    = 1e-5;
 
 
