@@ -55,8 +55,8 @@ for i = 1:numel(Mgrid_EngineOff)
     Cd_temp_EngineOff = interp.Cd_scattered_EngineOff(M_temp,AoA_temp);
     Cm_temp_EngineOff = interp.Cm_scattered_EngineOff(M_temp,AoA_temp);
     
-    Cl_temp_ViscousEngineOff = interp.Cl_scattered_Viscousaero_EngineOff(M_temp,AoA_temp,alt_temp);
-    Cd_temp_ViscousEngineOff = interp.Cd_scattered_Viscousaero_EngineOff(M_temp,AoA_temp,alt_temp);
+    Cl_temp_ViscousEngineOff = interp.Cl_scattered_Viscousaero_EngineOff(M_temp,AoA_temp,alt_temp/1000);
+    Cd_temp_ViscousEngineOff = interp.Cd_scattered_Viscousaero_EngineOff(M_temp,AoA_temp,alt_temp/1000);
     
     
     %determine Flap Component
@@ -140,17 +140,17 @@ for i = 1:numel(Mgrid_EngineOn)
 %     
     L_ref = 2294.0;
     
-    c = ppval(auxdata.interp.c_spline,alt_temp); % Calculate speed of sound using atmospheric data
+    c = ppval(auxdata.interp.c_spline,alt_temp*1000); % Calculate speed of sound using atmospheric data
 
     v = M_temp*c;
 
-    rho = ppval(auxdata.interp.rho_spline,alt_temp); % Calculate density using atmospheric data
+    rho = ppval(auxdata.interp.rho_spline,alt_temp*1000); % Calculate density using atmospheric data
 
     q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
-    T0 = ppval(auxdata.interp.T0_spline, alt_temp); 
+    T0 = ppval(auxdata.interp.T0_spline, alt_temp*1000); 
 
-    P0 = ppval(auxdata.interp.P0_spline, alt_temp);
+    P0 = ppval(auxdata.interp.P0_spline, alt_temp*1000);
 
     [Isp,Fueldt,eq,q1] = RESTint(M_temp, AoA_temp, auxdata,T0,P0);
 
@@ -221,38 +221,39 @@ Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_
 % Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
 % flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
 % Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
-
+% permute(Mgrid_EngineOff(9,:,:),[3 2 1])
 plotaero = 'no';
 if strcmp(plotaero,'yes')
 figure(401)
-contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_test_EngineOff,5000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOff(9,:,:),[3 2 1]),permute(altgrid_EngineOff(9,:,:),[3 2 1]),permute(Cl_Grid_test_EngineOff(9,:,:),[3 2 1]),5000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('Lift COefficient, No Flaps, Engine Off')
 c = colorbar;
 c.Label.String = 'Lift Coefficient';
 
+% 
+% figure(402)
+% contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% title('Drag COefficient, No Flaps, Engine Off')
+% c = colorbar;
+% c.Label.String = 'Drag Coefficient';
+% 
+% 
+% figure(403)
+% contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_test_EngineOff./Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
+% xlabel('Mach no.')
+% ylabel('Angle of Attack (deg)')
+% title('L/D, No Flaps, Engine Off')
+% c = colorbar;
+% c.Label.String = 'L/D';
+% shading interp
 
-figure(402)
-contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-title('Drag COefficient, No Flaps, Engine Off')
-c = colorbar;
-c.Label.String = 'Drag Coefficient';
-
-
-figure(403)
-contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_test_EngineOff./Cd_Grid_test_EngineOff,5000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-title('L/D, No Flaps, Engine Off')
-c = colorbar;
-c.Label.String = 'L/D';
-shading interp
 
 figure(404)
-contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_test_EngineOn,3000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('Lift COefficient, No Flaps, Engine On')
@@ -261,7 +262,7 @@ c.Label.String = 'Lift Coefficient';
 
 
 figure(405)
-contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_test_EngineOn,3000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cd_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('Drag Coefficient, No Flaps, Engine On')
@@ -270,7 +271,7 @@ c.Label.String = 'Drag Coefficient';
 
 
 figure(406)
-contourf(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_test_EngineOn./Cd_Grid_test_EngineOn,3000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(2,:,:),[3 2 1])./permute(Cd_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('L/D, No Flaps, Engine On')
@@ -279,7 +280,7 @@ c.Label.String = 'L/D';
 shading interp
 
 figure(407)
-contourf(Mgrid_EngineOff,AOAgrid_EngineOff,Cl_Grid_EngineOff./Cd_Grid_EngineOff,3000,'LineWidth',0.)
+contourf(Mgrid_EngineOff(:,:,3),AOAgrid_EngineOff(:,:,3),Cl_Grid_EngineOff(:,:,3)./Cd_Grid_EngineOff(:,:,3),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('L/D, Flaps, Engine Off')
