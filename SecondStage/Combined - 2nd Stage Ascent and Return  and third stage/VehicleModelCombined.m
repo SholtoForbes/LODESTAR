@@ -61,7 +61,7 @@ P0 = ppval(interp.P0_spline, alt);
 % Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
 
 if ThirdStage == 0
-    throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
+    throttle(M<5.1) =   0; % remove throttle points below operable range on return flight
 end
 
 if ThirdStage == 1
@@ -104,7 +104,7 @@ L = 0.5*Cl.*A.*rho.*v.^2;
 Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce ISP to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
 % Fueldt(M<5.0) = 0;
 
-Isp(M<5.1) = 0; % Reduce ISP to 0 at less than Mach 5.1
+% Isp(M<5.1) = 0; % Reduce ISP to 0 at less than Mach 5.1
 
 % Fueldt = Fueldt.*throttle;
 Fueldt = Fueldt.*throttle; %

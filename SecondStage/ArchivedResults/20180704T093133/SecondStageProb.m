@@ -324,7 +324,8 @@ bounds.phase(2).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax,
 % bounds.phase(2).finalstate.lower = [altMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
 % bounds.phase(2).finalstate.upper = [200, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 bounds.phase(2).finalstate.lower = [altMin, lonMin-0.001, latMin-0.001, speedMin, deg2rad(-20), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
-bounds.phase(2).finalstate.upper = [500, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+% bounds.phase(2).finalstate.upper = [500, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(2).finalstate.upper = [altMax, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
 bounds.phase(2).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
@@ -421,16 +422,47 @@ guess.phase(3).time    = tGuess;
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
-% mesh.method       = 'hp-LiuRao-Legendre';
+% mesh.method       = 'hp-LiuRao-Legendre'; % Default method does not perform h adaptions sometimes, and can be unstable. 
+ mesh.method       = 'hp-DarbyRao';
 mesh.maxiterations = 4;
 mesh.colpointsmin = 3;
-mesh.colpointsmax = 300;
+mesh.colpointsmax = 50;
 mesh.tolerance    = 1e-5;
 
-
-%-------------------------------------------------------------------%
+% mesh.phase(1).fraction = 0.1*ones(1,10)
+% 
+% mesh.phase(2).fraction = 0.05*ones(1,20)
+% 
+% mesh.phase(3).fraction = 0.1*ones(1,10)
+% 
+% mesh.phase(1).colpoints = 4*ones(1,10)
+% mesh.phase(2).colpoints = 5*ones(1,20)
+% mesh.phase(3).colpoints = 4*ones(1,10)
+%--------------------------------------------------------%
 %---------- Configure Setup Using the information provided ---------%
 %-------------------------------------------------------------------%
+% setup.name                           = 'Reusable-Launch-Vehicle-Entry-Problem';
+% setup.functions.continuous           = @CombinedContinuous;
+% setup.functions.endpoint             = @CombinedEndpoint;
+% setup.auxdata                        = auxdata;
+% setup.bounds                         = bounds;
+% setup.guess                          = guess;
+% setup.mesh                           = mesh;
+% setup.displaylevel                   = 2;
+% setup.nlp.solver                     = 'ipopt';
+% setup.nlp.ipoptoptions.linear_solver = 'ma57';
+% 
+% % setup.nlp.ipoptoptions.maxiterations = 510;
+% 
+% setup.derivatives.supplier           = 'sparseCD';
+% % setup.derivatives.derivativelevel    = 'second';
+% setup.derivatives.derivativelevel    = 'first';
+% % setup.scales.method                  = 'automatic-bounds';
+% setup.method                         = 'RPM-Differentiation';
+% setup.scales.method                  = 'automatic-guessUpdate';
+% setup.derivatives.dependencies      = 'full';
+
+
 setup.name                           = 'Reusable-Launch-Vehicle-Entry-Problem';
 setup.functions.continuous           = @CombinedContinuous;
 setup.functions.endpoint             = @CombinedEndpoint;
@@ -444,13 +476,16 @@ setup.nlp.ipoptoptions.linear_solver = 'ma57';
 
 % setup.nlp.ipoptoptions.maxiterations = 510;
 
-setup.derivatives.supplier           = 'sparseCD';
+setup.derivatives.supplier           = 'sparseFD';
 % setup.derivatives.derivativelevel    = 'second';
 setup.derivatives.derivativelevel    = 'first';
-% setup.scales.method                  = 'automatic-bounds';
+setup.scales.method                  = 'automatic-bounds';
 setup.method                         = 'RPM-Differentiation';
 setup.scales.method                  = 'automatic-guessUpdate';
 setup.derivatives.dependencies      = 'full';
+
+
+
 %-------------------------------------------------------------------%
 %------------------- Solve Problem Using GPOPS2 --------------------%
 %-------------------------------------------------------------------%
@@ -462,7 +497,7 @@ num_it = 3;
 for i = 1:num_it
     
 setup_par(i) = setup;
-setup_par(i).nlp.ipoptoptions.maxiterations = 500 + 10*i;
+setup_par(i).nlp.ipoptoptions.maxiterations = 300 + 10*i;
 
 end
 
@@ -490,7 +525,7 @@ forward0 = [alt2(1),gamma2(1),v2(1),zeta2(1),lat2(1),lon2(1), mFuel2(1)];
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time2,Alpha2,f_t),ControlInterp(time2,eta2,f_t),ThrottleInterp(time2,throttle2,f_t)),time2(1):time2(end),forward0);
 
 % error(i) = (f_y(end,6) + lon2(end))^2 + (f_y(end,5) + lat2(end))^2;
-
+error(i) = abs(mFuel2(end) - f_y(end,7));
 output_store{i} = output_temp;
 
 end
@@ -527,8 +562,11 @@ mFuel2 = output.result.solution.phase(2).state(:,9).';
 
 throttle2 = output.result.solution.phase(2).state(:,10).';
 
-omegadot  = output.result.solution.phase(1).control.'; 
+aoadot1  = output.result.solution.phase(1).control(:,1).'; 
+etadot1  = output.result.solution.phase(1).control(:,2).'; 
 
+aoadot2  = output.result.solution.phase(2).control(:,1).'; 
+etadot2  = output.result.solution.phase(2).control(:,2).'; 
 
 time = output.result.solution.phase(1).time.';
 time2 = output.result.solution.phase(2).time.';
@@ -649,7 +687,8 @@ nodes = length(alt)
 [~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11,flapdeflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel,mFuel(1),mFuel(end), 1);
 [~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12,flapdeflection2,heating_rate2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2,0,0, 0);
 
-throttle2(M2<5.0) = 0; % remove nonsense throttle points
+throttle2(M2<5.1) = 0; % remove nonsense throttle points
+Isp2(M2<5.1) = 0; % remove nonsense throttle points
 
 % figure out horizontal motion
 H(1) = 0;
@@ -864,7 +903,7 @@ addaxislabel(2,'Velocity (km/s)');
 % addaxis(time,fpa,':','color','k', 'linewidth', 1.);
 % addaxislabel(3,'Trajectory Angle (deg)');
 
-addaxis(time2,zeta2,':','color','k', 'linewidth', 1.2);
+addaxis(time2,rad2deg(zeta2),':','color','k', 'linewidth', 1.2);
 addaxislabel(3,'Heading Angle (Deg)');
 
 
@@ -1045,7 +1084,7 @@ interpIsp = auxdata.interp.IspGridded(gridM,gridT);
 
 figure(2100)
 hold on
-contourf(gridM,gridT,interpeq,100,'LineWidth',0);
+contourf(gridM,gridT,interpeq,100,'LineWidth',0.0);
 scatter(engine_data(:,1),engine_data(:,2),30,engine_data(:,4),'k');
 xlabel('M1')
 ylabel('T1')
@@ -1173,8 +1212,8 @@ saveas(figure(221),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Hamilton
 saveas(figure(220),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Validation.fig']);
 saveas(figure(212),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward1.fig']);
 saveas(figure(213),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward2.fig']);
-saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
-saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
+% saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
+% saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
 saveas(figure(2301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'GroundTrack.fig']);
 
 

@@ -1,11 +1,4 @@
-%--------------- Multiple-Stage Launch Vehicle Ascent Example ------------%
-% This example can be found in the following reference:                   %
-% Rao, A. V., Benson, D. A., Darby, C. L., Patterson, M. A., Francolin,   % 
-% C., Sanders, I., and Huntington, G. T., “Algorithm 902: GPOPS, A MATLAB %
-% Software for Solving Multiple-Phase Optimal Control Problems Using The  %
-% Gauss Pseudospectral Method,” ACM Transactions on Mathematical Software,%
-% Vol. 37, No. 2, April-June 2010, Article No. 22, pp. 1-39.              %
-% ------------------------------------------------------------------------%
+
 clear all; clc
 
 h0 = 0;
@@ -52,45 +45,6 @@ guess.phase(iphase).state(:,2) = [v0; v0];
 guess.phase(iphase).state(:,3) = [m0; mf];
 guess.phase(iphase).control = [0; Tmax];
 
-iphase = 2;
-bounds.phase(iphase).initialtime.lower = tfMin;
-bounds.phase(iphase).initialtime.upper = tfMax;
-bounds.phase(iphase).finaltime.lower = tfMin;
-bounds.phase(iphase).finaltime.upper = tfMax;
-bounds.phase(iphase).initialstate.lower = [hmin, vmin, mmin];
-bounds.phase(iphase).initialstate.upper = [hmax, vmax, mmax];
-bounds.phase(iphase).state.lower = [hmin, vmin, mmin];
-bounds.phase(iphase).state.upper = [hmax, vmax, mmax];
-bounds.phase(iphase).finalstate.lower = [hmin, vmin, mmin];
-bounds.phase(iphase).finalstate.upper = [hmax, vmax, mmax];
-bounds.phase(iphase).control.lower = 0;
-bounds.phase(iphase).control.upper = Tmax;
-bounds.phase(iphase).path.lower = 0;
-bounds.phase(iphase).path.upper = 0;
-guess.phase(iphase).time =  [tfMin; tfMax];
-guess.phase(iphase).state(:,1) = [h0; hmax];
-guess.phase(iphase).state(:,2) = [vmax; vmax];
-guess.phase(iphase).state(:,3) = [m0; mf];
-guess.phase(iphase).control(:,1) = [0; Tmax];
-
-iphase = 3;
-bounds.phase(iphase).initialtime.lower = tfMin;
-bounds.phase(iphase).initialtime.upper = tfMax;
-bounds.phase(iphase).finaltime.lower = tfMin;
-bounds.phase(iphase).finaltime.upper = tfMax;
-bounds.phase(iphase).initialstate.lower = [hmin, vmin, mmin];
-bounds.phase(iphase).initialstate.upper = [hmax, vmax, mmax];
-bounds.phase(iphase).state.lower = [hmin, vmin, mmin];
-bounds.phase(iphase).state.upper = [hmax, vmax, mmax];
-bounds.phase(iphase).finalstate.lower = [hmin, vmin, mf];
-bounds.phase(iphase).finalstate.upper = [hmax, vmax, mf];
-bounds.phase(iphase).control.lower = 0;
-bounds.phase(iphase).control.upper = 0;
-guess.phase(iphase).time =  [tfMin; tfMax];
-guess.phase(iphase).state(:,1) = [hmin; hmax];
-guess.phase(iphase).state(:,2) = [vmax; vmax];
-guess.phase(iphase).state(:,3) = [m0; mf];
-guess.phase(iphase).control(:,1) = [0; Tmax];
 
 %-------------------------------------------------------------------------%
 %------------- Set up Event Constraints That Link Phases -----------------%

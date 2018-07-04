@@ -422,7 +422,8 @@ guess.phase(3).time    = tGuess;
 %-------------------------------------------------------------------------%
 %----------Provide Mesh Refinement Method and Initial Mesh ---------------%
 %-------------------------------------------------------------------------%
-mesh.method       = 'hp-LiuRao-Legendre';
+mesh.method       = 'hp-LiuRao-Legendre'; % Default method does not perform h adaptions sometimes, and can be unstable. 
+%  mesh.method       = 'hp-DarbyRao';
 mesh.maxiterations = 4;
 mesh.colpointsmin = 3;
 mesh.colpointsmax = 50;
@@ -686,7 +687,8 @@ nodes = length(alt)
 [~,~,~,~,~,~, q1, M1, Fd1, rho1,L1,Fueldt1,T1,Isp1,q11,flapdeflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,lat,lon,Alpha,eta,1, mFuel,mFuel(1),mFuel(end), 1);
 [~,~,~,~,~,~, q2, M2, Fd2, rho2,L2,Fueldt2,T2,Isp2,q12,flapdeflection2,heating_rate2] = VehicleModelCombined(gamma2, alt2, v2,auxdata,zeta2,lat2,lon2,Alpha2,eta2,throttle2, mFuel2,0,0, 0);
 
-throttle2(M2<5.0) = 0; % remove nonsense throttle points
+throttle2(M2<5.1) = 0; % remove nonsense throttle points
+Isp2(M2<5.1) = 0; % remove nonsense throttle points
 
 % figure out horizontal motion
 H(1) = 0;
@@ -1082,7 +1084,7 @@ interpIsp = auxdata.interp.IspGridded(gridM,gridT);
 
 figure(2100)
 hold on
-contourf(gridM,gridT,interpeq,100,'LineWidth',0);
+contourf(gridM,gridT,interpeq,100,'LineWidth',0.0);
 scatter(engine_data(:,1),engine_data(:,2),30,engine_data(:,4),'k');
 xlabel('M1')
 ylabel('T1')
@@ -1210,8 +1212,8 @@ saveas(figure(221),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Hamilton
 saveas(figure(220),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Validation.fig']);
 saveas(figure(212),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward1.fig']);
 saveas(figure(213),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward2.fig']);
-saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
-saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
+% saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
+% saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
 saveas(figure(2301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'GroundTrack.fig']);
 
 

@@ -5,7 +5,7 @@ List of user-set options:
                    hessian_approximation = limited-memory        yes
                            linear_solver = ma57                  yes
                   ma57_automatic_scaling = yes                   yes
-                                max_iter = 330                   yes
+                                max_iter = 310                   yes
                              mu_strategy = adaptive              yes
                              output_file = Reusable-Launch-Vehicle-Entry-ProblemIPOPTinfo.txt  yes
                              print_level = 5                     yes
@@ -13,30 +13,27 @@ List of user-set options:
                                      tol = 1e-007                yes
 This is Ipopt version 3.11.0, running with linear solver ma57.
 
-Number of nonzeros in equality constraint Jacobian...:   424552
-Number of nonzeros in inequality constraint Jacobian.:    34542
+Number of nonzeros in equality constraint Jacobian...:   460012
+Number of nonzeros in inequality constraint Jacobian.:    39117
 Number of nonzeros in Lagrangian Hessian.............:        0
 
-Reallocating memory for MA57: lfact (4188418)
-Reallocating memory for MA57: lfact (5303307)
-Reallocating memory for MA57: lfact (6770899)
-Reallocating memory for MA57: lfact (8764321)
-Reallocating memory for MA57: lfact (11326384)
-Reallocating memory for MA57: lfact (14721655)
-Reallocating memory for MA57: lfact (19254900)
-Reallocating memory for MA57: lfact (25353473)
-Reallocating memory for MA57: lfact (33373385)
-Reallocating memory for MA57: lfact (44595737)
-Reallocating memory for MA57: lfact (58584821)
-Reallocating memory for MA57: lfact (74239048)
-Reallocating memory for MA57: lfact (94911398)
-Reallocating memory for MA57: lfact (122286819)
-Reallocating memory for MA57: lfact (157097740)
-Reallocating memory for MA57: lfact (203774088)
-Reallocating memory for MA57: lfact (266140434)
-Reallocating memory for MA57: lfact (347850778)
-Reallocating memory for MA57: lfact (453457919)
-Reallocating memory for MA57: lfact (592269878)
-Reallocating memory for MA57: lfact (773846746)
+Reallocating memory for MA57: lfact (6021989)
+Reallocating memory for MA57: lfact (8084867)
+Reallocating memory for MA57: lfact (10156213)
+Reallocating memory for MA57: lfact (12972485)
+Reallocating memory for MA57: lfact (16451958)
+Reallocating memory for MA57: lfact (21312062)
+Reallocating memory for MA57: lfact (27686390)
+Reallocating memory for MA57: lfact (36200037)
+Reallocating memory for MA57: lfact (47197855)
+Reallocating memory for MA57: lfact (61315072)
+Reallocating memory for MA57: lfact (80245822)
+Reallocating memory for MA57: lfact (104750422)
+Reallocating memory for MA57: lfact (136714321)
+Reallocating memory for MA57: lfact (180015575)
+Reallocating memory for MA57: lfact (236369526)
+Reallocating memory for MA57: lfact (327217119)
+Reallocating memory for MA57: lfact (539704448)
+Reallocating memory for MA57: lfact (697976658)
 
 EXIT: Not enough memory.
