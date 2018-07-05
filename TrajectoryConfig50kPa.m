@@ -26,7 +26,7 @@ Stage1.Bounds.gamma     = [deg2rad(-.1), Stage1.Initial.gamma]; % Trajectory Ang
 Stage1.Bounds.mTot      = [Stage1.m+Stage2.mStruct+Stage2.mFuel+Stage3.mTot,...
                            Stage1.m+Stage2.mStruct+Stage2.mFuel+Stage3.mTot-(Stage1.FMF*(Stage1.m-Stage1.mEngine)+Stage1.mEngine)]; % Total Mass Bounds, kg (note that this includes the SPARTAN and third stage)
 Stage1.Bounds.AoA       = [-deg2rad(5), deg2rad(2)]; % Angle of Attack Bounds, rad
-Stage1.Bounds.zeta      = [0, 2]; % Heading Angle Bounds, rad
+Stage1.Bounds.zeta      = [-pi, 2*pi]; % Heading Angle Bounds, rad
 Stage1.Bounds.AoAdot    = [-0.1, 0.1]; % Angle of Attack Derivative Bounds, rad/s
 Stage1.Bounds.phi       = [-0.5, -0.2]; % Latitude Bounds, rad
 Stage1.Bounds.control   = [-.0005, .0005]; % (Control) Angle of Attack Double-Derivative Bounds, rad/s^2

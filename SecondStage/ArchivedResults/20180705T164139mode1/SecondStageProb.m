@@ -217,12 +217,8 @@ aero3.Viscousaero_EngineOn = Viscousaero_EngineOn;
 %% Import Bounds %%========================================================
 lonMin = -pi;         lonMax = -lonMin;
 latMin = -70*pi/180;  latMax = -latMin;
-
-% lat0 = -0.264;
-% lon0 = deg2rad(145);
-lat0 = deg2rad(-12.164); % Equatorial Launch Australia Spaceport near Nhulunbuy
-lon0 = deg2rad(136.755);
-
+lat0 = -0.264;
+lon0 = deg2rad(145);
 aoaMin = 0;  aoaMax = 10*pi/180;
 bankMin1 = -1*pi/180; bankMax1 =   90*pi/180;
 

@@ -220,7 +220,7 @@ latMin = -70*pi/180;  latMax = -latMin;
 
 % lat0 = -0.264;
 % lon0 = deg2rad(145);
-lat0 = deg2rad(-12.164); % Equatorial Launch Australia Spaceport near Nhulunbuy
+lat0 = deg2rad(-12.164);
 lon0 = deg2rad(136.755);
 
 aoaMin = 0;  aoaMax = 10*pi/180;
