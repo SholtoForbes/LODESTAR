@@ -654,9 +654,9 @@ end
 % Separation_LD = lift(end)/Fd(end)
 
 
-figure(201)
+figure(211)
 fig = gcf;
-set(fig,'Position',[200 0 830 1170])
+set(fig,'Position',[200 0 850 1200])
 
 subplot(6,2,1)
 hold on
@@ -815,69 +815,151 @@ copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',strc
 
 
 
-%% PLOT RETURN
-addpath('..\SecondStageReturn\addaxis')
+% %% PLOT RETURN
+% addpath('..\SecondStageReturn\addaxis')
+% 
+% figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
+% % subplot(3,1,1)
+% hold on
+% 
+% 
+%  plot(time2,alt2/1000,'-','color','k', 'linewidth', 1.);
+% % ylim([-30,40]);
+% ylabel('altitude(km)');
+% xlabel('time (s)');
+% addaxis(time2,v2/1000,'--','color','k', 'linewidth', 1.);
+% addaxislabel(2,'Velocity (km/s)');
+% 
+% % addaxis(time,fpa,':','color','k', 'linewidth', 1.);
+% % addaxislabel(3,'Trajectory Angle (deg)');
+% 
+% addaxis(time2,rad2deg(zeta2),':','color','k', 'linewidth', 1.2);
+% addaxislabel(3,'Heading Angle (Deg)');
+% 
+% 
+% legend(  'Altitude', 'Velocity', 'Heading Angle', 'location', 'best');
+% 
+% figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
+% % subplot(3,1,2)
+% hold on
+% plot(time2,rad2deg(Alpha2),'-','color','k', 'linewidth', 1.);
+% ylabel('Angle of Attack (deg)');
+% xlabel('time (s)')
+% throttle(M2<5.0)=0;
+% addaxis(time2,throttle2*100,'--','color','k', 'linewidth', 1.);
+% addaxislabel(2,'Throttle (%)');
+% 
+% % addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
+% % addaxislabel(3,'Fuel Mass (kg)');
+% 
+% addaxis(time2,rad2deg(eta2),':','color','k', 'linewidth', 1.2);
+% addaxislabel(3,'Bank Angle (Deg)');
+% 
+% addaxis(time2,flapdeflection2,'-.','color','k', 'linewidth', 1.2);
+% addaxislabel(4,'Flap Deflection (Deg)');
+% legend(  'Angle of Attack', 'Throttle' , 'Bank Angle','FlapDeflection');
+% 
+% 
+% figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
+% hold on
+% % subplot(3,1,3)
+% plot(time2,M2,'-','color','k', 'linewidth', 1.);
+% ylabel('Mach no.')
+% xlabel('time (s)')
+% 
+% addaxis(time2,Isp2,'--','color','k', 'linewidth', 1.);
+% addaxislabel(2,'Specific Impulse (s)');
+% 
+% addaxis(time2,q2,':','color','k', 'linewidth', 1.2);
+% addaxislabel(3,'Dynamic Pressure (kPa)');
+% 
+% % addaxis(time,L./D,':','color','k', 'linewidth', 1.);
+% % addaxislabel(4,'L/D');
+% 
+% legend(  'Mach no.', 'Isp (potential)', 'q' );
 
-figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
-% subplot(3,1,1)
+
+figure(221)
+fig = gcf;
+set(fig,'Position',[200 0 850 1200])
+
+subplot(6,2,1)
+xlim([time2(1) time2(end)]);
 hold on
+plot(time2, alt2/1000,'Color','k')
+title('Trajectory (km)')
 
+dim = [.55 .7 .2 .2];
+annotation('textbox',dim,'string',{['Fuel Used: ' num2str(mFuel2(1)) ' kg']},'FitBoxToText','on');  
 
- plot(time2,alt2/1000,'-','color','k', 'linewidth', 1.);
-% ylim([-30,40]);
-ylabel('altitude(km)');
-xlabel('time (s)');
-addaxis(time2,v2/1000,'--','color','k', 'linewidth', 1.);
-addaxislabel(2,'Velocity (km/s)');
-
-% addaxis(time,fpa,':','color','k', 'linewidth', 1.);
-% addaxislabel(3,'Trajectory Angle (deg)');
-
-addaxis(time2,rad2deg(zeta2),':','color','k', 'linewidth', 1.2);
-addaxislabel(3,'Heading Angle (Deg)');
-
-
-legend(  'Altitude', 'Velocity', 'Heading Angle', 'location', 'best');
-
-figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
-% subplot(3,1,2)
+subplot(6,2,2)
+xlim([time2(1) time2(end)]);
 hold on
-plot(time2,rad2deg(Alpha2),'-','color','k', 'linewidth', 1.);
-ylabel('Angle of Attack (deg)');
-xlabel('time (s)')
-throttle(M2<5.0)=0;
-addaxis(time2,throttle2*100,'--','color','k', 'linewidth', 1.);
-addaxislabel(2,'Throttle (%)');
+plot(time2, v2,'Color','k')
+title('Velocity (m/s)')
 
-% addaxis(time,mfuel,'-.','color','k', 'linewidth', 1.);
-% addaxislabel(3,'Fuel Mass (kg)');
-
-addaxis(time2,rad2deg(eta2),':','color','k', 'linewidth', 1.2);
-addaxislabel(3,'Bank Angle (Deg)');
-
-addaxis(time2,flapdeflection2,'-.','color','k', 'linewidth', 1.2);
-addaxislabel(4,'Flap Deflection (Deg)');
-legend(  'Angle of Attack', 'Throttle' , 'Bank Angle','FlapDeflection');
-
-
-figure('units','normalized','outerposition',[0.1 0.1 .7 .5])
+subplot(6,2,3)
 hold on
-% subplot(3,1,3)
-plot(time2,M2,'-','color','k', 'linewidth', 1.);
-ylabel('Mach no.')
-xlabel('time (s)')
+xlim([time2(1) time2(end)]);
+plot(time2, M2,'Color','k')
+title('Mach no')
 
-addaxis(time2,Isp2,'--','color','k', 'linewidth', 1.);
-addaxislabel(2,'Specific Impulse (s)');
+subplot(6,2,4)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, q2/1000,'Color','k')
+title('Dynamic Pressure (kpa)')
 
-addaxis(time2,q2,':','color','k', 'linewidth', 1.2);
-addaxislabel(3,'Dynamic Pressure (kPa)');
+subplot(6,2,5)
+xlim([time2(1) time2(end)]);
+hold on
+plot(time2, rad2deg(gamma2),'Color','k')
+title('Trajectory Angle (Deg)')
 
-% addaxis(time,L./D,':','color','k', 'linewidth', 1.);
-% addaxislabel(4,'L/D');
+subplot(6,2,6)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, rad2deg(Alpha2),'Color','k')
+title('Angle of Attack (deg)')
 
-legend(  'Mach no.', 'Isp (potential)', 'q' );
+subplot(6,2,7)
+xlim([time2(1) time2(end)]);
+ylim([rad2deg(min(eta2))-1 rad2deg(max(eta2))+1])
+hold on
+plot(time2, rad2deg(eta2),'Color','k')
+title('Bank Angle (deg)')
 
+subplot(6,2,8)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, flapdeflection2,'Color','k')
+title('Flap Deflection (deg)')
+
+subplot(6,2,9)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, T2/1000,'Color','k')
+title('Thrust (kN)')
+
+subplot(6,2,10)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, Isp2,'Color','k')
+title('Potential Isp (s)')
+
+subplot(6,2,11)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, mFuel2,'Color','k')
+title('Fuel Mass (kg)')
+xlabel('Time (s)');
+
+subplot(6,2,12)
+hold on
+xlim([time2(1) time2(end)]);
+plot(time2, throttle2,'Color','k')
+title('Throttle')
+xlabel('Time (s)');
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % FORWARD SIMULATION
@@ -973,7 +1055,7 @@ for i = 1:length(lambda2)-1
     H2(i) = lambda2(i+1,:)*phaseout_test(2).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
 end
 
-figure(221)
+figure(2410)
 hold on
 plot(time(1:end-1),H1)
 plot(time2(1:end-1),H2)
@@ -984,7 +1066,7 @@ legend('Ascent','Return')
 % Check Primal Feasibility
 % Check calculated derivatives with the numerical derivative of each
 % porimal, scaled by that primal
-figure(220)
+figure(2420)
 hold on
 for i = 1:length(output.result.solution.phase(1).state(1,:))
 plot(time,([diff(output.result.solution.phase(1).state(:,i))./diff(output.result.solution.phase(1).time); 0] - phaseout_test(1).dynamics(:,i))./output.result.solution.phase(1).state(:,i),'--');
@@ -1101,32 +1183,78 @@ hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
 
+% 
+% figure(311)
+%     addpath('addaxis')
+%     hold on
+% 
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [alt3; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q3;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(aoa3);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
+%     ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
+%     
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[v3;v3exo.'], [0 7000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[ m3;mexo.';mexo(end)],2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
+%     addaxislabel(2,'Velocity (m/s), Mass (kg)');
+% 
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [rad2deg(gamma3);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
+%     addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
+% 
+%     legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
+%     xlabel('Time (s)');
+%     xlim([0 timeexo(end)+time3(end)-time3(1)])
+%     box off
+%     % Write data to file
 
-figure(301)
-    addpath('addaxis')
+
+figure(311)
+    fig = gcf;
+set(fig,'Position',[200 0 850 800])
     hold on
-
-    plot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [alt3; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
-    plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q3;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
-    plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(aoa3);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
-    ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
     
+    subplot(4,2,1)
+    hold on
+    title('Altitude (km');
+    plot([time3; timeexo.'+time3(end)], [alt3; altexo.']/1000,'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,2)
+    hold on
+    title('Dynamic Pressure (kPa');
+    plot([time3; timeexo.'+time3(end)],[q3;qexo.';qexo(end)]/1000,'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,3)
+    hold on
+    title('Angle of Attack (deg)');
+    plot([time3; timeexo.'+time3(end)],[rad2deg(aoa3);0*ones(length(timeexo),1)],'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,4)
+    hold on
+    title('Velocity (m/s)');
+    plot([time3; timeexo.'+time3(end)],[v3;v3exo.'],'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,5)
+    hold on
+    title('Mass (kg');
+    plot([time3; timeexo.'+time3(end)],[ m3;mexo.';mexo(end)],'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,6)
+    hold on
+    title('Thrust Vector Angle (deg)');
+    plot([time3; timeexo.'+time3(end)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)],'Color','k')
+    xlim([time3(1) timeexo(end)+time3(end)])
+    subplot(4,2,7)
+    hold on
+    title('Trajectory Angle (deg)');
+    plot([time3; timeexo.'+time3(end)], [rad2deg(gamma3);rad2deg(gammaexo).'],'Color','k')
 
-    addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[v3;v3exo.'], [0 7000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
-    addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[ m3;mexo.';mexo(end)],2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
-    addaxislabel(2,'Velocity (m/s), Mass (kg)');
-
-
-    addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
-    addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [rad2deg(gamma3);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
-    addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
-
-    legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
     xlabel('Time (s)');
-    xlim([0 timeexo(end)+time3(end)-time3(1)])
-    box off
+    xlim([time3(1) timeexo(end)+time3(end)])
+
+    
     % Write data to file
-   
     dlmwrite('SThirdStageData',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg) ' 'dynamic pressure (Pa)' 'trajectory angle (rad) ' 'Lift (N)' 'Drag (N)' 'heading angle (rad) ' 'latitude (rad) ' 'angle of attack (rad) '],'');
     dlmwrite('ThirdStageData',[[time3; timeexo'], [alt3; altexo'], [v3; v3exo'], [m3; mexo'; mexo(end)],[q3; qexo'; qexo(end)] ,[gamma3; gammaexo'],[L3; Lexo'; Lexo(end)],[D3; Dexo'; Dexo(end)] ,[zeta3; zetaexo'], [phi3; phiexo'], [aoa3; zeros(length(timeexo),1)]],'-append','delimiter',' ')
 copyfile('ThirdStageData',sprintf('../ArchivedResults/%s/ThirdStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
@@ -1134,15 +1262,13 @@ copyfile('ThirdStageData',sprintf('../ArchivedResults/%s/ThirdStage_%s',strcat(T
 
 %% SAVE FIGS
 
-saveas(figure(301),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'ThirdStage.fig']);
-print(figure(301),'ThirdStage','-dpng');
+saveas(figure(311),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'ThirdStage.fig']);
+print(figure(311),'ThirdStage','-dpng');
 movefile('ThirdStage.png',sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))));
-saveas(figure(201),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'SecondStage.fig']);
-saveas(figure(1),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return1.fig']);    
-saveas(figure(2),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return2.fig']);
-saveas(figure(3),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return3.fig']);
-saveas(figure(221),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Hamiltonian.fig']);
-saveas(figure(220),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Validation.fig']);
+saveas(figure(211),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'SecondStage.fig']);
+saveas(figure(221),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return.fig']);    
+saveas(figure(2410),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Hamiltonian.fig']);
+saveas(figure(2420),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Validation.fig']);
 saveas(figure(212),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Forward1.fig']);
 saveas(figure(213),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Forward2.fig']);
 % saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
@@ -1180,20 +1306,20 @@ copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/FirstStage_%s',strcat
 
 %% Create Easy Latex Inputs
 
-strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}');
-strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(1)/1000,2),'%.2f') , '}');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}'), 'delimiter','','newline', 'pc')
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(1)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc')
 
-strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}'), '-append','delimiter','','newline', 'pc');
 
-strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(end)/1000,2),'%.2f') , '}');
-strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v(end),0)) , '}');
-strcat('\newcommand{\23SeparationqMode', num2str(mode) ,'}{ ', num2str(round(q1(end)/1000,1),'%.1f') , '}');
-strcat('\newcommand{\23SeparationLDMode', num2str(mode) ,'}{ ', num2str(round(L1(end)/Fd1(end),1),'%.1f') , '}');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(end)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v(end),0)) , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationqMode', num2str(mode) ,'}{ ', num2str(round(q1(end)/1000,1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationLDMode', num2str(mode) ,'}{ ', num2str(round(L1(end)/Fd1(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
 
-strcat('\newcommand{\2FlightTimeMode', num2str(mode) ,'}{ ', num2str(round(time(end),1),'%.1f') , '}');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\2FlightTimeMode', num2str(mode) ,'}{ ', num2str(round(time(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
 
 qlt20 = find(q3<20000);
-strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
 
 
 

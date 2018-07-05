@@ -1,16 +1,16 @@
+function FirstStageOutput = FirstStageMain(hf,gammaf,phif,zetaf,mode,Timestamp)
+% clear all; clc
 
-clear all; clc
-
-hf = 25000
-gammaf = 0
-phif = -0.4
-zetaf = deg2rad(70)
-
-const = 1
+% hf = 25000
+% gammaf = 0
+% phif = -0.4
+% zetaf = deg2rad(70)
+% 
+% mode = 1
 
 
 
-auxdata.Throttle = 0.85; % throttle the Merlin engine down by a constant value, to enable easier pitchover
+auxdata.Throttle = 0.85; % throttle the Merlin engine down by a modeant value, to enable easier pitchover
 
 % Aerodynamics File Path
 Aero = dlmread('FirstStageAeroCoeffs.txt');
@@ -21,7 +21,7 @@ Aero = dlmread('FirstStageAeroCoeffs.txt');
 
 mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
 mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*(mRocket-mEngine) + mEngine; % structural mass fraction calculated without engine
+mFuel = 0.939*(mRocket-mEngine); % structural mass fraction calculated without engine
 mSpartan = 9819.11;
 
 % Thrust and Isp are modified with altitude through the formula:
@@ -75,7 +75,7 @@ mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
 alpha0 = 0; %Set initial angle of attack to 0
 
-if const == 32
+if mode == 32
     vf = 1596;
 else
 vf = 1520;
@@ -168,11 +168,11 @@ guess.phase.control = [0; 0];
 %-------------------------------------------------------------------------%
 
 setup.mesh.method       = 'hp-LiuRao-Legendre';
-setup.mesh.maxiterations = 4;
+setup.mesh.maxiterations = 5;
 setup.mesh.colpointsmin = 3;
 setup.mesh.colpointsmax = 50;
 
-setup.nlp.ipoptoptions.maxiterations = 300;
+setup.nlp.ipoptoptions.maxiterations = 500;
 
 
 setup.name = 'Goddard-Rocket-Problem';
@@ -289,28 +289,7 @@ legend('Trajectory Angle (degrees/100)','Velocity (m/s / 1000)','Altitude (km /1
 xlabel('Time (s)')
 xlim([0,t(end)+t_prepitch(end)]);
 
-% mu_1 = dual.states(1,:);
-% mu_2 = dual.states(2,:);
-% mu_3 = dual.states(3,:);
-% mu_4 = dual.states(4,:);
-% mu_5 = dual.states(5,:);
-% 
-% mu_u = dual.controls; % NOTE: This deviates from 0, as the controls are set as a buffer. Do not set a parameter directly tied to the vehicle model as the control.
-% 
-% %GRADIENT NORMALITY CONDITION
-% 
-% % Lagrangian of the Hamiltonian 
-% dLHdu = dual.dynamics(3,:) + mu_u; % 
+saveas(figure(201),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'FirstStage.fig']);
 
-% figure(102)
-% 
-% plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_5,t,mu_u);
-% legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');
-% title('Validation')
-
-
-% states_end = [t_prepitch.' t+t_prepitch(end) ; y.' primal.states];
-
-
-
+FirstStageOutput = output;
 
