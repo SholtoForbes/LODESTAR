@@ -1126,12 +1126,11 @@ figure(301)
     xlim([0 timeexo(end)+time3(end)-time3(1)])
     box off
     % Write data to file
-   
-    dlmwrite('SThirdStageData',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg) ' 'dynamic pressure (Pa)' 'trajectory angle (rad) ' 'Lift (N)' 'Drag (N)' 'heading angle (rad) ' 'latitude (rad) ' 'angle of attack (rad) '],'');
-    dlmwrite('ThirdStageData',[[time3; timeexo'], [alt3; altexo'], [v3; v3exo'], [m3; mexo'; mexo(end)],[q3; qexo'; qexo(end)] ,[gamma3; gammaexo'],[L3; Lexo'; Lexo(end)],[D3; Dexo'; Dexo(end)] ,[zeta3; zetaexo'], [phi3; phiexo'], [aoa3; zeros(length(timeexo),1)]],'-append','delimiter',' ')
+    
+    dlmwrite('ThirdStageData',[[time3; timeexo'], [alt3; altexo'], [v3; v3exo'], [m3; mexo'],[q3; qexo'] ,[gamma3; gammaexo'],[L3; Lexo'],[D3; Dexo'] ,[zeta3; zetaexo'], [phi3; phiexo]], ' ')
 copyfile('ThirdStageData',sprintf('../ArchivedResults/%s/ThirdStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
 
-
+    
 %% SAVE FIGS
 
 saveas(figure(301),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'ThirdStage.fig']);
@@ -1165,13 +1164,6 @@ alpha1 = FirstStageOutput.result.solution.phase.state(:,5).';
 zeta1 = FirstStageOutput.result.solution.phase.state(:,6).';
 phi1 = FirstStageOutput.result.solution.phase.state(:,8).';
 
-mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
-mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*(mRocket-mEngine); % Maximum fuel, structural mass fraction calculated without engine
-mSpartan = 9819.11;
-
-FirstStageSMF = (mRocket - mFuel)/(m1(1) - mSpartan);
-
 FirstStageStates = [t1' alt1' v1' m1' gamma1' alpha1' zeta1' phi1'];
 
 dlmwrite('FirstStageStates',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg)' 'trajectory angle (rad) ' 'angle of attack (rad) ' 'heading angle (rad) ' 'latitude (rad)'],'');
@@ -1183,7 +1175,7 @@ copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/FirstStage_%s',strcat
 strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}');
 strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(1)/1000,2),'%.2f') , '}');
 
-strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}');
+strcat('\newcommand{\FirstStagesmfMode', num2str(mode) ,'}{ ', num2str(round(FirstStagemf,3),'%.3f') , '}');
 
 strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(end)/1000,2),'%.2f') , '}');
 strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v(end),0)) , '}');

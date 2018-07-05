@@ -811,7 +811,7 @@ xlabel('Time (s)');
 SecondStageStates = [[time time2]' [alt alt2]' [lon lon2]' [lat lat2]' [v v2]' [gamma gamma2]' [zeta zeta2]' [Alpha Alpha2]' [eta eta2]' [mFuel mFuel2]'];
 dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
 dlmwrite('SecondStageStates',SecondStageStates,'-append','delimiter',' ');
-copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
+copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',Timestamp,Timestamp))
 
 
 
@@ -1078,15 +1078,15 @@ time3 = output.result.solution.phase(3).time;
 % [f_t, f_y] = ode45(@(f_t,f_y) ForwardSim(f_y,AlphaInterp(t,Alpha,f_t),communicator,communicator_trim,SPARTAN_SCALE,Atmosphere,mode,scattered),t,forward0);
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModel3_forward(f_t, f_y,auxdata,ControlInterp(time3,aoa3,f_t),ControlInterp(time3,aoadot3,f_t)),time3(1:end),forward0);
 
-[rdot3,xidot3,phidot3,gammadot3,vdot3,zetadot3, mdot3, Vec_angle3, AoA_max3, T3, L3, D3, q3] = ThirdStageDyn(alt3,gamma3,v3,m3,aoa3,time3,auxdata,aoadot3,phi3,zeta3);
+[rdot,xidot,phidot,gammadot,vdot,zetadot, mdot, Vec_angle, AoA_max, T, L, D, q] = ThirdStageDyn(alt3,gamma3,v3,m3,aoa3,time3,auxdata,aoadot3,phi3,zeta3);
 
 
-xi3(1) = lon(end);
+xi(1) = lon(end);
 for i = 2:length(time3)
-    xi3(i) = xi3(i-1) + xidot3(i-1)*(time3(i)-time3(i-1));
+    xi(i) = xi(i-1) + xidot(i-1)*(time3(i)-time3(i-1));
 end
 
-[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,incexo,Texo,CLexo,Lexo,incdiffexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi3(end), zeta3(end), m3(end), auxdata);
+[AltF_actual, v3F, altexo, v3exo, timeexo, mpayload, Alpha3, mexo,qexo,gammaexo,Dexo,zetaexo,phiexo,incexo,Texo,CLexo,Lexo,incdiffexo] = ThirdStageSim(alt3(end),gamma3(end),v3(end), phi3(end),xi(end), zeta3(end), m3(end), auxdata);
 
 
 
@@ -1107,7 +1107,7 @@ figure(301)
     hold on
 
     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [alt3; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
-    plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q3;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+    plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(aoa3);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
     ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
     
@@ -1117,7 +1117,7 @@ figure(301)
     addaxislabel(2,'Velocity (m/s), Mass (kg)');
 
 
-    addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+    addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [rad2deg(gamma3);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
     addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
 
@@ -1126,74 +1126,52 @@ figure(301)
     xlim([0 timeexo(end)+time3(end)-time3(1)])
     box off
     % Write data to file
-   
-    dlmwrite('SThirdStageData',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg) ' 'dynamic pressure (Pa)' 'trajectory angle (rad) ' 'Lift (N)' 'Drag (N)' 'heading angle (rad) ' 'latitude (rad) ' 'angle of attack (rad) '],'');
-    dlmwrite('ThirdStageData',[[time3; timeexo'], [alt3; altexo'], [v3; v3exo'], [m3; mexo'; mexo(end)],[q3; qexo'; qexo(end)] ,[gamma3; gammaexo'],[L3; Lexo'; Lexo(end)],[D3; Dexo'; Dexo(end)] ,[zeta3; zetaexo'], [phi3; phiexo'], [aoa3; zeros(length(timeexo),1)]],'-append','delimiter',' ')
-copyfile('ThirdStageData',sprintf('../ArchivedResults/%s/ThirdStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
+    dlmwrite('ThirdStageData',[time3, alt3, v3, m3,q ,gamma3,D ,zeta3], ' ')
 
-
+    
 %% SAVE FIGS
 
-saveas(figure(301),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'ThirdStage.fig']);
+saveas(figure(301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ThirdStage.fig']);
 print(figure(301),'ThirdStage','-dpng');
-movefile('ThirdStage.png',sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))));
-saveas(figure(201),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'SecondStage.fig']);
-saveas(figure(1),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return1.fig']);    
-saveas(figure(2),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return2.fig']);
-saveas(figure(3),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Return3.fig']);
-saveas(figure(221),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Hamiltonian.fig']);
-saveas(figure(220),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Validation.fig']);
-saveas(figure(212),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Forward1.fig']);
-saveas(figure(213),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'Forward2.fig']);
+movefile('ThirdStage.png',sprintf('../ArchivedResults/%s',Timestamp));
+saveas(figure(201),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'SecondStage.fig']);
+saveas(figure(1),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return1.fig']);    
+saveas(figure(2),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return2.fig']);
+saveas(figure(3),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Return3.fig']);
+saveas(figure(221),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Hamiltonian.fig']);
+saveas(figure(220),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Validation.fig']);
+saveas(figure(212),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward1.fig']);
+saveas(figure(213),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'Forward2.fig']);
 % saveas(figure(2100),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'eq.fig']);
 % saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
-saveas(figure(2301),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'GroundTrack.fig']);
+saveas(figure(2301),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'GroundTrack.fig']);
+
+
 
 
 %% Run First Stage =========================================================
-addpath('..\..\FirstStage-GPOPS')
-
-[FirstStageOutput] = FirstStageMain(alt(1),gamma(1),lat(1),zeta(1),mode,Timestamp);
-
-t1 = FirstStageOutput.result.solution.phase.time.';
-
-alt1 = FirstStageOutput.result.solution.phase.state(:,1).';
-v1 = FirstStageOutput.result.solution.phase.state(:,2).';
-m1 = FirstStageOutput.result.solution.phase.state(:,3).';
-gamma1 = FirstStageOutput.result.solution.phase.state(:,4).';
-alpha1 = FirstStageOutput.result.solution.phase.state(:,5).';
-zeta1 = FirstStageOutput.result.solution.phase.state(:,6).';
-phi1 = FirstStageOutput.result.solution.phase.state(:,8).';
-
-mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
-mEngine = 470; % Mass of Merlin 1C
-mFuel = 0.939*(mRocket-mEngine); % Maximum fuel, structural mass fraction calculated without engine
-mSpartan = 9819.11;
-
-FirstStageSMF = (mRocket - mFuel)/(m1(1) - mSpartan);
-
-FirstStageStates = [t1' alt1' v1' m1' gamma1' alpha1' zeta1' phi1'];
-
-dlmwrite('FirstStageStates',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg)' 'trajectory angle (rad) ' 'angle of attack (rad) ' 'heading angle (rad) ' 'latitude (rad)'],'');
-dlmwrite('FirstStageStates',FirstStageStates,'-append','delimiter',' ');
-copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/FirstStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
-
+% const_firststage = 1;
+% addpath('../../FirstStage')
+% % addpath('../../DIDO_7.3.7')
+% % run startup.m
+% [FirstStageStates] = FirstStageProblem(alt(1),gamma(1),lat(1),zeta(1),const_firststage);
+% % cd('../SecondStage/Combined - 2nd Stage Ascent and Return')
+% dlmwrite('FirstStageStates', FirstStageStates);
+% copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/firststage_%s',Timestamp,Timestamp))
+% % Latitude Plot
+% figure(250)
+% plot(FirstStageStates(:,9))
+% plot(phi)
+% plot(ThirdStagePhi)
+% title('Latitude')
+% 
+% saveas(figure(101),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'FirstStage.fig']);
 %% Create Easy Latex Inputs
 
-strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}');
-strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(1)/1000,2),'%.2f') , '}');
+strcat('\newcommand{\PayloadToOrbit', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1)) , '}');
+strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(SecondStageStates(1,2)/1000,2)) , '}');
 
-strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}');
 
-strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt(end)/1000,2),'%.2f') , '}');
-strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v(end),0)) , '}');
-strcat('\newcommand{\23SeparationqMode', num2str(mode) ,'}{ ', num2str(round(q1(end)/1000,1),'%.1f') , '}');
-strcat('\newcommand{\23SeparationLDMode', num2str(mode) ,'}{ ', num2str(round(L1(end)/Fd1(end),1),'%.1f') , '}');
-
-strcat('\newcommand{\2FlightTimeMode', num2str(mode) ,'}{ ', num2str(round(time(end),1),'%.1f') , '}');
-
-qlt20 = find(q3<20000);
-strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}');
 
 
 

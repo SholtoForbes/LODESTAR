@@ -12,7 +12,7 @@ alt1F  = input.phase(1).finalstate(1);
 v1F    = input.phase(1).finalstate(4);
 gamma1F  = input.phase(1).finalstate(5);
 
-const = input.auxdata.const;
+% const = input.auxdata.const;
 
 
 %%
