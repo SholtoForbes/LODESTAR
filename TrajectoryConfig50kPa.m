@@ -58,7 +58,7 @@ Stage2.Bounds.v         = [1500, 3100]; % Velocity Bounds, m/s
 Stage2.Bounds.gamma     = [-0.01, deg2rad(6)]; % Trajectory Angle Bounds, rad
 Stage2.Bounds.mFuel     = [0, Stage2.mFuel]; % Fuel Mass Bounds, kg
 Stage2.Bounds.gammadot  = [-0.001, 0.002]; % Trajectory Angle Derivative Bounds, rad/s
-Stage2.Bounds.zeta      = [1, 2]; % Heading Angle Bounds, rad
+Stage2.Bounds.zeta      = [-pi, 2*pi]; % Heading Angle Bounds, rad
 Stage2.Bounds.control   = [-0.00003, 0.0002]; % (Control) Trajectory Angle Double-Derivative Bounds, rad/s^2
 Stage2.Bounds.time      = [100, 800]; % Time Bounds, s
 

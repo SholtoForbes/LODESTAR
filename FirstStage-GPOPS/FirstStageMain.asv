@@ -8,7 +8,7 @@ function FirstStageOutput = FirstStageMain(hf,gammaf,phif,zetaf,mode,Timestamp)
 % 
 % mode = 1
 
-zetaf
+
 
 auxdata.Throttle = 0.85; % throttle the Merlin engine down by a modeant value, to enable easier pitchover
 
@@ -95,7 +95,7 @@ mUpp = mTotal;
 phiL = -0.5;
 phiU = -0.2;
 
-zetaMin = -2*pi;
+zetaMin = 0;
 zetaMax = 2*pi;
 
 alphaMin = -deg2rad(5);
@@ -196,6 +196,10 @@ setup.method = 'RPM-Differentiation';
 output = gpops2(setup);
 
 
+
+
+
+
 %============================================================================
 
 t = output.result.solution.phase.time.';
@@ -270,50 +274,42 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0, 0];
 
 
 figure(111);
-hold on
-title('First Stage Trajectory');
     fig = gcf;
 set(fig,'Position',[200 0 850 600])
 subplot(4,2,1)
 hold on
-title('Trajectory Angle (deg)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [rad2deg(y(:,4).') rad2deg(gamma)],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [rad2deg(y(:,4).')/100 rad2deg(gamma)/100],'color','k');
 subplot(4,2,2)
 hold on
-title('Velocity (m/s)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [y(:,2).' v],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [y(:,2).'/1000 v/1000],'color','k');
 subplot(4,2,3)
 hold on
-title('Altitude (km)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [y(:,1).'/1000 V/1000],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [y(:,1).'/10000 V/10000],'color','k');
 subplot(4,2,4)
 hold on
-title('Angle of Attack (deg)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha)],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha)/10],'color','k');
 subplot(4,2,5)
 hold on
-title('Mass (kg)');
 xlim([0 t(end)+t_prepitch(end)]);
 plot([t_prepitch.' t+t_prepitch(end)], [y(:,3).' m],'color','k');
 subplot(4,2,6)
 hold on
-title('Heading Angle (deg)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [rad2deg(y(:,6).') rad2deg(zeta)],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [y(:,6).' zeta],'color','k');
 subplot(4,2,7)
 hold on
-title('Latitude (deg)');
 xlim([0 t(end)+t_prepitch(end)]);
-plot([t_prepitch.' t+t_prepitch(end)], [rad2deg(phi(1)+y(:,8).') rad2deg(phi)],'color','k');
+plot([t_prepitch.' t+t_prepitch(end)], [y(:,8).' phi],'color','k');
 
 % plot([primal.nodes], [rad2deg(gamma)/100],'color','k','linestyle','-');
 % plot([primal.nodes], [v/1000],'color','k','linestyle','--');
 % plot([primal.nodes], [V/10000],'color','k','linestyle',':');
 % plot([primal.nodes], [rad2deg(alpha)/10],'color','k','linestyle','-.')
+
 xlabel('Time (s)')
 xlim([0,t(end)+t_prepitch(end)]);
 
