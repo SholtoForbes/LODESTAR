@@ -9,5 +9,5 @@ x0 = input.phase.initialstate;
 xf = input.phase.finalstate;
 
 % Objective Function
-output.objective = x0(3);
-
+% output.objective = x0(3);
+output.objective = -xf(2);
