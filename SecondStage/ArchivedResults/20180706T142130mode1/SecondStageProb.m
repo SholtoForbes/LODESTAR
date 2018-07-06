@@ -189,8 +189,7 @@ guess.phase(1).state(:,4) = [gamma0; 0];
 guess.phase(1).state(:,5) = [alpha0; 0];
 guess.phase(1).state(:,6) = [0; 0];
 guess.phase(1).state(:,7) = [0; 0];
-guess.phase(1).state(:,8) = [lat0; lat0];
-guess.phase(1).state(:,9) = [lon0; lon0];
+guess.phase(1).state(:,8) = [0; 0];
 
 guess.phase(1).control = [0; 0];
 
@@ -624,8 +623,8 @@ guess.phase(2).control      = [[0;0],[0;0]];
 guess.phase(2).time          = [0;650];
 
 % Tie stages together
-bounds.eventgroup(2).lower = [zeros(1,9)];
-bounds.eventgroup(2).upper = [zeros(1,9)]; 
+bounds.eventgroup(2).lower = [zeros(1,10)];
+bounds.eventgroup(2).upper = [zeros(1,10)]; 
 
 %% Flyback
 tfMin = 0;            tfMax = 5000;
@@ -672,8 +671,8 @@ bounds.phase(3).control.upper = [deg2rad(.2), deg2rad(5), 1];
 bounds.phase(3).path.lower = 0;
 bounds.phase(3).path.upper = 50000;
 
-bounds.eventgroup(3).lower = [0]; % Constrain final latitude and longitude, with variable first stage approximation
-bounds.eventgroup(3).upper = [0]; 
+% bounds.eventgroup(3).lower = []; % Constrain final latitude and longitude, with variable first stage approximation
+% bounds.eventgroup(3).upper = []; 
 
 % Guess
 tGuess              = [440; 1500];
@@ -1397,12 +1396,12 @@ phaseout_test = CombinedContinuous(input_test);
 
 lambda1 = output.result.solution.phase(2).costate;
 for i = 1:length(lambda1)-1
-    H1(i) = lambda1(i+1,:)*phaseout_test(2).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
+    H1(i) = lambda1(i+1,:)*phaseout_test(1).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
 end
 
 lambda2 = output.result.solution.phase(3).costate;
 for i = 1:length(lambda2)-1
-    H2(i) = lambda2(i+1,:)*phaseout_test(3).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
+    H2(i) = lambda2(i+1,:)*phaseout_test(2).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
 end
 
 figure(2410)
@@ -1419,13 +1418,13 @@ legend('Ascent','Return')
 figure(2420)
 hold on
 for i = 1:length(output.result.solution.phase(2).state(1,:))
-plot(time21,([diff(output.result.solution.phase(2).state(:,i))./diff(output.result.solution.phase(2).time); 0] - phaseout_test(2).dynamics(:,i))./output.result.solution.phase(2).state(:,i),'--');
+plot(time21,([diff(output.result.solution.phase(2).state(:,i))./diff(output.result.solution.phase(2).time); 0] - phaseout_test(1).dynamics(:,i))./output.result.solution.phase(2).state(:,i),'--');
 end
 for i = 1:length(output.result.solution.phase(3).state(1,:))
     if i<= 7 % Plot different line styles when no. of colours exceeded
-    plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i));
+    plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(2).dynamics(:,i))./output.result.solution.phase(3).state(:,i));
     else
-    plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i),':');
+    plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(2).dynamics(:,i))./output.result.solution.phase(3).state(:,i),':');
     end
 end
 xlabel('Time (s)')
@@ -1626,137 +1625,35 @@ saveas(figure(213),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2
 % saveas(figure(2110),[sprintf('../ArchivedResults/%s',Timestamp),filesep,'ISP.fig']);
 saveas(figure(2301),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'GroundTrack.fig']);
 
-% 
-%% First Stage =========================================================
 
-t1 = output.result.solution.phase(1).time.';
-% 
-alt1 = output.result.solution.phase(1).state(:,1).';
-v1 = output.result.solution.phase(1).state(:,2).';
-m1 = output.result.solution.phase(1).state(:,3).';
-gamma1 = output.result.solution.phase(1).state(:,4).';
-alpha1 = output.result.solution.phase(1).state(:,5).';
-zeta1 = output.result.solution.phase(1).state(:,6).';
-phi1 = output.result.solution.phase(1).state(:,8).';
-xi1 = output.result.solution.phase(1).state(:,9).';
-% 
+%% Run First Stage =========================================================
+addpath('..\..\FirstStage-GPOPS')
 
-% 
-FirstStageSMF = (mRocket - mFuel)/(m1(1) - mSpartan);
-% 
+[FirstStageOutput] = FirstStageMain(alt21(1),gamma21(1),lat21(1),zeta21(1),mode,Timestamp);
 
-FirstStageStates = [t1' alt1' v1' m1' gamma1' alpha1' zeta1' phi1' xi1'];
+t1 = FirstStageOutput.result.solution.phase.time.';
+
+alt1 = FirstStageOutput.result.solution.phase.state(:,1).';
+v1 = FirstStageOutput.result.solution.phase.state(:,2).';
+m1 = FirstStageOutput.result.solution.phase.state(:,3).';
+gamma1 = FirstStageOutput.result.solution.phase.state(:,4).';
+alpha1 = FirstStageOutput.result.solution.phase.state(:,5).';
+zeta1 = FirstStageOutput.result.solution.phase.state(:,6).';
+phi1 = FirstStageOutput.result.solution.phase.state(:,8).';
+
+% mRocket =21816 % total mass of scaled Falcon, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
+mRocket =20692; % total mass of scaled Falcon at 9.5m, note, this will not be the final total mass. Calculated using the method outlined in SIZING.docx
+mEngine = 470; % Mass of Merlin 1C
+mFuel1 = 0.939*(mRocket-mEngine); % Maximum fuel, structural mass fraction calculated without engine
+mSpartan = 9819.11;
+
+FirstStageSMF = (mRocket - mFuel1)/(m1(1) - mSpartan);
+
+FirstStageStates = [t1' alt1' v1' m1' gamma1' alpha1' zeta1' phi1'];
 
 dlmwrite('FirstStageStates',['time (s) ' 'altitude (m) ' 'velocity (m/s) ' 'mass (kg)' 'trajectory angle (rad) ' 'angle of attack (rad) ' 'heading angle (rad) ' 'latitude (rad)'],'');
 dlmwrite('FirstStageStates',FirstStageStates,'-append','delimiter',' ');
 copyfile('FirstStageStates',sprintf('../ArchivedResults/%s/FirstStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
-
-
-% Iterative Prepitch Determination ========================================
-%This back determines the mass and launch altitude necessary to get to
-%100m, 30m/s at the PS method determined fuel mass
-
-
-interp = auxdata.interp;
-Throttle = auxdata.Throttle;
-Vehicle = auxdata.Vehicle;
-Atmosphere = auxdata.Atmosphere;
-
-% ntoe that launch altitude does vary, but it should only be slightly
-controls = fminunc(@(controls) prepitch(controls,m1(1),interp,Throttle,Vehicle,Atmosphere),[10,6]);
-
-
-h_launch = controls(1)
-t_prepitch = controls(2)
-Isp1 = Vehicle.Isp.SL;
-T1 = Vehicle.T.SL;
-dm1 = -T1./Isp1./9.81;
-m0_prepitch = m1(1) - dm1*t_prepitch;
-
-
-
-%% Forward Integrator
- phase = 'postpitch';
-tspan = t1; 
-% postpitch0_f = [y(end,1) y(end,2) y(end,3) deg2rad(89.9) phi(1) zeta(1)]; % set mass
-postpitch0_f = [h0 v0 m1(1) deg2rad(89.9) phi1(1) zeta1(1)];
-
-[t_postpitch_f, postpitch_f] = ode45(@(t_f,postpitch_f) rocketDynamicsForward(postpitch_f,ControlFunction(t_f,t1,zeta1),ControlFunction(t_f,t1,alpha1),phase,interp,Throttle,Vehicle,Atmosphere), tspan, postpitch0_f);
-
-figure(103)
-hold on
-plot(postpitch_f(:,1));
-plot(alt1);
-
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%                        Pre-Pitchover Simulation                         %
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-h0_prepitch = h_launch;  %Rocket starts on the ground
-v0_prepitch = 0;  %Rocket starts stationary
-gamma0_prepitch = deg2rad(90);
-
-phase = 'prepitch';
-tspan2 = [0 t_prepitch]; % time to fly before pitchover (ie. straight up)
-
-y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch, 0, 0, 0, 0, 0];
-
-% this performs a forward simulation before pitchover. The end results of
-% this are used as initial conditions for the optimiser. 
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,0,phase,interp,Throttle,Vehicle,Atmosphere), tspan2, y0);  
-
-
-figure(111);
-hold on
-title('First Stage Trajectory');
-    fig = gcf;
-set(fig,'Position',[200 0 850 600])
-subplot(4,2,1)
-hold on
-title('Trajectory Angle (deg)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [rad2deg(y(:,4).') rad2deg(gamma1)],'color','k');
-subplot(4,2,2)
-hold on
-title('Velocity (m/s)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [y(:,2).' v1],'color','k');
-subplot(4,2,3)
-hold on
-title('Altitude (km)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [y(:,1).'/1000 alt1/1000],'color','k');
-subplot(4,2,4)
-hold on
-title('Angle of Attack (deg)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [zeros(1,length(t_prepitch)) rad2deg(alpha1)],'color','k');
-subplot(4,2,5)
-hold on
-title('Mass (kg)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [y(:,3).' m1],'color','k');
-subplot(4,2,6)
-hold on
-title('Heading Angle (deg)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [rad2deg(y(:,6).') rad2deg(zeta1)],'color','k');
-subplot(4,2,7)
-hold on
-title('Latitude (deg)');
-xlim([0 t1(end)+t_prepitch(end)]);
-plot([t_prepitch.' t1+t_prepitch(end)], [rad2deg(phi1(1)+y(:,8).') rad2deg(phi1)],'color','k');
-
-% plot([primal.nodes], [rad2deg(gamma)/100],'color','k','linestyle','-');
-% plot([primal.nodes], [v/1000],'color','k','linestyle','--');
-% plot([primal.nodes], [V/10000],'color','k','linestyle',':');
-% plot([primal.nodes], [rad2deg(alpha)/10],'color','k','linestyle','-.')
-xlabel('Time (s)')
-xlim([0,t1(end)+t_prepitch(end)]);
-
-saveas(figure(111),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))),filesep,'FirstStage.fig']);
-
-
 
 %% Create Easy Latex Inputs
 

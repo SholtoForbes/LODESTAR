@@ -1,96 +1,119 @@
 function phaseout = CombinedContinuous(input)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2D Dynamics
-alt1  = input.phase(1).state(:,1);
-lon1  = input.phase(1).state(:,2);
-lat1  = input.phase(1).state(:,3);
-v1    = input.phase(1).state(:,4);
-gamma1  = input.phase(1).state(:,5);
-zeta1  = input.phase(1).state(:,6);
-
-Alpha1  = input.phase(1).state(:,7);
-eta1  = input.phase(1).state(:,8);
-mFuel1  = input.phase(1).state(:,9);
-throttle1  = 1;
-
-aoadot1  = input.phase(1).control(:,1);
-bankdot1 = input.phase(1).control(:,2);
-
-% bank = 0*ones(length(aoa),1);
-% ---------------------------------------------------%
-% ------- Compute the Aerodynamic Quantities --------%
-% ---------------------------------------------------%
-
-time1 = input.phase(1).time;
+%% First Stage
 
 auxdata = input.auxdata;
 
-[altdot1,londot1,latdot1,fpadot1,vdot1,azidot1, q1, M, Fd, rho,L,Fueldt1,T3,Isp1,q1_aftershock] = VehicleModelCombined(gamma1, alt1, v1,auxdata,zeta1,lat1,lon1,Alpha1,eta1,throttle1, mFuel1,mFuel1(1),mFuel1(end), 1);
+t = input.phase(1).time';
+x = input.phase(1).state';
+u = input.phase(1).control';
 
-% ---------------------------------------------------%
-% ---- Evaluate Right-Hand Side of the Dynamics ---- %
-% ---------------------------------------------------%
+phase = 'postpitch';
 
-phaseout(1).dynamics  = [altdot1, londot1, latdot1, vdot1, fpadot1, azidot1, aoadot1, bankdot1, -Fueldt1];
-phaseout(1).path = q1;
-%%
+interp = auxdata.interp;
+Throttle = auxdata.Throttle;
+Vehicle = auxdata.Vehicle;
+Atmosphere = auxdata.Atmosphere;
 
-alt2  = input.phase(2).state(:,1);
-lon2  = input.phase(2).state(:,2);
-lat2  = input.phase(2).state(:,3);
-v2    = input.phase(2).state(:,4);
-fpa2  = input.phase(2).state(:,5);
-azi2  = input.phase(2).state(:,6);
+[dz1,q1,xi1] = rocketDynamics(x,u,t,phase,interp,Throttle,Vehicle,Atmosphere); % Pass primal variables into dynamics simulator
 
-aoa2  = input.phase(2).state(:,7);
-bank2  = input.phase(2).state(:,8);
-mFuel2  = input.phase(2).state(:,9);
-throttle2  = input.phase(2).state(:,10);
 
-aoadot2  = input.phase(2).control(:,1);
-bankdot2 = input.phase(2).control(:,2);
-throttledot2 = input.phase(2).control(:,3);
+phaseout(1).path = q1';
+
+
+phaseout(1).dynamics = dz1';
+
+
+
+%% Second Stage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+alt21  = input.phase(2).state(:,1);
+lon21  = input.phase(2).state(:,2);
+lat21  = input.phase(2).state(:,3);
+v21    = input.phase(2).state(:,4);
+gamma21  = input.phase(2).state(:,5);
+zeta21  = input.phase(2).state(:,6);
+
+Alpha21  = input.phase(2).state(:,7);
+eta21  = input.phase(2).state(:,8);
+mFuel21  = input.phase(2).state(:,9);
+throttle21  = 1;
+
+aoadot21  = input.phase(2).control(:,1);
+bankdot21 = input.phase(2).control(:,2);
 
 % ---------------------------------------------------%
 % ------- Compute the Aerodynamic Quantities --------%
 % ---------------------------------------------------%
 
-time2 = input.phase(1).time;
+time21 = input.phase(2).time;
 
-[altdot2,londot2,latdot2,fpadot2,vdot2,azidot2, q2, M, Fd, rho,L,Fueldt2,T3,Isp2,q2_aftershock] = VehicleModelCombined(fpa2, alt2, v2,auxdata,azi2,lat2,lon2,aoa2,bank2,throttle2, mFuel2,0,0,0);
+
+
+[altdot21,londot21,latdot21,fpadot21,vdot21,azidot21, q21, M, Fd, rho,L,Fueldt21,T3,Isp21,q21_aftershock] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,Alpha21,eta21,throttle21, mFuel21,mFuel21(1),mFuel21(end), 1);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
 % ---------------------------------------------------%
 
-phaseout(2).dynamics  = [altdot2, londot2, latdot2, vdot2, fpadot2, azidot2, aoadot2, bankdot2, -Fueldt2, throttledot2];
+phaseout(2).dynamics  = [altdot21, londot21, latdot21, vdot21, fpadot21, azidot21, aoadot21, bankdot21, -Fueldt21];
+phaseout(2).path = q21;
+%%
+
+alt22  = input.phase(3).state(:,1);
+lon22  = input.phase(3).state(:,2);
+lat22  = input.phase(3).state(:,3);
+v22    = input.phase(3).state(:,4);
+fpa22  = input.phase(3).state(:,5);
+azi22  = input.phase(3).state(:,6);
+
+aoa22  = input.phase(3).state(:,7);
+bank22  = input.phase(3).state(:,8);
+mFuel22  = input.phase(3).state(:,9);
+throttle22  = input.phase(3).state(:,10);
+
+aoadot22  = input.phase(3).control(:,1);
+bankdot22 = input.phase(3).control(:,2);
+throttledot22 = input.phase(3).control(:,3);
+
+% ---------------------------------------------------%
+% ------- Compute the Aerodynamic Quantities --------%
+% ---------------------------------------------------%
+
+time22 = input.phase(2).time;
+
+[altdot22,londot22,latdot22,fpadot22,vdot22,azidot22, q22, M, Fd, rho,L,Fueldt22,T22,Isp22,q22_aftershock] = VehicleModelCombined(fpa22, alt22, v22,auxdata,azi22,lat22,lon22,aoa22,bank22,throttle22, mFuel22,0,0,0);
+
+% ---------------------------------------------------%
+% ---- Evaluate Right-Hand Side of the Dynamics ---- %
+% ---------------------------------------------------%
+
+phaseout(3).dynamics  = [altdot22, londot22, latdot22, vdot22, fpadot22, azidot22, aoadot22, bankdot22, -Fueldt22, throttledot22];
 
 
-phaseout(2).path = q2;
+phaseout(3).path = q22;
 
 %% Third Stage
 
-alt3  = input.phase(3).state(:,1);
-v3    = input.phase(3).state(:,2);
-gamma3  = input.phase(3).state(:,3);
-m3    = input.phase(3).state(:,4);
-Alpha3    = input.phase(3).state(:,5);
-phi3    = input.phase(3).state(:,6);
-zeta3    = input.phase(3).state(:,7);
-time3 = input.phase(3).time;
+alt3  = input.phase(4).state(:,1);
+v3    = input.phase(4).state(:,2);
+gamma3  = input.phase(4).state(:,3);
+m3    = input.phase(4).state(:,4);
+Alpha3    = input.phase(4).state(:,5);
+phi3    = input.phase(4).state(:,6);
+zeta3    = input.phase(4).state(:,7);
+time3 = input.phase(4).time;
 
-Alphadot  = input.phase(3).control(:,1);
+Alphadot  = input.phase(4).control(:,1);
 
 auxdata=input.auxdata;
 
 [rdot3,xidot3,phidot3,gammadot3,vdot3,zetadot3, mdot3, Vec_angle3, AoA_max3, T3] = ThirdStageDyn(alt3,gamma3,v3,m3,Alpha3,time3,auxdata, Alphadot, phi3, zeta3);
 
-phaseout(3).dynamics  = [rdot3, vdot3, gammadot3, -mdot3*ones(length(rdot3),1), Alphadot, phidot3, zetadot3];
+phaseout(4).dynamics  = [rdot3, vdot3, gammadot3, -mdot3*ones(length(rdot3),1), Alphadot, phidot3, zetadot3];
 
 Alpha_constraint = Alpha3-AoA_max3;
 
-phaseout(3).path = [Vec_angle3,Alpha_constraint];
+phaseout(4).path = [Vec_angle3,Alpha_constraint];
 
 
 end
