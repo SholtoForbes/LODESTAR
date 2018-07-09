@@ -1,4 +1,4 @@
-function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1,flap_deflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,ThirdStage)
+function [altdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T,Isp,q1,flap_deflection,heating_rate] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,ThirdStage,forwardflag)
 
 interp = auxdata.interp;
 % =======================================================
@@ -60,8 +60,8 @@ P0 = ppval(interp.P0_spline, alt);
 % Cd = auxdata.interp.Cd_spline(mach,rad2deg(alpha));
 % Cl = auxdata.interp.Cl_spline(mach,rad2deg(alpha)); 
 
-if ThirdStage == 0
-    throttle(M<5.1) =   0; % remove throttle points below operable range on return flight
+if ThirdStage == 0 && forwardflag ==0;
+    throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
 end
 
 if ThirdStage == 1

@@ -49,7 +49,7 @@ time21 = input.phase(2).time;
 
 
 
-[altdot21,londot21,latdot21,fpadot21,vdot21,azidot21, q21, M, Fd, rho,L,Fueldt21,T3,Isp21,q21_aftershock] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,Alpha21,eta21,throttle21, mFuel21,mFuel21(1),mFuel21(end), 1);
+[altdot21,londot21,latdot21,fpadot21,vdot21,azidot21, q21, M, Fd, rho,L,Fueldt21,T3,Isp21,q21_aftershock] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,Alpha21,eta21,throttle21, mFuel21,mFuel21(1),mFuel21(end), 1, 0);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
@@ -81,7 +81,7 @@ throttledot22 = input.phase(3).control(:,3);
 
 time22 = input.phase(2).time;
 
-[altdot22,londot22,latdot22,fpadot22,vdot22,azidot22, q22, M, Fd, rho,L,Fueldt22,T22,Isp22,q22_aftershock] = VehicleModelCombined(fpa22, alt22, v22,auxdata,azi22,lat22,lon22,aoa22,bank22,throttle22, mFuel22,0,0,0);
+[altdot22,londot22,latdot22,fpadot22,vdot22,azidot22, q22, M, Fd, rho,L,Fueldt22,T22,Isp22,q22_aftershock] = VehicleModelCombined(fpa22, alt22, v22,auxdata,azi22,lat22,lon22,aoa22,bank22,throttle22, mFuel22,0,0,0, 0);
 
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %

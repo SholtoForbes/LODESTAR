@@ -85,7 +85,7 @@ mFuel = f_y(7);
 % 
 % v_H = v.*cos(gamma);
 
-[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,1);
+[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,mFuelinit,mFuelend,1,1);
 
 ydot = [rdot;gammadot;a;zetadot;phidot;xidot;-Fueldt];
 % =========================================================================

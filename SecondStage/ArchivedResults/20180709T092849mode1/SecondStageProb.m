@@ -20,6 +20,8 @@ clc
 mode = 1
 % auxdata.mode = mode;
 
+
+
 %% Misc Modifiers
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
@@ -49,6 +51,7 @@ mRocket =19569; % total mass of scaled Falcon at 8.5m, note, this will not be th
 
 mEngine = 470; % Mass of Merlin 1C
 mFuel = 0.939*(mRocket-mEngine); % structural mass fraction calculated without engine
+% mFuel = 0.85*mRocket; % structural mass fraction calculated without engine
 mSpartan = 9819.11;
 
 % Thrust and Isp are modified with altitude through the formula:
@@ -102,34 +105,42 @@ mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
 alpha0 = 0; %Set initial angle of attack to 0
 
-hMin1 = 1;   %Cannot go through the earth
-hMax1 = 30000;  
+if mode == 32
+    vf = 1596;
+else
+vf = 1520;
+end
 
-vMin1 = 0; 
-vMax1 = 3000;  
 
-mMin1 = mEmpty;
-mMax1 = mTotal;
 
-phiMin1 = -0.5;
-phiMax1 = -0.2;
+hLow = 1;   %Cannot go through the earth
+hUpp = 30000;  
 
-zetaMin1 = -2*pi;
-zetaMax1 = 2*pi;
+vLow = 0; 
+vUpp = 3000;  
 
-alphaMin1 = -deg2rad(5);
-alphaMax1 = deg2rad(2);
+mLow = mEmpty;
+mUpp = mTotal;
 
-dalphadt2Min1 = -0.1;
-dalphadt2Max1 = 0.1;
+phiL = -0.5;
+phiU = -0.2;
+
+zetaMin = -2*pi;
+zetaMax = 2*pi;
+
+alphaMin = -deg2rad(5);
+alphaMax = deg2rad(2);
+
+dalphadt2Min = -0.1;
+dalphadt2Max = 0.1;
 
 lonMin = 2;         lonMax = 3;
 
-gammaMin1 = deg2rad(-.1);
-gammaMax1 = gamma0;
+gammaLow = deg2rad(-.1);
+gammaUpp = gamma0;
 % This sets the control limits, this is second derivative of AoA
-uMin1 = [-.0005]; % Can do either AoA or thrust
-uMax1 = [.0005];
+uLow = [-.0005]; % Can do either AoA or thrust
+uUpp = [.0005];
 
 %-------------------------------------------
 % Set up the problem bounds in SCALED units
@@ -147,17 +158,17 @@ bounds.phase(1).initialtime.upper = 0;
 bounds.phase(1).finaltime.lower = 0;
 bounds.phase(1).finaltime.upper = tfMax1;
 
-bounds.phase(1).initialstate.lower = [h0, v0,  mF-1, gamma0, alpha0,  zetaMin1, dalphadt2Min1, lat0, lon0 ];
-bounds.phase(1).initialstate.upper = [h0, v0, mMax1, gamma0, alpha0, zetaMax1, dalphadt2Max1, lat0, lon0];
+bounds.phase(1).initialstate.lower = [h0, v0,  mF-1, gamma0, alpha0,  zetaMin, dalphadt2Min, lat0, lon0 ];
+bounds.phase(1).initialstate.upper = [h0, v0, mUpp, gamma0, alpha0, zetaMax, dalphadt2Max, lat0, lon0];
 
-bounds.phase(1).state.lower = [hMin1, vMin1, mF-1, gammaMin1, alphaMin1, zetaMin1, dalphadt2Min1, phiMin1, lonMin ];
-bounds.phase(1).state.upper = [ hMax1,  vMax1, mMax1, gammaMax1, alphaMax1, zetaMax1, dalphadt2Max1, phiMax1, lonMax];
+bounds.phase(1).state.lower = [hLow, vLow, mF-1, gammaLow, alphaMin, zetaMin, dalphadt2Min, phiL, lonMin ];
+bounds.phase(1).state.upper = [ hUpp,  vUpp, mUpp, gammaUpp, alphaMax, zetaMax, dalphadt2Max, phiU, lonMax];
 
-bounds.phase(1).finalstate.lower = [hMin1, vMin1, mF-1, gammaMin1, alphaMin1, zetaMin1, dalphadt2Min1, phiMin1, lonMin ];
-bounds.phase(1).finalstate.upper = [ hMax1,  vMax1, mMax1, gammaMax1, alphaMax1, zetaMax1, dalphadt2Max1, phiMax1, lonMax];
+bounds.phase(1).finalstate.lower = [hLow, vLow, mF-1, gammaLow, alphaMin, zetaMin, dalphadt2Min, phiL, lonMin ];
+bounds.phase(1).finalstate.upper = [ hUpp,  vUpp, mUpp, gammaUpp, alphaMax, zetaMax, dalphadt2Max, phiU, lonMax];
 
-bounds.phase(1).control.lower = uMin1;
-bounds.phase(1).control.upper = uMax1;
+bounds.phase(1).control.lower = uLow;
+bounds.phase(1).control.upper = uUpp;
 
 bounds.phase(1).path.lower = 0;
 bounds.phase(1).path.upper = 50000;
@@ -171,7 +182,7 @@ guess.phase(1).time =  [0; tfMax1];
 
 guess.phase(1).state(:,1) = [h0; h0];
 guess.phase(1).state(:,2) = [v0; vf];
-guess.phase(1).state(:,3) = [mMax1; mF];
+guess.phase(1).state(:,3) = [mUpp; mF];
 guess.phase(1).state(:,4) = [gamma0; 0];
 guess.phase(1).state(:,5) = [alpha0; 0];
 guess.phase(1).state(:,6) = [0; 0];
@@ -372,37 +383,43 @@ aero3.Viscousaero_EngineOn = Viscousaero_EngineOn;
 
 %% Import Bounds %%========================================================
 
-latMin2 = -0.5;  latMax2 = 0.5;
+latMin = -0.5;  latMax = 0.5;
 
 % lat0 = -0.264;
 % lon0 = deg2rad(145);
 
-aoaMin21 = 0;  aoaMax21 = 10*pi/180;
-bankMin21 = -1*pi/180; bankMax21 =   90*pi/180;
+
+aoaMin = 0;  aoaMax = 10*pi/180;
+bankMin1 = -1*pi/180; bankMax1 =   90*pi/180;
 
 % Primal Bounds
-bounds.phase(2).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin2, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin21, bankMin21, Stage2.Bounds.mFuel(1)];
-bounds.phase(2).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax2, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax21, bankMax21, Stage2.Bounds.mFuel(2)];
+% bounds.phase(2).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
+% bounds.phase(2).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
+bounds.phase(2).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Bounds.mFuel(1)];
+bounds.phase(2).state.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Bounds.mFuel(2)];
 
 % Initial States
-bounds.phase(2).initialstate.lower = [Stage2.Bounds.Alt(1),lonMin, latMin2, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin21, bankMin21, Stage2.Initial.mFuel] ;
-bounds.phase(2).initialstate.upper = [Stage2.Bounds.Alt(2),lonMax, latMax2, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax21, bankMax21, Stage2.Initial.mFuel];
+bounds.phase(2).initialstate.lower = [Stage2.Bounds.Alt(1),lonMin, latMin, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin, bankMin1, Stage2.Initial.mFuel] ;
+bounds.phase(2).initialstate.upper = [Stage2.Bounds.Alt(2),lonMax, latMax, Stage2.Bounds.v(2), Stage2.Bounds.gamma(2), Stage2.Bounds.zeta(2), aoaMax, bankMax1, Stage2.Initial.mFuel];
 
 % End States
-% End bounds are set slightly differently, to encourage an optimal solution
-bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Bounds.zeta(1), aoaMin21, 0, Stage2.End.mFuel];
-bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, 0, Stage2.Initial.mFuel];
+
+% bounds.phase(2).finalstate.lower = [Stage2.Bounds.Alt(1), lonMin, latMin, Stage2.Bounds.v(1), Stage2.End.gammaOpt(1), Stage2.End.Zeta, aoaMin, 0, Stage2.End.mFuel];
+% bounds.phase(2).finalstate.upper = [Stage2.Bounds.Alt(2), lonMax, latMax, Stage2.Bounds.v(2), Stage2.End.gammaOpt(2), Stage2.End.Zeta, aoaMax, 0, Stage2.Initial.mFuel];
+bounds.phase(2).finalstate.lower = [34000, lonMin, latMin, 2300, 0, Stage2.Bounds.zeta(1), aoaMin, 0, Stage2.End.mFuel];
+bounds.phase(2).finalstate.upper = [45000, lonMax, latMax, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax, 0, Stage2.Initial.mFuel];
  
 % Control Bounds
-bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-1)];
-bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(1)];
+% bounds.phase(2).control.lower = [deg2rad(-.1), deg2rad(-1)];
+% bounds.phase(2).control.upper = [deg2rad(.1), deg2rad(1)];
+bounds.phase(2).control.lower = [deg2rad(-.1), deg2rad(-1)];
+bounds.phase(2).control.upper = [deg2rad(.1), deg2rad(1)];
 
 % Time Bounds
 bounds.phase(2).initialtime.lower = 0;
 bounds.phase(2).initialtime.upper = Stage2.Bounds.time(2);
 bounds.phase(2).finaltime.lower = Stage2.Bounds.time(1);
 bounds.phase(2).finaltime.upper = Stage2.Bounds.time(2);
-
 
 %% Define Path Constraints
 % Path bounds, defined in Continuous function.
@@ -449,7 +466,10 @@ speedMin = 10;        speedMax = 5000;
 fpaMin = -80*pi/180;  fpaMax =  80*pi/180;
 aziMin = 60*pi/180; aziMax =  500*pi/180;
 mFuelMin = 0; mFuelMax = 500;
-bankMin21 = -10*pi/180; bankMax21 =   90*pi/180;
+bankMin2 = -10*pi/180; bankMax2 =   90*pi/180;
+
+% lonf = deg2rad(145);
+% latf   = -0.269;
 
 throttleMin = 0; throttleMax = 1;
 
@@ -459,16 +479,22 @@ bounds.phase(3).finaltime.lower = 400;
 bounds.phase(3).finaltime.upper = 4000;
 
 % Initial Bounds
-bounds.phase(3).initialstate.lower = [altMin, lonMin, latMin2, speedMin, fpaMin, aziMin, aoaMin21, 0, mFuelMin, throttleMin];
-bounds.phase(3).initialstate.upper = [altMax, lonMax, latMax2, speedMax, fpaMax, aziMax, aoaMax21, 0, mFuelMax, throttleMax];
+% bounds.phase(3).initialstate.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin2, mFuelMin, throttleMin];
+% bounds.phase(3).initialstate.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
+
+bounds.phase(3).initialstate.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, 0, mFuelMin, throttleMin];
+bounds.phase(3).initialstate.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, 0, mFuelMax, throttleMax];
 
 % State Bounds
-bounds.phase(3).state.lower = [altMin, lonMin, latMin2, speedMin, fpaMin, aziMin, aoaMin21, bankMin21, mFuelMin, throttleMin];
-bounds.phase(3).state.upper = [altMax, lonMax, latMax2, speedMax, fpaMax, aziMax, aoaMax21, bankMax21, mFuelMax, throttleMax];
+bounds.phase(3).state.lower = [altMin, lonMin, latMin, speedMin, fpaMin, aziMin, aoaMin, bankMin2, mFuelMin, throttleMin];
+bounds.phase(3).state.upper = [altMax, lonMax, latMax, speedMax, fpaMax, aziMax, aoaMax, bankMax2, mFuelMax, throttleMax];
 
 % End State Bounds
-bounds.phase(3).finalstate.lower = [altMin, lon0, lat0, speedMin, deg2rad(-20), aziMin, aoaMin21, bankMin21, Stage2.End.mFuel, throttleMin];
-bounds.phase(3).finalstate.upper = [altMax, lon0, lat0, speedMax, deg2rad(30), aziMax, aoaMax21, bankMax21, Stage2.End.mFuel, throttleMax];
+% bounds.phase(3).finalstate.lower = [altMin, lonf-0.002, latf-0.002, speedMin, deg2rad(-10), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+% bounds.phase(3).finalstate.upper = [200, lonf+0.002, latf+0.002, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(3).finalstate.lower = [altMin, lon0, lat0, speedMin, deg2rad(-20), aziMin, aoaMin, bankMin2, Stage2.End.mFuel, throttleMin];
+% bounds.phase(3).finalstate.upper = [500, lonMax+0.001, latMax+0.001, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
+bounds.phase(3).finalstate.upper = [altMax, lon0, lat0, speedMax, deg2rad(30), aziMax, aoaMax, bankMax2, Stage2.End.mFuel, throttleMax];
 
 % Control Bounds
 bounds.phase(3).control.lower = [deg2rad(-.2), deg2rad(-5), -1];
@@ -491,9 +517,11 @@ fpaGuess            = [0; 0];
 aziGuess            = [deg2rad(97); deg2rad(270)];
 aoaGuess            = [8*pi/180; 5*pi/180];
 bankGuess           = [89*pi/180; 89*pi/180];
+% mFuelGuess          = [mFuelMax; mFuelMin];
 mFuelGuess          = [100; mFuelMin];
 guess.phase(3).state   = [altGuess, lonGuess, latGuess, speedGuess, fpaGuess, aziGuess, aoaGuess, bankGuess, mFuelGuess,[0.;0.]];
 guess.phase(3).control = [[0;0],[0;0],[0;0]];
+% guess.phase.control = [aoaGuess];
 guess.phase(3).time    = tGuess;
 
 
@@ -519,8 +547,17 @@ bounds.phase(4).finaltime.lower = 1;
 bounds.phase(4).finaltime.upper = 10000;
 
 
+% bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zeta0];
+% bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zeta0];
+% bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zetaMin];
+% bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zetaMax];
+
 bounds.phase(4).initialstate.lower = [altMin3,vMin3, deg2rad(1),  auxdata.Stage3.mTot, aoaMin3, phiMin3, zetaMin3];
 bounds.phase(4).initialstate.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
+
+
+% bounds.phase(4).initialstate.lower = [altMin3,vMin3, deg2rad(1),  2000, aoaMin3, phiMin3, zetaMin3];
+% bounds.phase(4).initialstate.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
 
 bounds.phase(4).state.lower = [altMin3,vMin3, gammaMin3, 0, aoaMin3, phiMin3, zetaMin3];
 bounds.phase(4).state.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
@@ -618,33 +655,30 @@ output_temp = gpops2(setup_par(i)); % Run GPOPS-2. Use setup for each parallel i
 
 % Run forward simulation for comparison between runs
 % Extract states
-% alt22 = output_temp.result.solution.phase(3).state(:,1).';
-% lon22 = output_temp.result.solution.phase(3).state(:,2).';
-% lat22 = output_temp.result.solution.phase(3).state(:,3).';
-% v22 = output_temp.result.solution.phase(3).state(:,4).'; 
-% gamma22 = output_temp.result.solution.phase(3).state(:,5).'; 
-% zeta22 = output_temp.result.solution.phase(3).state(:,6).';
-% alpha22 = output_temp.result.solution.phase(3).state(:,7).';
-% eta22 = output_temp.result.solution.phase(3).state(:,8).';
-% mFuel22 = output_temp.result.solution.phase(3).state(:,9).'; 
-% time22 = output_temp.result.solution.phase(3).time.';
-% throttle22 = output_temp.result.solution.phase(3).state(:,10).';
-% 
-% % forward simulation
-% forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
-% [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time22,alpha22,f_t),ControlInterp(time22,eta22,f_t),ThrottleInterp(time22,throttle22,f_t)),time22(1):time22(end),forward0);
+alt22 = output_temp.result.solution.phase(3).state(:,1).';
+lon22 = output_temp.result.solution.phase(3).state(:,2).';
+lat22 = output_temp.result.solution.phase(3).state(:,3).';
+v22 = output_temp.result.solution.phase(3).state(:,4).'; 
+gamma22 = output_temp.result.solution.phase(3).state(:,5).'; 
+zeta22 = output_temp.result.solution.phase(3).state(:,6).';
+alpha22 = output_temp.result.solution.phase(3).state(:,7).';
+eta22 = output_temp.result.solution.phase(3).state(:,8).';
+mFuel22 = output_temp.result.solution.phase(3).state(:,9).'; 
+time22 = output_temp.result.solution.phase(3).time.';
+throttle22 = output_temp.result.solution.phase(3).state(:,10).';
+
+% forward simulation
+forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time22,alpha22,f_t),ControlInterp(time22,eta22,f_t),ThrottleInterp(time22,throttle22,f_t)),time22(1):time22(end),forward0);
 
 % error(i) = (f_y(end,6) + lon2(end))^2 + (f_y(end,5) + lat2(end))^2;
-% error(i) = abs(mFuel22(end) - f_y(end,7));
-PayloadMass(i) = -output_temp.result.objective;
-
+error(i) = abs(mFuel22(end) - f_y(end,7));
 output_store{i} = output_temp;
 
 end
 
-% [min_error,index] = min(error); % Calculate the result which minimises the chosen error function
+[min_error,index] = min(error); % Calculate the result which minimises the chosen error function
 
-[max_pl,index] = max(PayloadMass);% Calculate the result which maximises payload mass the chosen error function
 output = output_store{index};
 
 
@@ -755,8 +789,8 @@ ThirdStagePayloadMass = -output.result.objective;
 
 nodes = length(alt21)
 
-[altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1, 0);
-[~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0, 0);
+[altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1);
+[~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0);
 
 throttle22(M22<5.1) = 0; % remove nonsense throttle points
 Isp22(M22<5.1) = 0; % remove nonsense throttle points
@@ -1154,6 +1188,32 @@ hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
 
+% 
+% figure(311)
+%     addpath('addaxis')
+%     hold on
+% 
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [alt3; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q3;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(aoa3);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
+%     ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
+%     
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[v3;v3exo.'], [0 7000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[ m3;mexo.';mexo(end)],2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
+%     addaxislabel(2,'Velocity (m/s), Mass (kg)');
+% 
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [rad2deg(gamma3);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
+%     addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
+% 
+%     legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
+%     xlabel('Time (s)');
+%     xlim([0 timeexo(end)+time3(end)-time3(1)])
+%     box off
+%     % Write data to file
+
 
 
 figure(311)
@@ -1379,32 +1439,32 @@ dlmwrite('LatexInputs.txt',strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}
 
 for i = 1: length(output.result.solution.phase(2).state(1,:))-1
     if any(output.result.solution.phase(2).state(:,i) == bounds.phase(2).state.lower(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 2 is hitting lower bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 1 is hitting lower bound'))
     end
     
     if any(output.result.solution.phase(2).state(:,i) == bounds.phase(2).state.upper(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 2 is hitting upper bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 1 is hitting upper bound'))
     end
 end
 
 for i = 1: length(output.result.solution.phase(3).state(1,:))-2
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.lower(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting lower bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 2 is hitting lower bound'))
     end
     
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.upper(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting upper bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 2 is hitting upper bound'))
     end
 end
 
 % Angle of attack is not checked on third stage, because angle of attack is hard constrained and should be checked manually. 
 for i = [1:3 6: length(output.result.solution.phase(4).state(1,:))]
     if any(output.result.solution.phase(4).state(:,i) == bounds.phase(4).state.lower(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 4 is hitting lower bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting lower bound'))
     end
     
     if any(output.result.solution.phase(4).state(:,i) == bounds.phase(4).state.upper(i))
-        disp(strcat('State Id: ',num2str(i),' in Phase 4 is hitting upper bound'))
+        disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting upper bound'))
     end
 end
 

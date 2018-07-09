@@ -10,7 +10,7 @@ xi = f_y(6);
 mFuel = f_y(7);
 %
 
-[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,0,0,0);
+[rdot,xidot,phidot,gammadot,a,zetadot, q, M, D, rho,L,Fueldt,T] = VehicleModelCombined(gamma, alt, v,auxdata,zeta,phi,xi,alpha,eta,throttle,mFuel,0,0,0,1);
 
 ydot = [rdot;gammadot;a;zetadot;phidot;xidot;-Fueldt];
 % =========================================================================

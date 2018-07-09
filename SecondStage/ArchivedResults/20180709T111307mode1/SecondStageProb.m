@@ -20,6 +20,8 @@ clc
 mode = 1
 % auxdata.mode = mode;
 
+
+
 %% Misc Modifiers
 
 auxdata.delta = deg2rad(0) % thrust vector angle test
@@ -101,6 +103,12 @@ mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 
 
 alpha0 = 0; %Set initial angle of attack to 0
+
+if mode == 32
+    vf = 1596;
+else
+vf = 1520;
+end
 
 hMin1 = 1;   %Cannot go through the earth
 hMax1 = 30000;  
@@ -519,8 +527,17 @@ bounds.phase(4).finaltime.lower = 1;
 bounds.phase(4).finaltime.upper = 10000;
 
 
+% bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zeta0];
+% bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zeta0];
+% bounds.phase.initialstate.lower = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMin, phi0, zetaMin];
+% bounds.phase.initialstate.upper = [alt0, v0, gamma0, auxdata.ThirdStagem, aoaMax, phi0, zetaMax];
+
 bounds.phase(4).initialstate.lower = [altMin3,vMin3, deg2rad(1),  auxdata.Stage3.mTot, aoaMin3, phiMin3, zetaMin3];
 bounds.phase(4).initialstate.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
+
+
+% bounds.phase(4).initialstate.lower = [altMin3,vMin3, deg2rad(1),  2000, aoaMin3, phiMin3, zetaMin3];
+% bounds.phase(4).initialstate.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
 
 bounds.phase(4).state.lower = [altMin3,vMin3, gammaMin3, 0, aoaMin3, phiMin3, zetaMin3];
 bounds.phase(4).state.upper = [altMax3, vMax3, gammaMax3, auxdata.Stage3.mTot, aoaMax3, phiMax3, zetaMax3];
@@ -618,33 +635,30 @@ output_temp = gpops2(setup_par(i)); % Run GPOPS-2. Use setup for each parallel i
 
 % Run forward simulation for comparison between runs
 % Extract states
-% alt22 = output_temp.result.solution.phase(3).state(:,1).';
-% lon22 = output_temp.result.solution.phase(3).state(:,2).';
-% lat22 = output_temp.result.solution.phase(3).state(:,3).';
-% v22 = output_temp.result.solution.phase(3).state(:,4).'; 
-% gamma22 = output_temp.result.solution.phase(3).state(:,5).'; 
-% zeta22 = output_temp.result.solution.phase(3).state(:,6).';
-% alpha22 = output_temp.result.solution.phase(3).state(:,7).';
-% eta22 = output_temp.result.solution.phase(3).state(:,8).';
-% mFuel22 = output_temp.result.solution.phase(3).state(:,9).'; 
-% time22 = output_temp.result.solution.phase(3).time.';
-% throttle22 = output_temp.result.solution.phase(3).state(:,10).';
-% 
-% % forward simulation
-% forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
-% [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time22,alpha22,f_t),ControlInterp(time22,eta22,f_t),ThrottleInterp(time22,throttle22,f_t)),time22(1):time22(end),forward0);
+alt22 = output_temp.result.solution.phase(3).state(:,1).';
+lon22 = output_temp.result.solution.phase(3).state(:,2).';
+lat22 = output_temp.result.solution.phase(3).state(:,3).';
+v22 = output_temp.result.solution.phase(3).state(:,4).'; 
+gamma22 = output_temp.result.solution.phase(3).state(:,5).'; 
+zeta22 = output_temp.result.solution.phase(3).state(:,6).';
+alpha22 = output_temp.result.solution.phase(3).state(:,7).';
+eta22 = output_temp.result.solution.phase(3).state(:,8).';
+mFuel22 = output_temp.result.solution.phase(3).state(:,9).'; 
+time22 = output_temp.result.solution.phase(3).time.';
+throttle22 = output_temp.result.solution.phase(3).state(:,10).';
+
+% forward simulation
+forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
+[f_t, f_y] = ode45(@(f_t,f_y) VehicleModelReturn_forward(f_t, f_y,auxdata,ControlInterp(time22,alpha22,f_t),ControlInterp(time22,eta22,f_t),ThrottleInterp(time22,throttle22,f_t)),time22(1):time22(end),forward0);
 
 % error(i) = (f_y(end,6) + lon2(end))^2 + (f_y(end,5) + lat2(end))^2;
-% error(i) = abs(mFuel22(end) - f_y(end,7));
-PayloadMass(i) = -output_temp.result.objective;
-
+error(i) = abs(mFuel22(end) - f_y(end,7));
 output_store{i} = output_temp;
 
 end
 
-% [min_error,index] = min(error); % Calculate the result which minimises the chosen error function
+[min_error,index] = min(error); % Calculate the result which minimises the chosen error function
 
-[max_pl,index] = max(PayloadMass);% Calculate the result which maximises payload mass the chosen error function
 output = output_store{index};
 
 
@@ -755,8 +769,8 @@ ThirdStagePayloadMass = -output.result.objective;
 
 nodes = length(alt21)
 
-[altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1, 0);
-[~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0, 0);
+[altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1);
+[~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0);
 
 throttle22(M22<5.1) = 0; % remove nonsense throttle points
 Isp22(M22<5.1) = 0; % remove nonsense throttle points
@@ -1153,6 +1167,32 @@ figure(313)
 hold on
 plot(f_t(1:end),f_y(:,2));
 plot(time3,v3);
+
+% 
+% figure(311)
+%     addpath('addaxis')
+%     hold on
+% 
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [alt3; altexo.']/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.2)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[q3;qexo.';qexo(end)]/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 1.0)
+%     plot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(aoa3);0*ones(length(timeexo),1)], 'LineStyle', '--','Color','k', 'lineWidth', 0.7)
+%     ylabel('Altitude (km), Dynamic Pressure (kPa), Angle of Attack (deg)');
+%     
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[v3;v3exo.'], [0 7000], 'LineStyle', '--','Color','k', 'lineWidth', 1.8)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)],[ m3;mexo.';mexo(end)],2, 'LineStyle', ':','Color','k', 'lineWidth', 1.3)
+%     addaxislabel(2,'Velocity (m/s), Mass (kg)');
+% 
+% 
+%     addaxis([time3-time3(1); timeexo.'+time3(end)-time3(1)],[rad2deg(Vec_angle3);0*ones(length(timeexo),1)], 'LineStyle', ':','Color','k', 'lineWidth', 2.1)
+%     addaxisplot([time3-time3(1); timeexo.'+time3(end)-time3(1)], [rad2deg(gamma3);rad2deg(gammaexo).'],3, 'LineStyle', '-','Color','k', 'lineWidth', .6)
+%     addaxislabel(3,'Thrust Vector Angle (deg), Trajectory Angle (deg)');
+% 
+%     legend(  'Altitude','Dynamic Pressure','Angle of Attack', 'Velocity',  'Mass', 'Thrust Vector Angle', 'Trajectory Angle' );
+%     xlabel('Time (s)');
+%     xlim([0 timeexo(end)+time3(end)-time3(1)])
+%     box off
+%     % Write data to file
 
 
 

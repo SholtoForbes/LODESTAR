@@ -2,8 +2,8 @@
 % Uses conical shock calculator, the  interpolates
 clear all
 
-M0 = 7;
-Alpha = 4;
+M0 = 5;
+Alpha = 0;
 alt = 30;
 
 Atmosphere = dlmread('atmosphere.txt');
@@ -140,6 +140,7 @@ auxdata.interp.eqGridded = griddedInterpolant(grid.Mgrid_eng,grid.T_eng,grid.eq_
 
 [Isp,wf,eq,q1,w] = RESTint(M0, Alpha, auxdata,T0,P0);
 Isp
+w+wf
 
 T = Isp.*wf*9.81;
 
@@ -149,7 +150,7 @@ R = 8.314;
 
 rhoe = Pe/re/Te;
 
-A = 0.5586*4;
+A = 0.5683*4;
 
 mm = 0.029; % molar mass air
 
@@ -160,7 +161,7 @@ mm = 0.029; % molar mass air
 
 ve = Me*sqrt(Ge*re*Te);
 
-mdot = rhoe*A*ve;
+mdot = rhoe*A*ve
 
 %% Nondimensionalisation for CART3D
 %%
