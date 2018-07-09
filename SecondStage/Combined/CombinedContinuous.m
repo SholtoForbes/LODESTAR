@@ -57,8 +57,13 @@ time21 = input.phase(2).time;
 
 phaseout(2).dynamics  = [altdot21, londot21, latdot21, vdot21, fpadot21, azidot21, aoadot21, bankdot21, -Fueldt21];
 phaseout(2).path = q21;
-%%
 
+%% Fly-Back
+
+returnflag = auxdata.returnflag;
+
+if returnflag
+    
 alt22  = input.phase(3).state(:,1);
 lon22  = input.phase(3).state(:,2);
 lat22  = input.phase(3).state(:,3);
@@ -79,8 +84,6 @@ throttledot22 = input.phase(3).control(:,3);
 % ------- Compute the Aerodynamic Quantities --------%
 % ---------------------------------------------------%
 
-time22 = input.phase(2).time;
-
 [altdot22,londot22,latdot22,fpadot22,vdot22,azidot22, q22, M, Fd, rho,L,Fueldt22,T22,Isp22,q22_aftershock] = VehicleModelCombined(fpa22, alt22, v22,auxdata,azi22,lat22,lon22,aoa22,bank22,throttle22, mFuel22,0,0,0, 0);
 
 % ---------------------------------------------------%
@@ -92,28 +95,31 @@ phaseout(3).dynamics  = [altdot22, londot22, latdot22, vdot22, fpadot22, azidot2
 
 phaseout(3).path = q22;
 
+end
+
 %% Third Stage
+phase_no = auxdata.phase_no;
 
-alt3  = input.phase(4).state(:,1);
-v3    = input.phase(4).state(:,2);
-gamma3  = input.phase(4).state(:,3);
-m3    = input.phase(4).state(:,4);
-Alpha3    = input.phase(4).state(:,5);
-phi3    = input.phase(4).state(:,6);
-zeta3    = input.phase(4).state(:,7);
-time3 = input.phase(4).time;
+alt3  = input.phase(phase_no).state(:,1);
+v3    = input.phase(phase_no).state(:,2);
+gamma3  = input.phase(phase_no).state(:,3);
+m3    = input.phase(phase_no).state(:,4);
+Alpha3    = input.phase(phase_no).state(:,5);
+phi3    = input.phase(phase_no).state(:,6);
+zeta3    = input.phase(phase_no).state(:,7);
+time3 = input.phase(phase_no).time;
 
-Alphadot  = input.phase(4).control(:,1);
+Alphadot  = input.phase(phase_no).control(:,1);
 
 auxdata=input.auxdata;
 
 [rdot3,xidot3,phidot3,gammadot3,vdot3,zetadot3, mdot3, Vec_angle3, AoA_max3, T3] = ThirdStageDyn(alt3,gamma3,v3,m3,Alpha3,time3,auxdata, Alphadot, phi3, zeta3);
 
-phaseout(4).dynamics  = [rdot3, vdot3, gammadot3, -mdot3*ones(length(rdot3),1), Alphadot, phidot3, zetadot3];
+phaseout(phase_no).dynamics  = [rdot3, vdot3, gammadot3, -mdot3*ones(length(rdot3),1), Alphadot, phidot3, zetadot3];
 
 Alpha_constraint = Alpha3-AoA_max3;
 
-phaseout(4).path = [Vec_angle3,Alpha_constraint];
+phaseout(phase_no).path = [Vec_angle3,Alpha_constraint];
 
 
 end

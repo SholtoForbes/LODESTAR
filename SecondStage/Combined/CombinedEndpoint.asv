@@ -23,20 +23,36 @@ end
 
 %%
 
-output.eventgroup(1).event = [x021(1)-xf1(1) x021(2)-xf1(9) x021(3)-xf1(8) x021(4)-xf1(2) x021(5)-xf1(4) x021(6)-xf1(6) x021(7)-xf1(5)];
+output.eventgroup(1).event = [x021(1)-xf1(1) x021(2)-xf1(9) x021(3)-xf1(8) x021(4)-xf1(2) x021(5)-xf1(4) x021(6)-xf1(6) x021(7)-xf1(5) t021-tf1];
 
 
 %%
-if returnflag
-output.eventgroup(2).event = [x022(1:9)-xf21(1:9) t021-tf1];
+
+lon10  = input.phase(2).initialstate(2);
+lat10  = input.phase(2).initialstate(3);
+zeta10 = input.phase(2).initialstate(6);
+
+% Calculate approximate initial launch site
+initial_launch_lon = lon10-0.0051*cos(zeta10);
+initial_launch_lat = lat10-0.0051*sin(zeta10);
+
+alt1F  = input.phase(2).finalstate(1);
+v1F    = input.phase(2).finalstate(4);
+gamma1F  = input.phase(2).finalstate(5);
+
+% const = input.auxdata.const;
+
+
+%%
+
+
+lon22f  = input.phase(3).finalstate(2);
+lat22f  = input.phase(3).finalstate(3);
+
+output.eventgroup(2).event = [x022(1:9)-xf21(1:9)];
 
 output.eventgroup(3).event = [t022-tf21];
 
-else
-
-output.eventgroup(2).event = [t021-tf1];
-    
-end
 
 %%
 phase_no = auxdata.phase_no;

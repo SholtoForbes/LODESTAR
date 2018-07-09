@@ -174,8 +174,8 @@ bounds.phase(1).path.lower = 0;
 bounds.phase(1).path.upper = 50000;
 
 % Tie stages together
-bounds.eventgroup(1).lower = [zeros(1,7)];
-bounds.eventgroup(1).upper = [zeros(1,7)]; 
+bounds.eventgroup(1).lower = [zeros(1,8)];
+bounds.eventgroup(1).upper = [zeros(1,8)]; 
 
 
 guess.phase(1).time =  [0; tfMax1];
@@ -467,13 +467,8 @@ guess.phase(2).control      = [[0;0],[0;0]];
 guess.phase(2).time          = [0;650];
 
 % Tie stages together
-if returnflag
-bounds.eventgroup(2).lower = [zeros(1,10)];
-bounds.eventgroup(2).upper = [zeros(1,10)]; 
-else
-bounds.eventgroup(2).lower = [zeros(1,1)];
-bounds.eventgroup(2).upper = [zeros(1,1)];    
-end
+bounds.eventgroup(2).lower = [zeros(1,9)];
+bounds.eventgroup(2).upper = [zeros(1,9)]; 
 
 %% Flyback
 
@@ -695,40 +690,34 @@ EndTime = datestr(now,30) % Display the ending time
 % =========================================================================
 % Assign the primal variables
 alt21 = output.result.solution.phase(2).state(:,1).';
+alt22 = output.result.solution.phase(3).state(:,1).';
 lon21 = output.result.solution.phase(2).state(:,2).';
+lon22 = output.result.solution.phase(3).state(:,2).';
 lat21 = output.result.solution.phase(2).state(:,3).';
+lat22 = output.result.solution.phase(3).state(:,3).';
 v21 = output.result.solution.phase(2).state(:,4).'; 
+v22 = output.result.solution.phase(3).state(:,4).'; 
 gamma21 = output.result.solution.phase(2).state(:,5).'; 
+gamma22 = output.result.solution.phase(3).state(:,5).'; 
 zeta21 = output.result.solution.phase(2).state(:,6).';
+zeta22 = output.result.solution.phase(3).state(:,6).';
 alpha21 = output.result.solution.phase(2).state(:,7).';
+alpha22 = output.result.solution.phase(3).state(:,7).';
 eta21 = output.result.solution.phase(2).state(:,8).';
+eta22 = output.result.solution.phase(3).state(:,8).';
 mFuel21 = output.result.solution.phase(2).state(:,9).'; 
+mFuel22 = output.result.solution.phase(3).state(:,9).'; 
+
+throttle22 = output.result.solution.phase(3).state(:,10).';
 
 aoadot21  = output.result.solution.phase(2).control(:,1).'; 
 etadot21  = output.result.solution.phase(2).control(:,2).'; 
 
-time21 = output.result.solution.phase(2).time.';
-
-if returnflag
-alt22 = output.result.solution.phase(3).state(:,1).';
-lon22 = output.result.solution.phase(3).state(:,2).';
-lat22 = output.result.solution.phase(3).state(:,3).';
-v22 = output.result.solution.phase(3).state(:,4).'; 
-gamma22 = output.result.solution.phase(3).state(:,5).'; 
-zeta22 = output.result.solution.phase(3).state(:,6).';
-alpha22 = output.result.solution.phase(3).state(:,7).';
-eta22 = output.result.solution.phase(3).state(:,8).';
-mFuel22 = output.result.solution.phase(3).state(:,9).'; 
-
-throttle22 = output.result.solution.phase(3).state(:,10).';
 aoadot22  = output.result.solution.phase(3).control(:,1).'; 
 etadot22  = output.result.solution.phase(3).control(:,2).'; 
 
+time21 = output.result.solution.phase(2).time.';
 time22 = output.result.solution.phase(3).time.';
-end
-
-
-if returnflag
 
 figure(01)
 subplot(9,1,1)
@@ -765,7 +754,7 @@ figure(230)
 hold on
 plot3(lon21,lat21,alt21)
 plot3(lon22,lat22,alt22)
-end
+
   
     figure(2301)
 hold on
@@ -774,9 +763,7 @@ axesm('pcarree','Origin',[0 rad2deg(lon0) 0])
 geoshow('landareas.shp','FaceColor',[0.8 .8 0.8])
 % plotm(rad2deg(lat),rad2deg(lon+lon0))
 plotm(rad2deg(lat21),rad2deg(lon21),'b')
-if returnflag
 plotm(rad2deg(lat22),rad2deg(lon22),'r')
-end
     
     cities = shaperead('worldcities', 'UseGeoCoords', true);
 lats = extractfield(cities,'Lat');
@@ -804,12 +791,10 @@ ThirdStagePayloadMass = -output.result.objective;
 nodes = length(alt21)
 
 [altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1, 0);
-if returnflag
 [~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0, 0);
 
-throttle22(M22<5.) = 0; % remove nonsense throttle points
-Isp22(M22<5.) = 0; % remove nonsense throttle points
-end
+throttle22(M22<5.1) = 0; % remove nonsense throttle points
+Isp22(M22<5.1) = 0; % remove nonsense throttle points
 
 % figure out horizontal motion
 H(1) = 0;
@@ -889,19 +874,13 @@ plot(time21, rad2deg(zeta21),'Color','k')
 title('Heading Angle (deg)')
 xlabel('Time (s)');
 
-if returnflag
+
 SecondStageStates = [[time21 time22]' [alt21 alt22]' [lon21 lon22]' [lat21 lat22]' [v21 v22]' [gamma21 gamma22]' [zeta21 zeta22]' [alpha21 alpha22]' [eta21 eta22]' [mFuel21 mFuel22]'];
-else
-SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [eta21]' [mFuel21]'];
-end
-
-
 dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
 dlmwrite('SecondStageStates',SecondStageStates,'-append','delimiter',' ');
 copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
 
 %% Plot Return
-if returnflag
 figure(221)
 fig = gcf;
 set(fig,'Position',[200 0 850 1200])
@@ -990,7 +969,7 @@ xlim([time22(1) time22(end)]);
 plot(time22, rad2deg(zeta22),'Color','k')
 title('Heading Angle (deg)')
 xlabel('Time (s)');
-end
+
 %% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % FORWARD SIMULATION
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1035,7 +1014,7 @@ plot(f_t(1:end),f_y(:,7));
 plot(time21,mFuel21);
 
 
-if returnflag
+
 % Return Forward
 forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
 
@@ -1064,7 +1043,6 @@ subplot(7,1,6)
 hold on
 plot(f_t(1:end),f_y(:,7));
 plot(time22,mFuel22);
-end
 
 %% Check KKT and pontryagins minimum
 % Check that the hamiltonian = 0 (for free end time)
@@ -1078,24 +1056,18 @@ for i = 1:length(lambda1)-1
     H1(i) = lambda1(i+1,:)*phaseout_test(2).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
 end
 
-if returnflag
 lambda2 = output.result.solution.phase(3).costate;
 for i = 1:length(lambda2)-1
     H2(i) = lambda2(i+1,:)*phaseout_test(3).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
-end
 end
 
 figure(2410)
 hold on
 plot(time21(1:end-1),H1)
-if returnflag
 plot(time22(1:end-1),H2)
-end
 ylabel('Hamiltonian')
 xlabel('Time (s)')
-if returnflag
 legend('Ascent','Return')
-end
 
 % Check Primal Feasibility
 % Check calculated derivatives with the numerical derivative of each
@@ -1105,14 +1077,12 @@ hold on
 for i = 1:length(output.result.solution.phase(2).state(1,:))
 plot(time21,([diff(output.result.solution.phase(2).state(:,i))./diff(output.result.solution.phase(2).time); 0] - phaseout_test(2).dynamics(:,i))./output.result.solution.phase(2).state(:,i),'--');
 end
-if returnflag
 for i = 1:length(output.result.solution.phase(3).state(1,:))
     if i<= 7 % Plot different line styles when no. of colours exceeded
     plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i));
     else
     plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i),':');
     end
-end
 end
 xlabel('Time (s)')
 ylabel('Derivative Error')
@@ -1452,7 +1422,6 @@ for i = 1: length(output.result.solution.phase(2).state(1,:))-1
     end
 end
 
-if returnflag
 for i = 1: length(output.result.solution.phase(3).state(1,:))-2
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.lower(i))
         disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting lower bound'))
@@ -1461,7 +1430,6 @@ for i = 1: length(output.result.solution.phase(3).state(1,:))-2
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.upper(i))
         disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting upper bound'))
     end
-end
 end
 
 % Angle of attack is not checked on third stage, because angle of attack is hard constrained and should be checked manually. 
