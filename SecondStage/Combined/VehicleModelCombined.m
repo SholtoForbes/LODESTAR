@@ -64,6 +64,10 @@ if ThirdStage == 0 && forwardflag ==0;
     throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
 end
 
+if forwardflag ==0; 
+    throttle(q<20000) =   gaussmf(q(q<20000),[100 20000]); % remove throttle points below operable range on return flight
+end
+
 if ThirdStage == 1
     % Interpolate between centre of gravity conditions for FUll and Empty
     % fuel, as fuel depletes

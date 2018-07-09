@@ -428,8 +428,8 @@ if returnflag
 bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-.5)];
 bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(.5)];
 else
-bounds.phase(2).control.lower = [deg2rad(-.5)]; 
-bounds.phase(2).control.upper = [deg2rad(.5)];
+bounds.phase(2).control.lower = [deg2rad(-.1)]; 
+bounds.phase(2).control.upper = [deg2rad(.1)];
 end
 
 % Time Bounds

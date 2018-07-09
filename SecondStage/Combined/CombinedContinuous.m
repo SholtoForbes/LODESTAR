@@ -2,6 +2,7 @@ function phaseout = CombinedContinuous(input)
 %% First Stage
 
 auxdata = input.auxdata;
+returnflag = auxdata.returnflag;
 
 t = input.phase(1).time';
 x = input.phase(1).state';
@@ -34,13 +35,23 @@ gamma21  = input.phase(2).state(:,5);
 zeta21  = input.phase(2).state(:,6);
 
 Alpha21  = input.phase(2).state(:,7);
+
+if returnflag
 eta21  = input.phase(2).state(:,8);
 mFuel21  = input.phase(2).state(:,9);
-throttle21  = 1;
+else
+    eta21 = 0;
+mFuel21  = input.phase(2).state(:,8); 
+end
+
+
+throttle21  = ones(length(alt21),1);
 
 aoadot21  = input.phase(2).control(:,1);
-bankdot21 = input.phase(2).control(:,2);
 
+if returnflag
+bankdot21 = input.phase(2).control(:,2);
+end
 % ---------------------------------------------------%
 % ------- Compute the Aerodynamic Quantities --------%
 % ---------------------------------------------------%
@@ -54,13 +65,15 @@ time21 = input.phase(2).time;
 % ---------------------------------------------------%
 % ---- Evaluate Right-Hand Side of the Dynamics ---- %
 % ---------------------------------------------------%
-
+if returnflag
 phaseout(2).dynamics  = [altdot21, londot21, latdot21, vdot21, fpadot21, azidot21, aoadot21, bankdot21, -Fueldt21];
+else
+phaseout(2).dynamics  = [altdot21, londot21, latdot21, vdot21, fpadot21, azidot21, aoadot21, -Fueldt21];    
+end
 phaseout(2).path = q21;
 
 %% Fly-Back
 
-returnflag = auxdata.returnflag;
 
 if returnflag
     

@@ -29,7 +29,7 @@ MList_EngineOff = unique(aero_EngineOff(:,1));
 
 AoAList_engineOff = unique(aero_EngineOff(:,2));
 
-altList_engineOff = unique(Viscousaero_EngineOff(:,3)); % Use engine only case for this
+altList_engineOff = unique(Viscousaero_EngineOff(:,3)); %
 
 % [Mgrid_EngineOff,AOAgrid_EngineOff] = ndgrid(MList_EngineOff,AoAList_engineOff);
 
@@ -115,7 +115,10 @@ MList_EngineOn = unique(aero_EngineOn(:,1));
 
 AoAList_engineOn = unique(aero_EngineOn(:,2));
 
-altList_engineOn = unique(aero_Engine(:,3)); % Use engine only case for this
+% altList_engineOn = unique(aero_Engine(:,3)); % Use engine only case for this
+% 
+altList_engineOn = unique(Viscousaero_EngineOn(:,3))/1000; % Use engine only case for this
+
 
 [Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn] = ndgrid(MList_EngineOn,AoAList_engineOn,altList_engineOn);
 
@@ -132,12 +135,10 @@ for i = 1:numel(Mgrid_EngineOn)
     AoA_temp = AOAgrid_EngineOn(i);
     alt_temp = altgrid_EngineOn(i);
     
-    
-    %% PUT THIS BACK IN WHEN ADDING ENGINE, just taken out because of lack of alt right now 29/6
-    % Also modify flaps below, and change interp in cehicle model
+
     
     %Calculate Thrust
-%     
+
     L_ref = 2294.0;
     
     c = ppval(auxdata.interp.c_spline,alt_temp*1000); % Calculate speed of sound using atmospheric data

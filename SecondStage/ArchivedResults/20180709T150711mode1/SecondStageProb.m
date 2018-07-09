@@ -14,8 +14,8 @@ clc
 % Change mode to set the target of the simulation. Much of the problem
 % definition changes with mode.
 
-% mode = 1x: No end constraint, used for optimal trajectory calculation
-% mode = 1: 50kPa limit, 12: 55 kPa limit, 13: 45 kPa limit, 14: 50kPa limit & 10% additional drag
+% mode = 1x: Maximum Payload
+% mode = 1: Standard
 
 
 mode = 1
@@ -417,8 +417,8 @@ bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Boun
 bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, 0, Stage2.mFuel];
  
 % Control Bounds
-bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-1)];
-bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(1)];
+bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-.5)];
+bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(.5)];
 
 % Time Bounds
 bounds.phase(2).initialtime.lower = 0;
@@ -460,7 +460,11 @@ guess.phase(2).state(:,4)   = Stage2.Guess.v.';
 guess.phase(2).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(2).state(:,6)   = Stage2.Guess.zeta.';
 guess.phase(2).state(:,7)   = [2*pi/180; 5*pi/180];
-guess.phase(2).state(:,8)   = [deg2rad(10);deg2rad(10)];
+if returnflag
+guess.phase(2).state(:,8)   = [deg2rad(30);deg2rad(30)];
+else
+guess.phase(2).state(:,8)   = [deg2rad(0);deg2rad(0)];  
+end
 guess.phase(2).state(:,9) 	= [Stage2.mFuel, 100];
 
 guess.phase(2).control      = [[0;0],[0;0]];
@@ -728,7 +732,7 @@ time22 = output.result.solution.phase(3).time.';
 end
 
 
-
+if returnflag
 
 figure(01)
 subplot(9,1,1)
@@ -765,7 +769,7 @@ figure(230)
 hold on
 plot3(lon21,lat21,alt21)
 plot3(lon22,lat22,alt22)
-
+end
   
     figure(2301)
 hold on
@@ -774,7 +778,9 @@ axesm('pcarree','Origin',[0 rad2deg(lon0) 0])
 geoshow('landareas.shp','FaceColor',[0.8 .8 0.8])
 % plotm(rad2deg(lat),rad2deg(lon+lon0))
 plotm(rad2deg(lat21),rad2deg(lon21),'b')
+if returnflag
 plotm(rad2deg(lat22),rad2deg(lon22),'r')
+end
     
     cities = shaperead('worldcities', 'UseGeoCoords', true);
 lats = extractfield(cities,'Lat');
@@ -802,10 +808,12 @@ ThirdStagePayloadMass = -output.result.objective;
 nodes = length(alt21)
 
 [altdot21,xidot21,phidot21,gammadot21,a21,zetadot21, q21, M21, Fd21, rho21,L21,Fueldt21,T21,Isp21,q121,flapdeflection21,heating_rate21] = VehicleModelCombined(gamma21, alt21, v21,auxdata,zeta21,lat21,lon21,alpha21,eta21,1, mFuel21,mFuel21(1),mFuel21(end), 1, 0);
+if returnflag
 [~,~,~,~,~,~, q22, M22, Fd22, rho22,L22,Fueldt22,T22,Isp22,q122,flapdeflection22,heating_rate22] = VehicleModelCombined(gamma22, alt22, v22,auxdata,zeta22,lat22,lon22,alpha22,eta22,throttle22, mFuel22,0,0, 0, 0);
 
-throttle22(M22<5.1) = 0; % remove nonsense throttle points
-Isp22(M22<5.1) = 0; % remove nonsense throttle points
+throttle22(M22<5.) = 0; % remove nonsense throttle points
+Isp22(M22<5.) = 0; % remove nonsense throttle points
+end
 
 % figure out horizontal motion
 H(1) = 0;
@@ -885,13 +893,19 @@ plot(time21, rad2deg(zeta21),'Color','k')
 title('Heading Angle (deg)')
 xlabel('Time (s)');
 
-
+if returnflag
 SecondStageStates = [[time21 time22]' [alt21 alt22]' [lon21 lon22]' [lat21 lat22]' [v21 v22]' [gamma21 gamma22]' [zeta21 zeta22]' [alpha21 alpha22]' [eta21 eta22]' [mFuel21 mFuel22]'];
+else
+SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [eta21]' [mFuel21]'];
+end
+
+
 dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
 dlmwrite('SecondStageStates',SecondStageStates,'-append','delimiter',' ');
 copyfile('SecondStageStates',sprintf('../ArchivedResults/%s/SecondStage_%s',strcat(Timestamp,'mode',num2str(mode)),Timestamp));
 
 %% Plot Return
+if returnflag
 figure(221)
 fig = gcf;
 set(fig,'Position',[200 0 850 1200])
@@ -980,7 +994,7 @@ xlim([time22(1) time22(end)]);
 plot(time22, rad2deg(zeta22),'Color','k')
 title('Heading Angle (deg)')
 xlabel('Time (s)');
-
+end
 %% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % FORWARD SIMULATION
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1025,7 +1039,7 @@ plot(f_t(1:end),f_y(:,7));
 plot(time21,mFuel21);
 
 
-
+if returnflag
 % Return Forward
 forward0 = [alt22(1),gamma22(1),v22(1),zeta22(1),lat22(1),lon22(1), mFuel22(1)];
 
@@ -1054,6 +1068,7 @@ subplot(7,1,6)
 hold on
 plot(f_t(1:end),f_y(:,7));
 plot(time22,mFuel22);
+end
 
 %% Check KKT and pontryagins minimum
 % Check that the hamiltonian = 0 (for free end time)
@@ -1072,14 +1087,19 @@ lambda2 = output.result.solution.phase(3).costate;
 for i = 1:length(lambda2)-1
     H2(i) = lambda2(i+1,:)*phaseout_test(3).dynamics(i,:).'; %H = lambda transpose * f(x,u,t) + L, note that there is no continuous cost L
 end
+end
 
 figure(2410)
 hold on
 plot(time21(1:end-1),H1)
+if returnflag
 plot(time22(1:end-1),H2)
+end
 ylabel('Hamiltonian')
 xlabel('Time (s)')
+if returnflag
 legend('Ascent','Return')
+end
 
 % Check Primal Feasibility
 % Check calculated derivatives with the numerical derivative of each
@@ -1089,12 +1109,14 @@ hold on
 for i = 1:length(output.result.solution.phase(2).state(1,:))
 plot(time21,([diff(output.result.solution.phase(2).state(:,i))./diff(output.result.solution.phase(2).time); 0] - phaseout_test(2).dynamics(:,i))./output.result.solution.phase(2).state(:,i),'--');
 end
+if returnflag
 for i = 1:length(output.result.solution.phase(3).state(1,:))
     if i<= 7 % Plot different line styles when no. of colours exceeded
     plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i));
     else
     plot(time22,([diff(output.result.solution.phase(3).state(:,i))./diff(output.result.solution.phase(3).time); 0] - phaseout_test(3).dynamics(:,i))./output.result.solution.phase(3).state(:,i),':');
     end
+end
 end
 xlabel('Time (s)')
 ylabel('Derivative Error')
@@ -1417,7 +1439,7 @@ dlmwrite('LatexInputs.txt',strcat('\newcommand{\2FlightTimeMode', num2str(mode) 
 qlt20 = find(q3<20000);
 dlmwrite('LatexInputs.txt',strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
 
-
+movefile('LatexInputs.txt',sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))));
 
 %% Bound Check
 % Peform check to see if any of the states are hitting their bounds. This
@@ -1434,6 +1456,7 @@ for i = 1: length(output.result.solution.phase(2).state(1,:))-1
     end
 end
 
+if returnflag
 for i = 1: length(output.result.solution.phase(3).state(1,:))-2
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.lower(i))
         disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting lower bound'))
@@ -1442,6 +1465,7 @@ for i = 1: length(output.result.solution.phase(3).state(1,:))-2
     if any(output.result.solution.phase(3).state(:,i) == bounds.phase(3).state.upper(i))
         disp(strcat('State Id: ',num2str(i),' in Phase 3 is hitting upper bound'))
     end
+end
 end
 
 % Angle of attack is not checked on third stage, because angle of attack is hard constrained and should be checked manually. 

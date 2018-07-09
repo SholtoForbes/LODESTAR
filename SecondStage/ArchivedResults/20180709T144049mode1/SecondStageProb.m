@@ -14,8 +14,8 @@ clc
 % Change mode to set the target of the simulation. Much of the problem
 % definition changes with mode.
 
-% mode = 1x: Maximum Payload
-% mode = 1: Standard
+% mode = 1x: No end constraint, used for optimal trajectory calculation
+% mode = 1: 50kPa limit, 12: 55 kPa limit, 13: 45 kPa limit, 14: 50kPa limit & 10% additional drag
 
 
 mode = 1
@@ -395,20 +395,13 @@ bankMin21 = -1*pi/180; bankMax21 =   90*pi/180;
 % Bounds %-----------------------------------------------------------------
 Stage2.Bounds.Alt       = [20000, 50000]; % Altitude Bounds, m
 Stage2.Bounds.v         = [1400, 3100]; % Velocity Bounds, m/s
-Stage2.Bounds.gamma     = [-0.5, deg2rad(20)]; % Trajectory Angle Bounds, rad
+Stage2.Bounds.gamma     = [-0.5, deg2rad(6)]; % Trajectory Angle Bounds, rad
 Stage2.Bounds.mFuel     = [0, Stage2.mFuel]; % Fuel Mass Bounds, kg
 Stage2.Bounds.gammadot  = [-0.01, 0.02]; % Trajectory Angle Derivative Bounds, rad/s
 Stage2.Bounds.zeta      = [-4/3*pi, 2*pi]; % Heading Angle Bounds, rad
 Stage2.Bounds.control   = [-0.00003, 0.0002]; % (Control) Trajectory Angle Double-Derivative Bounds, rad/s^2
 Stage2.Bounds.time      = [100, 800]; % Time Bounds, s
 
-BankSep = 0;
-
-if not(returnflag)
-    bankMin21 = [];
-    bankMax21 = [];
-    BankSep = [];
-end
 
 % Primal Bounds
 bounds.phase(2).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin2, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin21, bankMin21, Stage2.Bounds.mFuel(1)];
@@ -420,17 +413,12 @@ bounds.phase(2).initialstate.upper = [Stage2.Bounds.Alt(2),lonMax, latMax2, Stag
 
 % End States
 % End bounds are set slightly differently, to encourage an optimal solution
-bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Bounds.zeta(1), aoaMin21, BankSep, Stage2.Bounds.mFuel(1)];
-bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, BankSep, Stage2.mFuel];
+bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Bounds.zeta(1), aoaMin21, 0, Stage2.Bounds.mFuel(1)];
+bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, 0, Stage2.mFuel];
  
 % Control Bounds
-if returnflag
-bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-.5)];
-bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(.5)];
-else
-bounds.phase(2).control.lower = [deg2rad(-.5)]; 
-bounds.phase(2).control.upper = [deg2rad(.5)];
-end
+bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-1)];
+bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(1)];
 
 % Time Bounds
 bounds.phase(2).initialtime.lower = 0;
@@ -472,21 +460,14 @@ guess.phase(2).state(:,4)   = Stage2.Guess.v.';
 guess.phase(2).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(2).state(:,6)   = Stage2.Guess.zeta.';
 guess.phase(2).state(:,7)   = [2*pi/180; 5*pi/180];
-
 if returnflag
 guess.phase(2).state(:,8)   = [deg2rad(30);deg2rad(30)];
+else
+guess.phase(2).state(:,8)   = [deg2rad(0);deg2rad(0)];  
+end
 guess.phase(2).state(:,9) 	= [Stage2.mFuel, 100];
-else
-% guess.phase(2).state(:,8)   = [deg2rad(0);deg2rad(0)];  
-guess.phase(2).state(:,8)   = [Stage2.mFuel, 100]; 
-end
 
-if returnflag
 guess.phase(2).control      = [[0;0],[0;0]];
-else
-guess.phase(2).control      = [0;0];
-end
-
 guess.phase(2).time          = [0;650];
 
 % Tie stages together
@@ -644,11 +625,7 @@ setup.auxdata                        = auxdata;
 setup.bounds                         = bounds;
 setup.guess                          = guess;
 setup.mesh                           = mesh;
-if mode == 1
 setup.displaylevel                   = 2;
-else
-setup.displaylevel                   = 0; 
-end
 setup.nlp.solver                     = 'ipopt';
 setup.nlp.ipoptoptions.linear_solver = 'ma57';
 
@@ -711,7 +688,7 @@ end
 
 % [min_error,index] = min(error); % Calculate the result which minimises the chosen error function
 
-[max_pl,index] = max(PayloadMass);% Calculate the result which maximises payload mass 
+[max_pl,index] = max(PayloadMass);% Calculate the result which maximises payload mass the chosen error function
 output = output_store{index};
 
 
@@ -728,19 +705,11 @@ v21 = output.result.solution.phase(2).state(:,4).';
 gamma21 = output.result.solution.phase(2).state(:,5).'; 
 zeta21 = output.result.solution.phase(2).state(:,6).';
 alpha21 = output.result.solution.phase(2).state(:,7).';
-
-if returnflag
 eta21 = output.result.solution.phase(2).state(:,8).';
 mFuel21 = output.result.solution.phase(2).state(:,9).'; 
-else
-eta21 = 0;
-mFuel21 = output.result.solution.phase(2).state(:,8).';   
-end
 
 aoadot21  = output.result.solution.phase(2).control(:,1).'; 
-if returnflag
 etadot21  = output.result.solution.phase(2).control(:,2).'; 
-end
 
 time21 = output.result.solution.phase(2).time.';
 
@@ -752,10 +721,8 @@ v22 = output.result.solution.phase(3).state(:,4).';
 gamma22 = output.result.solution.phase(3).state(:,5).'; 
 zeta22 = output.result.solution.phase(3).state(:,6).';
 alpha22 = output.result.solution.phase(3).state(:,7).';
-
 eta22 = output.result.solution.phase(3).state(:,8).';
 mFuel22 = output.result.solution.phase(3).state(:,9).'; 
-
 
 throttle22 = output.result.solution.phase(3).state(:,10).';
 aoadot22  = output.result.solution.phase(3).control(:,1).'; 
@@ -928,14 +895,8 @@ xlabel('Time (s)');
 
 if returnflag
 SecondStageStates = [[time21 time22]' [alt21 alt22]' [lon21 lon22]' [lat21 lat22]' [v21 v22]' [gamma21 gamma22]' [zeta21 zeta22]' [alpha21 alpha22]' [eta21 eta22]' [mFuel21 mFuel22]'];
-
-dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
-
 else
-    
-    dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'fuel mass (kg) '],'');
-
-SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [mFuel21]'];
+SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [eta21]' [mFuel21]'];
 end
 
 
@@ -1047,12 +1008,9 @@ end
 
 
 forward0 = [alt21(1),gamma21(1),v21(1),zeta21(1),lat21(1),lon21(1), mFuel21(1)];
-if returnflag
+
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),ControlInterp(time21,eta21,f_t),1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-else
-  [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),0,1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-  
-end
+
 figure(212)
 subplot(7,1,[1 2])
 hold on
@@ -1464,6 +1422,24 @@ saveas(figure(111),[sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2
 
 
 
+%% Create Easy Latex Inputs
+
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}'), 'delimiter','','newline', 'pc')
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt21(1)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc')
+
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}'), '-append','delimiter','','newline', 'pc');
+
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt21(end)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v21(end),0)) , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationqMode', num2str(mode) ,'}{ ', num2str(round(q21(end)/1000,1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationLDMode', num2str(mode) ,'}{ ', num2str(round(L21(end)/Fd21(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
+
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\2FlightTimeMode', num2str(mode) ,'}{ ', num2str(round(time21(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
+
+qlt20 = find(q3<20000);
+dlmwrite('LatexInputs.txt',strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
+
+
 
 %% Bound Check
 % Peform check to see if any of the states are hitting their bounds. This
@@ -1502,30 +1478,6 @@ for i = [1:3 6: length(output.result.solution.phase(phase_no).state(1,:))]
         disp(strcat('State Id: ',num2str(i),' in Phase 4 is hitting upper bound'))
     end
 end
-
-
-%% Create Easy Latex Inputs
-
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\PayloadToOrbitMode', num2str(mode) ,'}{ ', num2str(round(ThirdStagePayloadMass,1),'%.1f') , '}'), 'delimiter','','newline', 'pc')
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\12SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt21(1)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc')
-
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\FirstStageSMFMode', num2str(mode) ,'}{ ', num2str(round(FirstStageSMF,3),'%.3f') , '}'), '-append','delimiter','','newline', 'pc');
-
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationAltMode', num2str(mode) ,'}{ ', num2str(round(alt21(end)/1000,2),'%.2f') , '}'), '-append','delimiter','','newline', 'pc');
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationvMode', num2str(mode) ,'}{ ', num2str(round(v21(end),0)) , '}'), '-append','delimiter','','newline', 'pc');
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationqMode', num2str(mode) ,'}{ ', num2str(round(q21(end)/1000,1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\23SeparationLDMode', num2str(mode) ,'}{ ', num2str(round(L21(end)/Fd21(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
-
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\2FlightTimeMode', num2str(mode) ,'}{ ', num2str(round(time21(end),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
-
-qlt20 = find(q3<20000);
-dlmwrite('LatexInputs.txt',strcat('\newcommand{\3qOver20Mode', num2str(mode) ,'}{ ', num2str(round(time3(qlt20(1))-time3(1),1),'%.1f') , '}'), '-append','delimiter','','newline', 'pc');
-
-movefile('LatexInputs.txt',sprintf('../ArchivedResults/%s',strcat(Timestamp,'mode',num2str(mode))));
-
-
-
-
 
 %% =========================================================================
 % Troubleshooting Procedure

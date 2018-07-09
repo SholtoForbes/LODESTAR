@@ -728,19 +728,11 @@ v21 = output.result.solution.phase(2).state(:,4).';
 gamma21 = output.result.solution.phase(2).state(:,5).'; 
 zeta21 = output.result.solution.phase(2).state(:,6).';
 alpha21 = output.result.solution.phase(2).state(:,7).';
-
-if returnflag
 eta21 = output.result.solution.phase(2).state(:,8).';
 mFuel21 = output.result.solution.phase(2).state(:,9).'; 
-else
-eta21 = 0;
-mFuel21 = output.result.solution.phase(2).state(:,8).';   
-end
 
 aoadot21  = output.result.solution.phase(2).control(:,1).'; 
-if returnflag
 etadot21  = output.result.solution.phase(2).control(:,2).'; 
-end
 
 time21 = output.result.solution.phase(2).time.';
 
@@ -753,9 +745,12 @@ gamma22 = output.result.solution.phase(3).state(:,5).';
 zeta22 = output.result.solution.phase(3).state(:,6).';
 alpha22 = output.result.solution.phase(3).state(:,7).';
 
+if returnflag
 eta22 = output.result.solution.phase(3).state(:,8).';
 mFuel22 = output.result.solution.phase(3).state(:,9).'; 
-
+else
+mFuel22 = output.result.solution.phase(3).state(:,8).';   
+end
 
 throttle22 = output.result.solution.phase(3).state(:,10).';
 aoadot22  = output.result.solution.phase(3).control(:,1).'; 
@@ -928,14 +923,8 @@ xlabel('Time (s)');
 
 if returnflag
 SecondStageStates = [[time21 time22]' [alt21 alt22]' [lon21 lon22]' [lat21 lat22]' [v21 v22]' [gamma21 gamma22]' [zeta21 zeta22]' [alpha21 alpha22]' [eta21 eta22]' [mFuel21 mFuel22]'];
-
-dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
-
 else
-    
-    dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'fuel mass (kg) '],'');
-
-SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [mFuel21]'];
+SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [eta21]' [mFuel21]'];
 end
 
 
@@ -1047,12 +1036,9 @@ end
 
 
 forward0 = [alt21(1),gamma21(1),v21(1),zeta21(1),lat21(1),lon21(1), mFuel21(1)];
-if returnflag
+
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),ControlInterp(time21,eta21,f_t),1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-else
-  [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),0,1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-  
-end
+
 figure(212)
 subplot(7,1,[1 2])
 hold on

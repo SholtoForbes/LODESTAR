@@ -402,13 +402,6 @@ Stage2.Bounds.zeta      = [-4/3*pi, 2*pi]; % Heading Angle Bounds, rad
 Stage2.Bounds.control   = [-0.00003, 0.0002]; % (Control) Trajectory Angle Double-Derivative Bounds, rad/s^2
 Stage2.Bounds.time      = [100, 800]; % Time Bounds, s
 
-BankSep = 0;
-
-if not(returnflag)
-    bankMin21 = [];
-    bankMax21 = [];
-    BankSep = [];
-end
 
 % Primal Bounds
 bounds.phase(2).state.lower = [Stage2.Bounds.Alt(1), lonMin, latMin2, Stage2.Bounds.v(1), Stage2.Bounds.gamma(1), Stage2.Bounds.zeta(1), aoaMin21, bankMin21, Stage2.Bounds.mFuel(1)];
@@ -420,17 +413,12 @@ bounds.phase(2).initialstate.upper = [Stage2.Bounds.Alt(2),lonMax, latMax2, Stag
 
 % End States
 % End bounds are set slightly differently, to encourage an optimal solution
-bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Bounds.zeta(1), aoaMin21, BankSep, Stage2.Bounds.mFuel(1)];
-bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, BankSep, Stage2.mFuel];
+bounds.phase(2).finalstate.lower = [34000, lonMin, latMin2, 2300, 0, Stage2.Bounds.zeta(1), aoaMin21, 0, Stage2.Bounds.mFuel(1)];
+bounds.phase(2).finalstate.upper = [45000, lonMax, latMax2, Stage2.Bounds.v(2), deg2rad(20), Stage2.Bounds.zeta(2), aoaMax21, 0, Stage2.mFuel];
  
 % Control Bounds
-if returnflag
 bounds.phase(2).control.lower = [deg2rad(-.5), deg2rad(-.5)];
 bounds.phase(2).control.upper = [deg2rad(.5), deg2rad(.5)];
-else
-bounds.phase(2).control.lower = [deg2rad(-.5)]; 
-bounds.phase(2).control.upper = [deg2rad(.5)];
-end
 
 % Time Bounds
 bounds.phase(2).initialtime.lower = 0;
@@ -472,21 +460,14 @@ guess.phase(2).state(:,4)   = Stage2.Guess.v.';
 guess.phase(2).state(:,5)   = Stage2.Guess.gamma.';
 guess.phase(2).state(:,6)   = Stage2.Guess.zeta.';
 guess.phase(2).state(:,7)   = [2*pi/180; 5*pi/180];
-
 if returnflag
 guess.phase(2).state(:,8)   = [deg2rad(30);deg2rad(30)];
+else
+guess.phase(2).state(:,8)   = [deg2rad(0);deg2rad(0)];  
+end
 guess.phase(2).state(:,9) 	= [Stage2.mFuel, 100];
-else
-% guess.phase(2).state(:,8)   = [deg2rad(0);deg2rad(0)];  
-guess.phase(2).state(:,8)   = [Stage2.mFuel, 100]; 
-end
 
-if returnflag
 guess.phase(2).control      = [[0;0],[0;0]];
-else
-guess.phase(2).control      = [0;0];
-end
-
 guess.phase(2).time          = [0;650];
 
 % Tie stages together
@@ -728,19 +709,11 @@ v21 = output.result.solution.phase(2).state(:,4).';
 gamma21 = output.result.solution.phase(2).state(:,5).'; 
 zeta21 = output.result.solution.phase(2).state(:,6).';
 alpha21 = output.result.solution.phase(2).state(:,7).';
-
-if returnflag
 eta21 = output.result.solution.phase(2).state(:,8).';
 mFuel21 = output.result.solution.phase(2).state(:,9).'; 
-else
-eta21 = 0;
-mFuel21 = output.result.solution.phase(2).state(:,8).';   
-end
 
 aoadot21  = output.result.solution.phase(2).control(:,1).'; 
-if returnflag
 etadot21  = output.result.solution.phase(2).control(:,2).'; 
-end
 
 time21 = output.result.solution.phase(2).time.';
 
@@ -752,10 +725,8 @@ v22 = output.result.solution.phase(3).state(:,4).';
 gamma22 = output.result.solution.phase(3).state(:,5).'; 
 zeta22 = output.result.solution.phase(3).state(:,6).';
 alpha22 = output.result.solution.phase(3).state(:,7).';
-
 eta22 = output.result.solution.phase(3).state(:,8).';
 mFuel22 = output.result.solution.phase(3).state(:,9).'; 
-
 
 throttle22 = output.result.solution.phase(3).state(:,10).';
 aoadot22  = output.result.solution.phase(3).control(:,1).'; 
@@ -928,14 +899,8 @@ xlabel('Time (s)');
 
 if returnflag
 SecondStageStates = [[time21 time22]' [alt21 alt22]' [lon21 lon22]' [lat21 lat22]' [v21 v22]' [gamma21 gamma22]' [zeta21 zeta22]' [alpha21 alpha22]' [eta21 eta22]' [mFuel21 mFuel22]'];
-
-dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'bank angle (rad) ' 'fuel mass (kg) '],'');
-
 else
-    
-    dlmwrite('SecondStageStates',['time (s) ' 'altitude (m) ' 'longitude (rad) ' 'latitude (rad) ' 'velocity (m/s) ' 'trajectory angle (rad) ' 'heading angle (rad) ' 'angle of attack (rad) ' 'fuel mass (kg) '],'');
-
-SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [mFuel21]'];
+SecondStageStates = [[time21]' [alt21]' [lon21]' [lat21]' [v21]' [gamma21]' [zeta21]' [alpha21]' [eta21]' [mFuel21]'];
 end
 
 
@@ -1047,12 +1012,9 @@ end
 
 
 forward0 = [alt21(1),gamma21(1),v21(1),zeta21(1),lat21(1),lon21(1), mFuel21(1)];
-if returnflag
+
 [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),ControlInterp(time21,eta21,f_t),1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-else
-  [f_t, f_y] = ode45(@(f_t,f_y) VehicleModelAscent_forward(f_t, f_y,auxdata,ControlInterp(time21,alpha21,f_t),0,1,mFuel21(1),mFuel21(end)),time21(1:end),forward0);
-  
-end
+
 figure(212)
 subplot(7,1,[1 2])
 hold on
