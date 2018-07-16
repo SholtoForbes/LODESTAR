@@ -1,0 +1,9 @@
+\newcommand{\PayloadToOrbitMode1}{178.1}
+\newcommand{\12SeparationAltMode1}{25.54}
+\newcommand{\FirstStageSMFMode1}{0.084}
+\newcommand{\23SeparationAltMode1}{49.46}
+\newcommand{\23SeparationvMode1}{2535}
+\newcommand{\23SeparationqMode1}{3.4}
+\newcommand{\23SeparationLDMode1}{6.1}
+\newcommand{\2FlightTimeMode1}{836.2}
+\newcommand{\3qOver20Mode1}{0.0}

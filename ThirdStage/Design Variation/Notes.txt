@@ -1,0 +1,18 @@
+Variation in the design of the third stage.
+
+Design parameters:
+
+SPARTAN dependent:
+Length
+Width (Can change the nozzle with width and modify ISP)
+
+SPARTAN Independent:
+Thrust (remember to reduce ISP)
+Cone angle
+Mass (may be either fuel or payload mass changing)
+
+
+These design changes need to be offset appropriately by:
+Structural mass
+Cost (wont do this, but may comment on it)
+Payload capacity
