@@ -84,20 +84,23 @@ mFuel_cyltanks = 710;
 % 
 % % Calculate CG variation before and after cylindrical tank depletion (ie,
 % % cylindrical tanks are depleted first)
-% CG(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*(EngineOn_CG_Fuel-CG_cyltanksEmpty_ThirdStage)+CG_cyltanksEmpty_ThirdStage;
-% CG(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*(CG_cyltanksEmpty_ThirdStage-EngineOn_CG_noFuel)+EngineOn_CG_noFuel;
+% CG(index_overcyl) = (mFuel-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*(EngineOn_CG_Fuel-CG_cyltanksEmpty_ThirdStage)+CG_cyltanksEmpty_ThirdStage;
+% CG(index_undercyl) = (mFuel)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*(CG_cyltanksEmpty_ThirdStage-EngineOn_CG_noFuel)+EngineOn_CG_noFuel;
 
 
+index_overcyl = mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks);
+Proportion_fulltocyl  = (mFuel(index_overcyl)-(auxdata.Stage2.mFuel-mFuel_cyltanks))./(mFuel_cyltanks);
 
+Cd(index_overcyl) = Proportion_fulltocyl.*auxdata.interp.Cd_spline_EngineOn.fullFuel(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000) + (1-Proportion_fulltocyl).*auxdata.interp.Cd_spline_EngineOn.cylTankEnd(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000);
+Cl(index_overcyl) = Proportion_fulltocyl.*auxdata.interp.Cl_spline_EngineOn.fullFuel(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000) + (1-Proportion_fulltocyl).*auxdata.interp.Cl_spline_EngineOn.cylTankEnd(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000);
+flap_deflection(index_overcyl) = Proportion_fulltocyl.*auxdata.interp.flap_spline_EngineOn.fullFuel(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000) + (1-Proportion_fulltocyl).*auxdata.interp.flap_spline_EngineOn.cylTankEnd(mach(index_overcyl),rad2deg(alpha(index_overcyl)),alt(index_overcyl)/1000);
 
-Cd(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*auxdata.interp.Cd_spline_EngineOn.fullFuel(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks)).*auxdata.interp.Cd_spline_EngineOn.cylTankEnd(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
-Cl(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*auxdata.interp.Cl_spline_EngineOn.fullFuel(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks)).*auxdata.interp.Cl_spline_EngineOn.cylTankEnd(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
-flap_deflection(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks).*auxdata.interp.flap_spline_EngineOn.fullFuel(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(auxdata.Stage2.mFuel-mFuel_cyltanks)).*auxdata.interp.flap_spline_EngineOn.cylTankEnd(mach(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel>(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
+index_undercyl = mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks);
+Proportion_EmptytoCyl = ((auxdata.Stage2.mFuel-mFuel_cyltanks)-mFuel(index_undercyl))./(auxdata.Stage2.mFuel-mFuel_cyltanks);
 
-
-Cd(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel_cyltanks-mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)))./(mFuel_cyltanks).*auxdata.interp.Cd_spline_EngineOn.noFuel(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(mFuel_cyltanks)).*auxdata.interp.Cd_spline_EngineOn.cylTankEnd(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
-Cl(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel_cyltanks-mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)))./(mFuel_cyltanks).*auxdata.interp.Cl_spline_EngineOn.noFuel(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(mFuel_cyltanks)).*auxdata.interp.Cl_spline_EngineOn.cylTankEnd(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
-flap_deflection(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)) = (mFuel_cyltanks-mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)))./(mFuel_cyltanks).*auxdata.interp.flap_spline_EngineOn.noFuel(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000) + (1-(mFuel(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))-mFuel_cyltanks)./(mFuel_cyltanks)).*auxdata.interp.flap_spline_EngineOn.cylTankEnd(mach(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks)),rad2deg(alpha(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))),alt(mFuel<=(auxdata.Stage2.mFuel-mFuel_cyltanks))/1000);
+Cd(index_undercyl) = Proportion_EmptytoCyl.*auxdata.interp.Cd_spline_EngineOn.noFuel(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000) + (1-Proportion_EmptytoCyl).*auxdata.interp.Cd_spline_EngineOn.cylTankEnd(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000);
+Cl(index_undercyl) = Proportion_EmptytoCyl.*auxdata.interp.Cl_spline_EngineOn.noFuel(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000) + (1-Proportion_EmptytoCyl).*auxdata.interp.Cl_spline_EngineOn.cylTankEnd(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000);
+flap_deflection(index_undercyl) = Proportion_EmptytoCyl.*auxdata.interp.flap_spline_EngineOn.noFuel(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000) + (1-Proportion_EmptytoCyl).*auxdata.interp.flap_spline_EngineOn.cylTankEnd(mach(index_undercyl),rad2deg(alpha(index_undercyl)),alt(index_undercyl)/1000);
 
 Cd = Cd.';
 Cl = Cl.';
@@ -139,8 +142,8 @@ Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly red
 Fueldt = Fueldt.*throttle; %
 
 % T = Isp.*Fueldt*9.81.*cos(alpha); % Thrust in direction of motion
+% T = Isp.*Fueldt*9.81.*cos(alpha).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion
 T = Isp.*Fueldt*9.81.*cos(alpha).*gaussmf(throttle,[0.1,1]); % Thrust in direction of motion
-
 %Rotational Coordinates =================================================
 %=================================================
 
