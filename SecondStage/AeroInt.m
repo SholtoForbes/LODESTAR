@@ -179,12 +179,12 @@ for i = 1:numel(Mgrid_EngineOn)
     Cl_temp_AoA0 = interp.Cl_scattered_EngineOff(M_temp,0);
     Cm_temp_AoA0 = interp.Cm_scattered_EngineOff(M_temp,0);
     
-%     Cl_AoA0_withflaps_temp_EngineOn = interp.flap_momentCl_scattered(M_temp,-(Cm_temp_EngineOn+Cm_temp_Engine+Tm-Cm_temp_AoA0));
-%     Cd_AoA0_withflaps_temp_EngineOn = interp.flap_momentCd_scattered(M_temp,-(Cm_temp_EngineOn+Cm_temp_Engine+Tm-Cm_temp_AoA0)) ;
+    Cl_AoA0_withflaps_temp_EngineOn = interp.flap_momentCl_scattered(M_temp,-(Cm_temp_EngineOn+Cm_temp_Engine+Tm-Cm_temp_AoA0));
+    Cd_AoA0_withflaps_temp_EngineOn = interp.flap_momentCd_scattered(M_temp,-(Cm_temp_EngineOn+Cm_temp_Engine+Tm-Cm_temp_AoA0)) ;
 
-    Cl_AoA0_withflaps_temp_EngineOn = interp.flap_momentCl_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0));
-    Cd_AoA0_withflaps_temp_EngineOn = interp.flap_momentCd_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0)) ;
-    disp('Engine and viscous not being used')
+%     Cl_AoA0_withflaps_temp_EngineOn = interp.flap_momentCl_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0));
+%     Cd_AoA0_withflaps_temp_EngineOn = interp.flap_momentCd_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0)) ;
+%     disp('Engine and viscous not being used')
     
     
     flap_Cl_temp_EngineOn = Cl_AoA0_withflaps_temp_EngineOn - Cl_temp_AoA0;
@@ -195,14 +195,20 @@ for i = 1:numel(Mgrid_EngineOn)
     I = cell(1, ndims(Mgrid_EngineOn)); 
     [I{:}] = ind2sub(size(Mgrid_EngineOn),i);
     
-%     Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn+Cl_temp_Engine+Cl_temp_ViscousEngineOn+flap_Cl_temp_EngineOn;
-%     Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn+Cd_temp_Engine+Cd_temp_ViscousEngineOn+flap_Cd_temp_EngineOn;
-%     Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
-
-disp('Engine and viscous not being used')
-   Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn+flap_Cl_temp_EngineOn;
-    Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn+flap_Cd_temp_EngineOn;
+    Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn+Cl_temp_Engine+Cl_temp_ViscousEngineOn+flap_Cl_temp_EngineOn;
+    Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn+Cd_temp_Engine+Cd_temp_ViscousEngineOn+flap_Cd_temp_EngineOn;
     Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
+
+% disp('Engine and viscous not being used')
+%    Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_EngineOn+flap_Cl_temp_EngineOn;
+%     Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_EngineOn+flap_Cd_temp_EngineOn;
+%     Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
+%     Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_Engine;
+%     Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_Engine;
+%     Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
+%     Cl_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cl_temp_ViscousEngineOn;
+%     Cd_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cd_temp_ViscousEngineOn;
+%     Cm_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = Cm_temp_EngineOn;
 
     flap_Grid_EngineOn(I{(1)},I{(2)},I{(3)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp_EngineOn+Tm-Cm_temp_AoA0)) ;
 % flap_Grid_EngineOn(I{(1)},I{(2)}) = interp.flap_momentdef_scattered(M_temp,-(Cm_temp_EngineOn-Cm_temp_AoA0)) ;    
@@ -220,6 +226,11 @@ Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_
 Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
 flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
 Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
+
+% Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cl_Grid_EngineOn,'linear','linear');
+% Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cd_Grid_EngineOn,'linear','linear');
+% flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,flap_Grid_EngineOn,'linear','linear');
+% Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_EngineOn,Cm_Grid_EngineOn,'linear','linear');
 
 % Cl_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cl_Grid_EngineOn,'spline','linear');
 % Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
@@ -256,21 +267,21 @@ if strcmp(plotaero,'yes')
 % c.Label.String = 'L/D';
 % shading interp
 figure(401)
-contourf(Mgrid_EngineOn(:,:,1),AOAgrid_EngineOn(:,:,1),Cl_Grid_EngineOn(:,:,1)./Cd_Grid_EngineOn(:,:,1),3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn(:,:,3),AOAgrid_EngineOn(:,:,3),Cl_Grid_EngineOn(:,:,3)./Cd_Grid_EngineOn(:,:,3),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('L/D, Engine On')
 c = colorbar;
 c.Label.String = 'L/D';
 figure(402)
-contourf(Mgrid_EngineOn(:,:,1),AOAgrid_EngineOn(:,:,1),Cd_Grid_EngineOn(:,:,1),3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn(:,:,3),AOAgrid_EngineOn(:,:,3),Cd_Grid_EngineOn(:,:,3),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('drag COefficient, Engine On')
 c = colorbar;
 c.Label.String = 'Drag Coefficient';
 figure(403)
-contourf(Mgrid_EngineOn(:,:,1),AOAgrid_EngineOn(:,:,1),Cl_Grid_EngineOn(:,:,1),3000,'LineWidth',0.)
+contourf(Mgrid_EngineOn(:,:,3),AOAgrid_EngineOn(:,:,3),Cl_Grid_EngineOn(:,:,3),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
 title('Lift COefficient, Engine On')
@@ -278,28 +289,28 @@ c = colorbar;
 c.Label.String = 'Lift Coefficient';
 
 figure(404)
-contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOn(3,:,:),[3 2 1]),permute(altgrid_EngineOn(3,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(3,:,:),[3 2 1]),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
-title('Lift COefficient, No Flaps, Engine On')
+title('Lift COefficient, Engine On')
 c = colorbar;
 c.Label.String = 'Lift Coefficient';
 
 
 figure(405)
-contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cd_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
+contourf(permute(AOAgrid_EngineOn(3,:,:),[3 2 1]),permute(altgrid_EngineOn(3,:,:),[3 2 1]),permute(Cd_Grid_EngineOn(3,:,:),[3 2 1]),3000,'LineWidth',0.)
 xlabel('Mach no.')
 ylabel('Angle of Attack (deg)')
-title('Drag Coefficient, No Flaps, Engine On')
+title('Drag Coefficient, Engine On')
 c = colorbar;
 c.Label.String = 'Drag Coefficient';
 
 
 figure(406)
-contourf(permute(AOAgrid_EngineOn(2,:,:),[3 2 1]),permute(altgrid_EngineOn(2,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(2,:,:),[3 2 1])./permute(Cd_Grid_EngineOn(2,:,:),[3 2 1]),3000,'LineWidth',0.)
-xlabel('Mach no.')
-ylabel('Angle of Attack (deg)')
-title('L/D, No Flaps, Engine On')
+contourf(permute(AOAgrid_EngineOn(3,:,:),[3 2 1]),permute(altgrid_EngineOn(3,:,:),[3 2 1]),permute(Cl_Grid_EngineOn(3,:,:),[3 2 1])./permute(Cd_Grid_EngineOn(3,:,:),[3 2 1]),3000,'LineWidth',0.)
+xlabel('aoa.')
+ylabel('alt')
+title('L/D, Engine On')
 c = colorbar;
 c.Label.String = 'L/D';
 shading interp
