@@ -39,8 +39,8 @@ P0 = ppval(interp.P0_spline, alt);
 if ThirdStage == 0 && forwardflag ==0;
     % Turn off throttle at unoperable flight conditions for aerodynamic and
     % thrust purposes
-    throttle(q1<20000) = 0; % rapidly reduce throttle to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
-    throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
+    throttle(q1<20000) = throttle(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce throttle to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
+    throttle(M<5.0) =   throttle(M<5.0).*gaussmf(M(M<5.0),[.1,5]); % remove throttle points below operable range on return flight
 end
 
 Fueldt = Fueldt_max.*throttle; %
