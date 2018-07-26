@@ -31,19 +31,19 @@ T0 = ppval(interp.T0_spline, alt);
 P0 = ppval(interp.P0_spline, alt);
 %% Thrust 
 
-[Isp,Fueldt_max,eq,q1] = RESTint(M, rad2deg(alpha), auxdata,T0,P0); % Calculate C-REST engin properties
+[Isp,Fueldt_max,eq,q1] = RESTint(M, rad2deg(alpha), auxdata,T0,P0); % Calculate C-REST engine properties
 
 % Isp(q1<20000) = Isp(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce ISP to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
 
-Fueldt = Fueldt_max.*throttle; % 
 
 if ThirdStage == 0 && forwardflag ==0;
-    % Turn off throttle atunoperable flight conditions for aerodynamic and
+    % Turn off throttle at unoperable flight conditions for aerodynamic and
     % thrust purposes
-    throttle(q1<20000) = throttle(q1<20000).*gaussmf(q1(q1<20000),[1000,20000]); % rapidly reduce throttle to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
+    throttle(q1<20000) = 0; % rapidly reduce throttle to 0 after passing the lower limit of 20kPa dynamic pressure. This dynamic pressure is after the conical shock.
     throttle(M<5.0) =   0; % remove throttle points below operable range on return flight
 end
 
+Fueldt = Fueldt_max.*throttle; %
 
 % T = Isp.*Fueldt*9.81.*cos(alpha).*gaussmf(throttle,[0.1,1]); % Thrust in
 % direction of , modified by a gaussmf funtion to reduce thrutst rapidly

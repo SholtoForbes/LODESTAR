@@ -236,7 +236,7 @@ Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,altgrid_
 % Cd_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cd_Grid_EngineOn,'spline','linear');
 % flap_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,flap_Grid_EngineOn,'spline','linear');
 % Cm_spline_EngineOn = griddedInterpolant(Mgrid_EngineOn,AOAgrid_EngineOn,Cm_Grid_EngineOn,'spline','linear');
-permute(Mgrid_EngineOff(9,:,:),[3 2 1])
+% permute(Mgrid_EngineOff(9,:,:),[3 2 1])
 
 plotaero = 'no';
 if strcmp(plotaero,'yes')

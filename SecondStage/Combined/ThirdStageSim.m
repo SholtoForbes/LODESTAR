@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc,T,CL,L,inc_diff] = ThirdStageSim(alt0,gamma0,v0, phi0, xi0, zeta0, m0, auxdata)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha, m,q,gamma,D,zeta,phi, inc,T,CL,L,inc_diff,xi] = ThirdStageSim(alt0,gamma0,v0, phi0, xi0, zeta0, m0, auxdata)
 % Function for simulating the Third Stage Rocket Trajectory
 % Created by Sholto Forbes-Spyratos
 
@@ -22,7 +22,7 @@ i=1;
 t(1) = 0.;
 r(1) = r_E + alt0;
 Alt(1) = alt0;
-xi(1) = 0;
+xi(1) = xi0;
 phi(1) = phi0;
 gamma(1) = gamma0;
 v(1) = v0;
